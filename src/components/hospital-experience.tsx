@@ -20,16 +20,6 @@ import {
 import { toast } from "sonner";
 
 import heroImage from "@/assets/hospital-hero.jpg";
-import coastImg from "@/assets/puerto-rico-coast.jpg";
-import hiltonImg from "@/assets/partners/caribe-hilton.jpg";
-import villaImg from "@/assets/partners/villa-montana.jpg";
-import eastImg from "@/assets/partners/east-island.jpg";
-import bioImg from "@/assets/partners/bio-bay.jpg";
-import toroImg from "@/assets/partners/toro-verde.jpg";
-import bacardiImg from "@/assets/partners/casa-bacardi.jpg";
-import spaImg from "@/assets/partners/copamarina.jpg";
-import doradoImg from "@/assets/partners/dorado-beach.jpg";
-import conqImg from "@/assets/partners/el-conquistador.jpg";
 import hospitalIconAsset from "@/assets/wepa-hospital.png.asset.json";
 import { Button } from "@/components/ui/button";
 import {
@@ -724,6 +714,7 @@ function GigBuilder({
 }) {
   const { t: tr } = useLanguage();
   const { update } = useHospital();
+  usePartner(); // re-render when partners publish offers into the perk menu
   const [title, setTitle] = useState("");
   const [specialty, setSpecialty] = useState("ICU / Critical Care");
   const [town, setTown] = useState<string>(locName(facilityLocation));
