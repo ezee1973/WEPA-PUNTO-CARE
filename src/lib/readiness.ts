@@ -79,6 +79,7 @@ export const seed: ReadinessState = {
     { id: "orient", title: "Facility orientation", done: false },
     { id: "ehr", title: "EHR orientation", done: false },
   ],
+  interests: { regions: [], experiences: [], length: "", housing: "", settings: [] },
   stage: "Applied",
   officialAuthorization: "Pending",
 };
