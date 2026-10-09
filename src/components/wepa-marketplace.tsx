@@ -20,6 +20,7 @@ import {
 import { toast } from "sonner";
 
 import coastImage from "@/assets/puerto-rico-coast.jpg";
+import anthemPoster from "@/assets/wepa-anthem-poster.jpg";
 import jingleAsset from "@/assets/wepa-jingle.asset.json";
 import logoAsset from "@/assets/wepa-care-logo.asset.json";
 import { Button } from "@/components/ui/button";
@@ -107,24 +108,47 @@ function AnthemTakeover({ onDone }: { onDone: () => void }) {
   return (
     <div
       className={cn(
-        "fixed inset-0 z-[80] flex items-center justify-center bg-surface-dark transition-opacity duration-500",
+        "fixed inset-0 z-[80] overflow-hidden bg-surface-dark transition-opacity duration-700 ease-in-out",
         fading && "pointer-events-none opacity-0",
       )}
       role="dialog"
       aria-label="Welcome to WEPA.care"
     >
+      {/* Full-bleed island backdrop blends the welcome into the anthem */}
+      <img
+        src={anthemPoster}
+        alt=""
+        aria-hidden
+        className={cn(
+          "absolute inset-0 h-full w-full object-cover transition-all duration-700",
+          started ? "opacity-0" : "opacity-60 scale-105",
+        )}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-surface-dark/70 via-surface-dark/40 to-surface-dark/85" />
       <video
         ref={videoRef}
         src={jingleUrl}
         playsInline
         preload="auto"
         onEnded={finish}
-        className={cn("h-full w-full object-contain transition-opacity duration-300", started ? "opacity-100" : "opacity-0")}
+        className={cn("absolute inset-0 h-full w-full object-cover transition-opacity duration-500", started ? "opacity-100" : "opacity-0")}
       />
       {!started && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-8 px-6">
-          <img src={logoUrl} alt="WEPA.care" className="h-12 w-auto rounded-md bg-background px-3 py-2 sm:h-14" />
-          <Button size="lg" className="min-w-40 rounded-full px-10 text-base font-black" onClick={enter} autoFocus>
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-10 px-6">
+          <img
+            src={logoUrl}
+            alt="WEPA.care"
+            className="h-24 w-auto rounded-3xl bg-background/95 px-6 py-4 shadow-2xl shadow-surface-dark/60 sm:h-32 sm:px-8"
+          />
+          <p className="max-w-xs text-center text-sm font-bold uppercase tracking-widest text-surface-dark-foreground/90 sm:max-w-none sm:text-base">
+            Come for the Island. Care for its People.
+          </p>
+          <Button
+            size="lg"
+            className="min-w-52 animate-pulse rounded-full bg-coral px-14 py-7 text-xl font-black text-coral-foreground shadow-xl shadow-coral/30 hover:bg-coral/90"
+            onClick={enter}
+            autoFocus
+          >
             Enter
           </Button>
         </div>
