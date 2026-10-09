@@ -1,29 +1,20 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode, type RefObject } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import {
   ArrowRight,
   Bell,
-  BriefcaseMedical,
   Building2,
   Check,
   CheckCircle2,
-  ChevronRight,
-  CircleDollarSign,
   ClipboardCheck,
   FileCheck2,
   HeartPulse,
   MapPin,
   Menu,
   Music2,
-  Palmtree,
   Play,
-  Plane,
-  Plus,
   Search,
-  ShieldCheck,
   Sparkles,
-  Star,
   Stethoscope,
-  Users,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -37,10 +28,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Textarea } from "@/components/ui/textarea";
 import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
-import { demoGigs, demoOffers, qualificationSteps, type DemoGig, type DemoOffer, type DemoRole } from "@/lib/wepa-data";
+import { demoGigs, qualificationSteps, type DemoGig } from "@/lib/wepa-data";
 import { cn } from "@/lib/utils";
 
 const logoUrl = logoAsset.url;
@@ -333,10 +323,6 @@ function GigCard({ gig, featured, onOpen }: { gig: DemoGig; featured: boolean; o
 
 function HeroStat({ value, label }: { value: string; label: string }) {
   return <div className="border border-surface-dark-foreground/20 bg-surface-dark/50 px-3 py-3 backdrop-blur"><strong className="block text-lg font-black text-primary sm:text-xl">{value}</strong><span className="mt-0.5 block text-[11px] leading-tight text-surface-dark-foreground/70">{label}</span></div>;
-}
-
-function Stat({ label, value, icon: Icon }: { label: string; value: string; icon: typeof Star }) {
-  return <div className="border border-border bg-card p-4"><Icon className="size-5 text-primary" /><strong className="mt-5 block text-2xl font-black">{value}</strong><span className="text-xs text-muted-foreground">{label}</span></div>;
 }
 
 function GigDialog({ gig, onClose, signedIn, onAuth }: { gig: DemoGig | null; onClose: () => void; signedIn: boolean; onAuth: () => void }) {
