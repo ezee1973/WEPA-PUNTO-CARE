@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
-import { INTEREST_OPTIONS, interestsComplete, elena, pathwayResult, preparationProgress, streamGuide, useReadiness, type ChecklistItem, type ItemStatus, type Pathway, type ReadinessState } from "@/lib/readiness";
+import { INTEREST_OPTIONS, interestsComplete, elena, nextBestAction, pathwayResult, preparationProgress, streamGuide, useReadiness, type ChecklistItem, type ItemStatus, type Pathway, type ReadinessState } from "@/lib/readiness";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 
@@ -53,9 +53,7 @@ export function ReadinessPassport() {
     { label: "Gig matching interests", value: interestsComplete(state.interests) ? 100 : 0, note: interestsComplete(state.interests) ? `${state.interests.regions.length} regions · ${state.interests.experiences.length} experiences` : "Tell us what island life you want" },
     { label: "Clinical Spanish readiness", value: state.spanish ? 100 : 0, note: state.spanish ?? "Scenario not started" },
   ];
-  const nextAction = !state.packetConfirmed
-    ? state.packetPrepared ? "Review and confirm your prepared packet" : "Tap “Prepare my packet” — Wepa Guide will review everything"
-    : state.checklist.find((c) => c.id === "declaration")?.status !== "Submitted — self-reported" ? "Sign your sworn declaration before a notary" : !state.spanish ? "Complete the 3-question clinical Spanish scenario" : !interestsComplete(state.interests) ? "Pick your island interests so we can match you" : !state.applied ? "Join the WEPA gig pool and start matching" : "You're in the gig pool — hospitals with matching gigs can now see your Passport";
+  const nextAction = nextBestAction(state);
 
   async function ask(task: string, detail = "", onDone?: (t: string) => void) {
     abortRef.current?.abort();
