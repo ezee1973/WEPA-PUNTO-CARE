@@ -385,7 +385,7 @@ function GuidePanel({ guide, onAsk, onPrepare, onStop }: { guide: { text: string
       {onPrepare && <Button onClick={onPrepare} className="bg-coral text-coral-foreground hover:bg-coral/90">Prepare my packet</Button>}
       <div className="flex flex-wrap gap-2">{chips.map(([t, l]) => <Button key={t} size="sm" variant="outline" onClick={() => onAsk(t)} disabled={guide.busy}>{l}</Button>)}</div>
       <div className="min-h-32 flex-1 overflow-y-auto rounded-2xl bg-muted p-3 text-sm">
-        {guide.error ? <p className="text-destructive">{guide.error}</p> : guide.text || (guide.busy ? <span className="flex items-center gap-2 text-muted-foreground"><Loader2 className="size-4 animate-spin" /> Reviewing your information…</span> : <span className="text-muted-foreground">Ask me what a document is, or let me prepare your packet.</span>)}
+        {guide.error ? <p className="text-destructive">{guide.error}</p> : guide.text ? <div className="space-y-2 [&_h3]:mt-2 [&_h3]:font-bold [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5"><ReactMarkdown>{guide.text}</ReactMarkdown></div> : (guide.busy ? <span className="flex items-center gap-2 text-muted-foreground"><Loader2 className="size-4 animate-spin" /> Reviewing your information…</span> : <span className="text-muted-foreground">Ask me what a document is, or let me prepare your packet.</span>)}
       </div>
       <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); if (q.trim()) { onAsk("ask", q); setQ(""); } }}>
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Ask about Puerto Rico prep…" className="min-w-0 flex-1 rounded-full border border-input bg-background px-4 text-sm" />
