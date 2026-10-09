@@ -10,8 +10,6 @@ import {
   HeartPulse,
   MapPin,
   Menu,
-  Music2,
-  Play,
   Search,
   Sparkles,
   Stethoscope,
@@ -20,7 +18,6 @@ import {
 import { toast } from "sonner";
 
 import coastImage from "@/assets/puerto-rico-coast.jpg";
-import anthemPoster from "@/assets/wepa-anthem-poster.jpg";
 import jingleAsset from "@/assets/wepa-jingle.asset.json";
 import logoAsset from "@/assets/wepa-care-logo.asset.json";
 import { Button } from "@/components/ui/button";
@@ -36,30 +33,17 @@ import { cn } from "@/lib/utils";
 const logoUrl = logoAsset.url;
 const jingleUrl = jingleAsset.url;
 
-const ANTHEM_SEEN_KEY = "wepa-anthem-experienced";
-
 export function WepaMarketplace() {
   const [selectedGig, setSelectedGig] = useState<DemoGig | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
-  const [anthemPlaying, setAnthemPlaying] = useState(false);
+  // Every land opens with the anthem takeover; it plays, fades, and you're in.
+  const [anthemPlaying, setAnthemPlaying] = useState(true);
   const [signedInEmail, setSignedInEmail] = useState<string | null>(null);
 
   useEffect(() => {
     void supabase.auth.getUser().then(({ data }) => setSignedInEmail(data.user?.email ?? null));
     const { data } = supabase.auth.onAuthStateChange((_event, session) => setSignedInEmail(session?.user.email ?? null));
     return () => data.subscription.unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    // First land only: the anthem takes over the whole screen, then fades away.
-    try {
-      if (!window.localStorage.getItem(ANTHEM_SEEN_KEY)) {
-        window.localStorage.setItem(ANTHEM_SEEN_KEY, "1");
-        setAnthemPlaying(true);
-      }
-    } catch {
-      setAnthemPlaying(true);
-    }
   }, []);
 
   async function signOut() {
@@ -71,12 +55,11 @@ export function WepaMarketplace() {
     <main className="min-h-screen bg-background text-foreground">
       {anthemPlaying && <AnthemTakeover onDone={() => setAnthemPlaying(false)} />}
       <Header
-        onAnthem={() => setAnthemPlaying(true)}
         signedInEmail={signedInEmail}
         onAuth={() => setAuthOpen(true)}
         onSignOut={() => void signOut()}
       />
-      <NurseExperience onSelectGig={setSelectedGig} onAnthem={() => setAnthemPlaying(true)} />
+      <NurseExperience onSelectGig={setSelectedGig} />
       <GigDialog gig={selectedGig} onClose={() => setSelectedGig(null)} signedIn={Boolean(signedInEmail)} onAuth={() => setAuthOpen(true)} />
       <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
     </main>
@@ -125,29 +108,17 @@ function AnthemTakeover({ onDone }: { onDone: () => void }) {
         autoPlay
         playsInline
         onEnded={finish}
-        className="h-full w-full object-cover"
+        className="h-full w-full object-contain"
       />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between bg-gradient-to-t from-surface-dark/80 to-transparent p-5 sm:p-8">
-        <img src={logoUrl} alt="" className="h-9 w-auto object-contain" />
-        <button
-          type="button"
-          onClick={finish}
-          className="pointer-events-auto rounded-full border border-surface-dark-foreground/30 bg-surface-dark/60 px-4 py-2 text-xs font-bold uppercase tracking-wide text-surface-dark-foreground backdrop-blur transition-colors hover:bg-surface-dark-foreground/15"
-        >
-          Skip
-        </button>
-      </div>
     </div>
   );
 }
 
 function Header({
-  onAnthem,
   signedInEmail,
   onAuth,
   onSignOut,
 }: {
-  onAnthem: () => void;
   signedInEmail: string | null;
   onAuth: () => void;
   onSignOut: () => void;
@@ -159,9 +130,6 @@ function Header({
         <div className="hidden h-7 w-px bg-border sm:block" />
         <p className="hidden text-xs font-semibold uppercase text-muted-foreground sm:block">Come for the Island.<br />Care for its People.</p>
         <div className="ml-auto flex items-center gap-1">
-          <Button variant="ghost" size="icon" onClick={onAnthem} aria-label="Play the WEPA anthem" title="Play the WEPA anthem">
-            <Music2 />
-          </Button>
           <Button variant="ghost" size="icon" aria-label="Notifications"><Bell /></Button>
           {signedInEmail ? (
             <Button variant="outline" size="sm" onClick={onSignOut} className="hidden sm:inline-flex">Sign out</Button>
@@ -175,7 +143,7 @@ function Header({
   );
 }
 
-function NurseExperience({ onSelectGig, onAnthem }: { onSelectGig: (gig: DemoGig) => void; onAnthem: () => void }) {
+function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void }) {
   const [specialty, setSpecialty] = useState("All specialties");
   const [stepState, setStepState] = useState(qualificationSteps);
   const complete = stepState.filter((step) => step.done).length;
@@ -192,7 +160,7 @@ function NurseExperience({ onSelectGig, onAnthem }: { onSelectGig: (gig: DemoGig
       <section className="relative isolate overflow-hidden bg-surface-dark text-surface-dark-foreground">
         <img src={coastImage} alt="Puerto Rico coast and turquoise Caribbean water" className="absolute inset-0 -z-20 h-full w-full object-cover object-center" />
         <div className="absolute inset-0 -z-10 bg-hero-wash" />
-        <div className="mx-auto grid max-w-[1440px] items-end gap-10 px-4 pb-12 pt-20 sm:px-6 lg:grid-cols-[1.05fr_.95fr] lg:px-8 lg:pb-16">
+        <div className="mx-auto max-w-[1440px] px-4 pb-12 pt-20 sm:px-6 lg:px-8 lg:pb-16">
           <div>
             <div className="mb-5 inline-flex items-center gap-2 border-l-2 border-accent px-3 text-xs font-bold uppercase text-surface-dark-foreground/80">
               <Sparkles className="size-4 text-accent" /> Travel nursing, Puerto Rico remixed
@@ -209,18 +177,6 @@ function NurseExperience({ onSelectGig, onAnthem }: { onSelectGig: (gig: DemoGig
               <Button size="lg" variant="outline" className="border-surface-dark-foreground/30 bg-surface-dark/30 text-surface-dark-foreground hover:bg-surface-dark-foreground/10 hover:text-surface-dark-foreground" onClick={() => document.getElementById("ready")?.scrollIntoView({ behavior: "smooth" })}>Get Puerto Rico ready</Button>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onAnthem}
-            aria-label="Replay the WEPA anthem"
-            className="group relative block w-full cursor-pointer overflow-hidden border border-surface-dark-foreground/25 shadow-2xl"
-          >
-            <img src={anthemPoster} alt="Frame from the WEPA.care anthem video" className="aspect-video w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-            <span className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-surface-dark/35 transition-colors group-hover:bg-surface-dark/20">
-              <span className="flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform group-hover:scale-105"><Play className="ml-0.5 size-6" /></span>
-              <span className="text-xs font-bold uppercase tracking-wide text-surface-dark-foreground">Replay the anthem · 6s</span>
-            </span>
-          </button>
         </div>
       </section>
 
