@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { bookingTotals, hospitalWeekly, netPay, payoutSchedule } from "@/lib/business";
-import { fullDirectory, partnerSeed } from "@/lib/partner-offers";
+import {
+  PARTNER_ACCOUNTS,
+  accountSlice,
+  fullDirectory,
+  partnerSeed,
+  type AccountSlice,
+} from "@/lib/partner-offers";
 
 describe("business model", () => {
   it("nurse sees net, hospital pays gross + fee", () => {
@@ -11,7 +17,10 @@ describe("business model", () => {
   it("boosted offers rank first", () => {
     const base = fullDirectory(partnerSeed);
     const last = base[base.length - 1]!.id;
-    const boosted = fullDirectory({ ...partnerSeed, boosts: { [last]: "spotlight" } });
+    const accounts: Record<string, AccountSlice> = {};
+    for (const a of PARTNER_ACCOUNTS) accounts[a.id] = { offers: accountSlice(partnerSeed, a.id).offers, boosts: {} };
+    accounts["east-island"]!.boosts[last] = "spotlight";
+    const boosted = fullDirectory({ loggedIn: true, accountId: "east-island", accounts });
     expect(boosted[0]!.id).toBe(last);
     expect(boosted[0]!.boost).toBe("spotlight");
   });

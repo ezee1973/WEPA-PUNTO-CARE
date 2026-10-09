@@ -22,3 +22,6 @@
 - [x] Nurse community: connections, travel teams, experience reviews, and approved testimonials
 - [x] Center nurse journey on Passport; embed community and route its actions through profile/readiness completion
 - [x] Business model: net nurse pay, hospital membership + fee billing, partner boosts, traveler services (simulated)
+- [x] Hospital billing: replace "How WEPA earns" with a fee schedule covering every audience
+- [x] T&T partner login: multiple real operators to choose from, each with own offers, stats, and billing
+- [x] Gig builder perk cards: boost badge moved beside the offer-type pill so it no longer overlaps the offer title

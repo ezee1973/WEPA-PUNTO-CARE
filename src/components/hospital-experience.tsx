@@ -981,23 +981,25 @@ function GigBuilder({
                       className="h-full w-full object-cover transition-transform group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-surface-dark/90 via-surface-dark/20 to-transparent" />
-                    <span
-                      className={cn(
-                        "absolute left-2 top-2 px-2 py-0.5 text-[10px] font-black uppercase",
-                        o.offerType === "Limited time"
-                          ? "bg-coral text-primary-foreground"
-                          : o.offerType === "Special"
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-card text-foreground",
-                      )}
-                    >
-                      {tr(o.offerType)}
-                    </span>
-                    {boosts[p.id] && (
-                      <span className="absolute bottom-2 left-2 bg-coral px-2 py-0.5 text-[10px] font-black uppercase text-primary-foreground">
-                        {tr(boostTier(boosts[p.id])!.name)}
+                    <div className="absolute left-2 top-2 flex flex-wrap gap-1">
+                      <span
+                        className={cn(
+                          "px-2 py-0.5 text-[10px] font-black uppercase",
+                          o.offerType === "Limited time"
+                            ? "bg-coral text-primary-foreground"
+                            : o.offerType === "Special"
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-card text-foreground",
+                        )}
+                      >
+                        {tr(o.offerType)}
                       </span>
-                    )}
+                      {boosts[p.id] && (
+                        <span className="bg-foreground px-2 py-0.5 text-[10px] font-black uppercase text-background">
+                          {tr(boostTier(boosts[p.id])!.name)}
+                        </span>
+                      )}
+                    </div>
                     <span
                       className={cn(
                         "absolute right-2 top-2 flex size-6 items-center justify-center rounded-full border-2",

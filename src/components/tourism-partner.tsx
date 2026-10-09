@@ -3,6 +3,7 @@ import {
   ArrowRight,
   BarChart3,
   Bookmark,
+  CreditCard,
   Copy,
   Eye,
   Flame,
@@ -38,34 +39,39 @@ import { useLanguage } from "@/lib/i18n";
 import { LOCATIONS, type LocationId, type OfferType, type PerkCategory } from "@/lib/hospital-data";
 import {
   CATEGORIES,
-  DEMO_PARTNER,
   OFFER_TYPES,
+  PARTNER_ACCOUNTS,
   REGIONS,
   SAMPLE_IMAGES,
+  accountOffers,
   customToDirectory,
   fullDirectory,
+  hash,
   trending,
   usePartner,
+  type AccountSlice,
   type CustomOffer,
   type DirectoryOffer,
   type OfferStatus,
+  type PartnerAccount,
 } from "@/lib/partner-offers";
-import { BOOST_TIERS, boostTier, type BoostId } from "@/lib/business";
+import { BOOST_TIERS, boostSpend, boostTier, type BoostId } from "@/lib/business";
+import { FeeSchedule } from "@/components/fee-schedule";
 import heroImg from "@/assets/partners/el-conquistador.jpg";
 
 const money = (n: number) => `$${n.toLocaleString()}`;
-type Tab = "directory" | "trending" | "mine";
+type Tab = "directory" | "trending" | "mine" | "billing";
 
 export function TourismExperience() {
   const { t: tr } = useLanguage();
-  const { state, update, reset } = usePartner();
+  const { state, account, slice, update, loginAs, logout, reset } = usePartner();
   const [tab, setTab] = useState<Tab>("directory");
   const [editing, setEditing] = useState<CustomOffer | null>(null);
   const [wizard, setWizard] = useState(false);
   const [boosting, setBoosting] = useState<CustomOffer | null>(null);
   const directory = useMemo(() => fullDirectory(state), [state]);
 
-  if (!state.loggedIn) return <PartnerLanding count={directory.length} onLogin={() => update((s) => ({ ...s, loggedIn: true }))} />;
+  if (!state.loggedIn) return <PartnerLanding count={directory.length} onLogin={loginAs} />;
 
   function save(o: CustomOffer) {
     update((s) => ({ ...s, offers: s.offers.some((x) => x.id === o.id) ? s.offers.map((x) => (x.id === o.id ? o : x)) : [o, ...s.offers] }));
@@ -80,16 +86,16 @@ export function TourismExperience() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="eyebrow">{tr("Partner workspace")}</p>
-          <h2 className="text-2xl font-black sm:text-3xl">{DEMO_PARTNER}</h2>
-          <p className="text-xs text-muted-foreground">{tr("Fajardo · Adventure & sailing · Demo partner")}</p>
+          <h2 className="text-2xl font-black sm:text-3xl">{account.name}</h2>
+          <p className="text-xs text-muted-foreground">{tr(`${account.town} · ${account.category}`)}</p>
         </div>
         <div className="flex gap-2">
           <Button onClick={() => { setEditing(null); setWizard(true); }}><Plus />{tr("Create an offer")}</Button>
-          <Button variant="outline" size="icon" aria-label={tr("Sign out")} onClick={() => update((s) => ({ ...s, loggedIn: false }))}><LogOut /></Button>
+          <Button variant="outline" size="icon" aria-label={tr("Sign out")} onClick={logout}><LogOut /></Button>
         </div>
       </div>
       <nav className="sticky top-0 z-10 -mx-4 mt-5 flex gap-1 overflow-x-auto border-b border-border bg-background px-4 sm:mx-0 sm:px-0">
-        {([["directory", "Offer directory", Store], ["trending", "Trending", Flame], ["mine", "My offers", BarChart3]] as const).map(([id, label, Icon]) => (
+        {([["directory", "Offer directory", Store], ["trending", "Trending", Flame], ["mine", "My offers", BarChart3], ["billing", "Billing", CreditCard]] as const).map(([id, label, Icon]) => (
           <button key={id} onClick={() => setTab(id)} className={cn("flex shrink-0 items-center gap-2 border-b-2 px-4 py-3 text-sm font-bold", tab === id ? "border-primary text-foreground" : "border-transparent text-muted-foreground")}>
             <Icon className="size-4" />{tr(label)}
           </button>
@@ -100,37 +106,40 @@ export function TourismExperience() {
         {tab === "trending" && <Trending list={directory} onCreate={() => setWizard(true)} />}
         {tab === "mine" && (
           <MyOffers
-            offers={state.offers}
-            boosts={state.boosts ?? {}}
+            partner={account.name}
+            offers={slice.offers}
+            boosts={slice.boosts}
             onBoost={setBoosting}
             onEdit={(o) => { setEditing(o); setWizard(true); }}
-            onStatus={(id, status) => update((s) => ({ ...s, offers: s.offers.map((o) => (o.id === id ? { ...o, status } : o)) }))}
-            onDuplicate={(o) => update((s) => ({ ...s, offers: [{ ...o, id: `partner-${Date.now()}`, title: `${o.title} (copy)`, status: "Draft" }, ...s.offers] }))}
+            onStatus={(id, status) => update((a) => ({ ...a, offers: a.offers.map((o) => (o.id === id ? { ...o, status } : o)) }))}
+            onDuplicate={(o) => update((a) => ({ ...a, offers: [{ ...o, id: `partner-${Date.now()}`, title: `${o.title} (copy)`, status: "Draft" }, ...a.offers] }))}
             onReset={reset}
           />
         )}
+        {tab === "billing" && <PartnerBilling account={account} slice={slice} onBoostOffer={setBoosting} />}
       </div>
       <p className="mt-10 text-center text-xs text-muted-foreground">
         {tr("Real Puerto Rico businesses shown for demonstration. All deals, prices, and performance figures are synthetic.")}
       </p>
       <BoostDialog
         offer={boosting}
-        current={boosting ? state.boosts?.[boosting.id] : undefined}
+        current={boosting ? slice.boosts[boosting.id] : undefined}
         onClose={() => setBoosting(null)}
         onSet={(id, tier) => {
-          update((s) => { const b = { ...(s.boosts ?? {}) }; if (tier) b[id] = tier; else delete b[id]; return { ...s, boosts: b }; });
+          update((a) => { const b = { ...a.boosts }; if (tier) b[id] = tier; else delete b[id]; return { ...a, boosts: b }; });
           toast.success(tr(tier ? "Boost active. Your offer now ranks higher for hospitals." : "Boost removed."));
           setBoosting(null);
         }}
       />
-      <OfferWizard open={wizard} initial={editing} onClose={() => { setWizard(false); setEditing(null); }} onSave={save} />
+      <OfferWizard open={wizard} partner={account.name} initial={editing} onClose={() => { setWizard(false); setEditing(null); }} onSave={save} />
     </section>
   );
 }
 
 /* ---------- Landing: sell participation ---------- */
-function PartnerLanding({ count, onLogin }: { count: number; onLogin: () => void }) {
+function PartnerLanding({ count, onLogin }: { count: number; onLogin: (accountId: string) => void }) {
   const { t: tr } = useLanguage();
+  const [picking, setPicking] = useState(false);
   return (
     <>
       <section className="relative isolate overflow-hidden bg-surface-dark text-surface-dark-foreground">
@@ -144,7 +153,7 @@ function PartnerLanding({ count, onLogin }: { count: number; onLogin: () => void
             {tr("Hospitals add your offer to travel-nurse gig packages. Nurses arrive with you already booked — a steady stream of guests who stay for weeks, not nights.")}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Button size="lg" onClick={onLogin}><LogIn />{tr("Log in as a partner")}</Button>
+            <Button size="lg" onClick={() => setPicking(true)}><LogIn />{tr("Log in as a partner")}</Button>
           </div>
           <p className="mt-3 text-xs text-surface-dark-foreground/60">{tr("Demo login — no password needed.")}</p>
           <dl className="mt-12 grid max-w-3xl grid-cols-3 gap-4 border-t border-surface-dark-foreground/20 pt-6">
@@ -170,6 +179,24 @@ function PartnerLanding({ count, onLogin }: { count: number; onLogin: () => void
           );
         })}
       </section>
+      <section className="mx-auto max-w-[1440px] px-4 pb-16 sm:px-6 lg:px-8">
+        <h2 className="text-2xl font-black sm:text-3xl">{tr("Log in as one of these operators")}</h2>
+        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">{tr("Each operator opens with its own book of offers, placement spend and billing — all synthetic, all editable.")}</p>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {PARTNER_ACCOUNTS.map((a) => <OperatorCard key={a.id} a={a} onPick={() => onLogin(a.id)} />)}
+        </div>
+      </section>
+      <Dialog open={picking} onOpenChange={setPicking}>
+        <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-black">{tr("Log in as a partner")}</DialogTitle>
+            <DialogDescription>{tr("Demo access — no password needed. Pick an operator to open its offers, placement and billing.")}</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {PARTNER_ACCOUNTS.map((a) => <OperatorCard key={a.id} a={a} onPick={() => { setPicking(false); onLogin(a.id); }} />)}
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
@@ -396,11 +423,11 @@ function Ranked({ title, list, metric }: { title: string; list: DirectoryOffer[]
 }
 
 /* ---------- My offers ---------- */
-function MyOffers({ offers, boosts, onBoost, onEdit, onStatus, onDuplicate, onReset }: {
-  offers: CustomOffer[]; boosts: Record<string, BoostId>; onBoost: (o: CustomOffer) => void; onEdit: (o: CustomOffer) => void; onStatus: (id: string, s: OfferStatus) => void; onDuplicate: (o: CustomOffer) => void; onReset: () => void;
+function MyOffers({ partner, offers, boosts, onBoost, onEdit, onStatus, onDuplicate, onReset }: {
+  partner: string; offers: CustomOffer[]; boosts: Record<string, BoostId>; onBoost: (o: CustomOffer) => void; onEdit: (o: CustomOffer) => void; onStatus: (id: string, s: OfferStatus) => void; onDuplicate: (o: CustomOffer) => void; onReset: () => void;
 }) {
   const { t: tr } = useLanguage();
-  const d = offers.map(customToDirectory);
+  const d = offers.map((o) => customToDirectory(o, partner));
   const live = d.filter((o) => o.status === "Live");
   const sum = (k: keyof DirectoryOffer["stats"]) => live.reduce((a, o) => a + o.stats[k], 0);
   return (
@@ -461,7 +488,7 @@ const blank = (): CustomOffer => ({
   offerType: "Standard", headline: "", retail: 0, cost: 0, capacity: 10, locations: ["fajardo"], status: "Draft",
 });
 
-function OfferWizard({ open, initial, onClose, onSave }: { open: boolean; initial: CustomOffer | null; onClose: () => void; onSave: (o: CustomOffer) => void }) {
+function OfferWizard({ open, partner, initial, onClose, onSave }: { open: boolean; partner: string; initial: CustomOffer | null; onClose: () => void; onSave: (o: CustomOffer) => void }) {
   const { t: tr } = useLanguage();
   const [step, setStep] = useState(0);
   const [o, setO] = useState<CustomOffer>(blank);
@@ -547,7 +574,7 @@ function OfferWizard({ open, initial, onClose, onSave }: { open: boolean; initia
           {step === 5 && (
             <>
               <p className="text-sm text-muted-foreground">{tr("This is exactly how hospitals will see your offer.")}</p>
-              <div className="mx-auto max-w-xs"><OfferCard o={customToDirectory(o)} /></div>
+              <div className="mx-auto max-w-xs"><OfferCard o={customToDirectory(o, partner)} /></div>
             </>
           )}
         </div>
@@ -602,5 +629,102 @@ function BoostDialog({ offer, current, onClose, onSet }: { offer: CustomOffer | 
         <p className="text-xs text-muted-foreground">{tr("Simulated checkout for demonstration. No card is charged.")}</p>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/* ---------- Operator picker (landing) ---------- */
+function OperatorCard({ a, onPick }: { a: PartnerAccount; onPick: () => void }) {
+  const { t: tr } = useLanguage();
+  const live = accountOffers(a.id).filter((o) => o.status === "Live").length;
+  return (
+    <button type="button" onClick={onPick} className="group flex overflow-hidden border border-border bg-card text-left transition hover:border-primary">
+      <img src={a.image} alt={tr(a.name)} loading="lazy" className="h-24 w-24 shrink-0 object-cover" />
+      <div className="min-w-0 p-3">
+        <p className="truncate font-extrabold">{a.name}</p>
+        <p className="truncate text-xs font-semibold text-primary">{tr(a.town)} · {tr(a.category)}</p>
+        <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{tr(a.blurb)}</p>
+        <p className="mt-1 text-[11px] font-bold text-muted-foreground">{live} {tr("live offers")} · {tr("Partner since")} {a.since}</p>
+      </div>
+    </button>
+  );
+}
+
+/* ---------- Partner billing (placement spend, simulated) ---------- */
+function PartnerBilling({ account, slice, onBoostOffer }: { account: PartnerAccount; slice: AccountSlice; onBoostOffer: (o: CustomOffer) => void }) {
+  const { t: tr, language } = useLanguage();
+  const spend = boostSpend(slice.boosts);
+  const charges = Object.entries(slice.boosts)
+    .map(([id, tier]) => ({ id, tier, title: slice.offers.find((o) => o.id === id)?.title ?? id, price: boostTier(tier)?.price ?? 0 }))
+    .sort((a, b) => b.price - a.price);
+  const now = new Date();
+  const dateOf = (seed: string) =>
+    new Date(now.getFullYear(), now.getMonth(), 1 + (hash(account.id + seed) % 6)).toLocaleDateString(language === "es" ? "es-PR" : "en-US", { month: "short", day: "numeric" });
+  const live = slice.offers.filter((o) => o.status === "Live");
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-3 md:grid-cols-3">
+        <div className="border-2 border-primary bg-primary/5 p-5">
+          <p className="text-xs font-bold uppercase text-muted-foreground">{tr("This month")}</p>
+          <p className="mt-2 text-3xl font-black">{money(spend)}<span className="text-sm font-bold text-muted-foreground">{tr("/mo")}</span></p>
+          <p className="text-sm text-muted-foreground">{tr(`${charges.length} active boosts on your offers`)}</p>
+        </div>
+        <div className="border border-border bg-card p-5">
+          <p className="text-xs font-bold uppercase text-muted-foreground">{tr("Listing fee")}</p>
+          <p className="mt-2 text-3xl font-black">{money(0)}</p>
+          <p className="text-sm text-muted-foreground">{tr("Free to list, forever. You only pay for placement.")}</p>
+        </div>
+        <div className="border border-border bg-card p-5">
+          <p className="text-xs font-bold uppercase text-muted-foreground">{tr("Payment method")}</p>
+          <p className="mt-2 text-lg font-black">{account.card}</p>
+          <p className="text-sm text-muted-foreground">{tr(`Next invoice ${dateOf("invoice")} · ${live.length} live offers`)}</p>
+        </div>
+      </div>
+
+      <div className="overflow-x-auto border border-border bg-card">
+        <h3 className="flex items-center gap-2 p-4 font-black"><CreditCard className="size-4" />{tr("Charges this month")}</h3>
+        <table className="w-full min-w-[560px] text-sm">
+          <thead className="bg-muted text-left text-xs uppercase text-muted-foreground">
+            <tr><th className="p-2">{tr("Date")}</th><th className="p-2">{tr("Item")}</th><th className="p-2">{tr("Placement")}</th><th className="p-2 text-right">{tr("Amount")}</th></tr>
+          </thead>
+          <tbody>
+            {charges.map((c) => (
+              <tr key={c.id} className="border-t border-border">
+                <td className="p-2 text-muted-foreground">{dateOf(c.id)}</td>
+                <td className="p-2 font-semibold">{tr(c.title)}</td>
+                <td className="p-2">{tr(boostTier(c.tier)!.name)}</td>
+                <td className="p-2 text-right font-black">{money(c.price)}</td>
+              </tr>
+            ))}
+            <tr className="border-t border-border">
+              <td className="p-2 text-muted-foreground">{dateOf("listing")}</td>
+              <td className="p-2 font-semibold">{tr("Directory listing")}</td>
+              <td className="p-2 text-muted-foreground">{tr("Standard placement")}</td>
+              <td className="p-2 text-right font-black">{money(0)}</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr className="border-t-2 border-border font-black">
+              <td className="p-2" colSpan={3}>{tr("Total this month")}</td>
+              <td className="p-2 text-right">{money(spend)}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div className="border border-border bg-card p-5">
+        <h3 className="font-black">{tr("Buy placement")}</h3>
+        <p className="text-sm text-muted-foreground">{tr("Pick a live offer and choose how high it ranks in the directory and in hospitals' perk menu.")}</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {live.map((o) => (
+            <Button key={o.id} size="sm" variant={slice.boosts[o.id] ? "default" : "outline"} onClick={() => onBoostOffer(o)}>
+              <Megaphone />{o.title}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      <FeeSchedule />
+      <p className="text-center text-xs text-muted-foreground">{tr("Simulated billing for demonstration. No real invoices or charges.")}</p>
+    </div>
   );
 }

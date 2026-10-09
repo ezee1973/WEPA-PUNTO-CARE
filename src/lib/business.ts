@@ -25,6 +25,8 @@ export const BOOST_TIERS: { id: BoostId; name: string; price: number; lift: numb
 ];
 export const boostRank = (b?: BoostId) => (b === "spotlight" ? 3 : b === "featured" ? 2 : b === "boost" ? 1 : 0);
 export const boostTier = (b?: BoostId) => BOOST_TIERS.find((t) => t.id === b);
+/** What a partner pays for placement this month. */
+export const boostSpend = (boosts: Record<string, BoostId>) => Object.values(boosts).reduce((a, id) => a + (boostTier(id)?.price ?? 0), 0);
 
 export type ServiceKind = "Flights" | "Airport transfer" | "Concierge";
 export type Service = { id: string; kind: ServiceKind; title: string; detail: string; price: number; wepaShare: number; often?: string };
