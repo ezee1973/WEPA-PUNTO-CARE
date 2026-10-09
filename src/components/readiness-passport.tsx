@@ -132,7 +132,7 @@ export function ReadinessPassport() {
     <div className="min-h-dvh bg-background pb-32 lg:pb-12">
       <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
-          <Button asChild variant="ghost" size="icon" aria-label="Back to WEPA.care"><Link to="/"><ArrowLeft /></Link></Button>
+          <Button asChild variant="ghost" size="icon" aria-label="Back to WEPA.care"><Link to="/" search={{ home: "nurse" }}><ArrowLeft /></Link></Button>
           <div className="min-w-0 flex-1">
             <p className="truncate font-display text-lg font-bold leading-tight">Puerto Rico Readiness Passport</p>
             <p className="truncate text-xs text-muted-foreground">{state.profile.name} · {state.profile.specialty}</p>

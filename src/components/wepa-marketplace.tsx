@@ -44,13 +44,13 @@ const jingleUrl = jingleAsset.url;
 
 type MarketRole = "nurse" | "hospital" | "tourism";
 
-export function WepaMarketplace() {
+export function WepaMarketplace({ home }: { home?: MarketRole | undefined } = {}) {
   const [selectedGig, setSelectedGig] = useState<DemoGig | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
   // Every land opens with the anthem takeover; it plays, fades, and you're in.
-  const [anthemPlaying, setAnthemPlaying] = useState(true);
+  const [anthemPlaying, setAnthemPlaying] = useState(!home);
   const [signedInEmail, setSignedInEmail] = useState<string | null>(null);
-  const [role, setRole] = useState<MarketRole>("nurse");
+  const [role, setRole] = useState<MarketRole>(home ?? "nurse");
 
   useEffect(() => {
     void supabase.auth.getUser().then(({ data }) => setSignedInEmail(data.user?.email ?? null));

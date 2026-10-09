@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { WepaMarketplace } from "@/components/wepa-marketplace";
 
 export const Route = createFileRoute("/")({
+  validateSearch: (s: Record<string, unknown>) => ({ home: s.home === "nurse" || s.home === "hospital" || s.home === "tourism" ? (s.home as "nurse" | "hospital" | "tourism") : undefined }),
   head: () => ({
     meta: [
       { title: "WEPA.care — Come for the Island. Care for its People." },
@@ -17,5 +18,6 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  return <WepaMarketplace />;
+  const { home } = Route.useSearch();
+  return <WepaMarketplace home={home} />;
 }
