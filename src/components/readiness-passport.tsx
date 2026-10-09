@@ -309,12 +309,13 @@ function PathwayCheck({ pathway, onChange, onContinue }: { pathway: Pathway; onC
     ["pending", "Do you have any pending disciplinary investigations?"],
     ["revoked", "Has a license ever been revoked or surrendered?"],
   ];
+  const complete = pathwayComplete(pathway);
   const result = pathwayResult(pathway);
   return (
     <section className="space-y-3">
       <div className="rounded-3xl bg-surface-dark p-5 text-surface-dark-foreground">
-        <p className="text-sm opacity-75">Result</p>
-        <p className="font-display text-2xl font-bold">{result}</p>
+        <p className="text-sm opacity-75">Step 1 · Your authorization route</p>
+        <p className="font-display text-2xl font-bold">{complete ? result : "Answer the questions below to see your route"}</p>
         <p className="mt-2 text-xs opacity-75">{DISCLAIMER}</p>
       </div>
       {qs.map(([k, q]) => (
