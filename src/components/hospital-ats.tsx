@@ -42,7 +42,7 @@ export function PassportViewer({ nurse, onClose }: { nurse: PoolNurse | null; on
               <p><strong>Traveling with:</strong> {nurse.family} · <strong>Wants:</strong> {nurse.experiences.join(", ")}</p>
               <p className="mt-2 text-xs opacity-70">Candidate-reported. Only Puerto Rico’s licensing authority can determine eligibility or authorize practice.</p>
             </div>
-            <DialogClose asChild><Button size="lg" className="w-full bg-coral text-coral-foreground hover:bg-coral/90"><X /> Close passport</Button></DialogClose>
+            <div><DialogClose asChild><Button size="lg" className="w-full bg-coral text-coral-foreground hover:bg-coral/90"><X /> Close passport</Button></DialogClose></div>
           </>
         )}
       </DialogContent>
