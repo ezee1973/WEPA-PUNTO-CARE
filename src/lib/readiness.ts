@@ -5,8 +5,14 @@ export type ItemStatus =
   | "Official review" | "Accepted" | "Expired" | "Manual review";
 
 export type ChecklistItem = {
-  id: string; title: string; status: ItemStatus; source: string; expires?: string; next: string; help: string; file?: string;
+  id: string; title: string; status: ItemStatus; source: string; expires?: string; next: string; help: string; file?: string; fileData?: string; fileType?: string;
 };
+
+function sampleDoc(title: string, lines: string[], tone = "#16C9AD") {
+  const rows = lines.map((l, i) => `<text x="40" y="${200 + i * 34}" font-size="20" fill="#092D37">${l}</text>`).join("");
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="420"><rect width="640" height="420" rx="24" fill="#F5F2E9"/><rect width="640" height="90" rx="24" fill="${tone}"/><text x="40" y="58" font-size="28" font-weight="700" fill="#092D37" font-family="sans-serif">${title}</text><rect x="470" y="130" width="130" height="160" rx="12" fill="#092D37" opacity=".15"/><g font-family="sans-serif">${rows}</g><text x="40" y="390" font-size="16" fill="#FF7563" font-family="sans-serif" font-weight="700">SAMPLE · FICTIONAL DEMO DOCUMENT</text></svg>`;
+  return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+}
 
 export type Stage = "Applied" | "Readiness review" | "Clinical review" | "Conditional offer" | "Credentialing" | "Cleared to start";
 export const STAGES: Stage[] = ["Applied", "Readiness review", "Clinical review", "Conditional offer", "Credentialing", "Cleared to start"];
@@ -62,9 +68,9 @@ export function nextBestAction(s: ReadinessState) {
 
 
 const seedChecklist: ChecklistItem[] = [
-  { id: "id", title: "Government-issued photo ID", status: "Nurse confirmed", source: "Florida driver license", expires: "2029-04-02", next: "None", help: "A valid passport, REAL ID or driver license. The Board also asks for a recent 2×2 photo." },
-  { id: "citizen", title: "Citizenship or work-authorization evidence", status: "Nurse confirmed", source: "U.S. passport", expires: "2031-09-10", next: "None", help: "U.S. citizens use a passport or birth certificate. Others provide valid work authorization." },
-  { id: "license", title: "Current out-of-state license", status: "Nurse confirmed", source: "Florida Board of Nursing", expires: "2027-07-31", next: "None", help: "Your active home-state RN license: number, issue date and status (Vigente / Good standing)." },
+  { id: "id", title: "Government-issued photo ID", status: "Nurse confirmed", source: "Florida driver license", expires: "2029-04-02", next: "None", file: "fl-driver-license.svg", fileType: "image/svg+xml", fileData: sampleDoc("FLORIDA DRIVER LICENSE", ["ELENA RIVERA", "DOB 03/14/1990", "Orlando, FL", "EXP 04/02/2029"]), help: "A valid passport, REAL ID or driver license. The Board also asks for a recent 2×2 photo." },
+  { id: "citizen", title: "Citizenship or work-authorization evidence", status: "Nurse confirmed", source: "U.S. passport", expires: "2031-09-10", next: "None", file: "us-passport.svg", fileType: "image/svg+xml", fileData: sampleDoc("UNITED STATES PASSPORT", ["RIVERA, ELENA", "Nationality: USA", "EXP 09/10/2031"], "#FF7563"), help: "U.S. citizens use a passport or birth certificate. Others provide valid work authorization." },
+  { id: "license", title: "Current out-of-state license", status: "Nurse confirmed", source: "Florida Board of Nursing", expires: "2027-07-31", next: "None", file: "fl-rn-license.svg", fileType: "image/svg+xml", fileData: sampleDoc("FLORIDA BOARD OF NURSING", ["Registered Nurse · RN9481726", "ELENA RIVERA", "Status: Clear / Active", "EXP 07/31/2027"]), help: "Your active home-state RN license: number, issue date and status (Vigente / Good standing)." },
   { id: "standing", title: "Good-standing certificate", status: "Ready for review", source: "Nursys license verification (requested)", next: "Confirm the request details", help: "An official letter or Nursys verification showing your license is active with no restrictions." },
   { id: "discipline", title: "Disciplinary-history certification", status: "Ready for review", source: "Florida Board of Nursing", next: "Confirm the request details", help: "A certification from your home board stating whether any disciplinary action exists." },
   { id: "declaration", title: "Notarized sworn declaration", status: "Missing", source: "Not started", next: "Draft with Wepa Guide, then sign before a notary", help: "The Puerto Rico application is a 'declaración jurada' — you swear the information is true before a notary public. If sworn outside Puerto Rico, the notary usually also needs County Clerk authentication." },
