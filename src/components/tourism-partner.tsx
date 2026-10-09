@@ -575,7 +575,7 @@ function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; chi
 }
 
 /* ---------- Boost (paid placement, simulated checkout) ---------- */
-function BoostDialog({ offer, current, onClose, onSet }: { offer: CustomOffer | null; current?: BoostId; onClose: () => void; onSet: (id: string, tier?: BoostId) => void }) {
+function BoostDialog({ offer, current, onClose, onSet }: { offer: CustomOffer | null; current?: BoostId | undefined; onClose: () => void; onSet: (id: string, tier?: BoostId) => void }) {
   const { t: tr } = useLanguage();
   const [pick, setPick] = useState<BoostId>("featured");
   if (!offer) return null;

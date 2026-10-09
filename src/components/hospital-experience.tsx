@@ -35,7 +35,7 @@ import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { perkImage, usePartner } from "@/lib/partner-offers";
 import { HospitalBilling } from "@/components/hospital-billing";
-import { boostTier, hospitalWeekly } from "@/lib/business";
+import { boostRank, boostTier, hospitalWeekly } from "@/lib/business";
 import { currentBoosts } from "@/lib/partner-offers";
 import { PassportThumb, PassportViewer, Pipeline } from "@/components/hospital-ats";
 import {
@@ -736,7 +736,7 @@ function GigBuilder({
 
   const loc = LOCATIONS.find((l) => l.id === location)!;
   const boosts = currentBoosts();
-  const rankOf = (id: string) => ({ spotlight: 3, featured: 2, boost: 1 })[boosts[id] ?? ""] ?? 0;
+  const rankOf = (id: string) => boostRank(boosts[id]);
   const available = perksFor(location)
     .filter((p) => (cat === "All" || p.category === cat) && (!freeOnly || p.cost === 0))
     .map((p, i) => ({ p, i }))
