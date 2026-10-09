@@ -226,7 +226,39 @@ export function ReadinessPassport() {
 
         <GuidePanel guide={guide} onAsk={ask} onPrepare={state.packetPrepared ? undefined : preparePacket} onStop={() => abortRef.current?.abort()} />
       </main>
+
+      <ProfileDialog open={editProfile} onOpenChange={setEditProfile} profile={state.profile} onSave={(p) => { update((s) => ({ ...s, profile: p })); setEditProfile(false); toast.success("Profile updated everywhere — passport, checklist and Wepa Guide."); }} />
     </div>
+  );
+}
+
+function ProfileDialog({ open, onOpenChange, profile, onSave }: { open: boolean; onOpenChange: (o: boolean) => void; profile: NurseProfile; onSave: (p: NurseProfile) => void }) {
+  const [draft, setDraft] = useState(profile);
+  useEffect(() => { if (open) setDraft(profile); }, [open, profile]);
+  const set = (k: keyof NurseProfile, v: string) => setDraft((d) => ({ ...d, [k]: k === "years" ? Math.max(0, Number(v) || 0) : k === "certs" ? v.split(",").map((c) => c.trim()).filter(Boolean) : v }));
+  const fields: [keyof NurseProfile, string, string?][] = [
+    ["name", "Full name"], ["city", "Home city & state"], ["specialty", "Specialty"], ["years", "Years of experience", "number"],
+    ["license", "Home-state license"], ["licenseIssued", "License issued", "date"], ["licenseExpires", "License expires", "date"],
+    ["certs", "Certifications (comma-separated)"], ["availability", "Availability"], ["spanish", "Spanish level"], ["travelingWith", "Traveling with"], ["email", "Email", "email"],
+  ];
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[85dvh] overflow-y-auto sm:max-w-lg">
+        <DialogTitle>Edit your profile</DialogTitle>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {fields.map(([k, label, type]) => (
+            <label key={k} className={cn("text-xs font-semibold", (k === "license" || k === "certs" || k === "availability") && "sm:col-span-2")}>
+              {label}
+              <Input type={type ?? "text"} value={k === "certs" ? draft.certs.join(", ") : String(draft[k])} onChange={(e) => set(k, e.target.value)} className="mt-1" />
+            </label>
+          ))}
+        </div>
+        <div className="flex gap-2">
+          <Button onClick={() => onSave(draft)}>Save profile</Button>
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
