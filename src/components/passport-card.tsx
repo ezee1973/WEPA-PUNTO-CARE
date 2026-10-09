@@ -33,9 +33,9 @@ export function Avatar({
   name: string;
   className?: string;
 }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   return photo ? (
-    <img src={photo} alt={t(name)} className={cn("rounded-full object-cover", className)} />
+    <img src={photo} alt={tr(name)} className={cn("rounded-full object-cover", className)} />
   ) : (
     <span
       className={cn(
@@ -43,7 +43,7 @@ export function Avatar({
         className,
       )}
     >
-      {t(initials(name))}
+      {tr(initials(name))}
     </span>
   );
 }
@@ -58,7 +58,7 @@ export function PassportDocument({
   photo?: string | undefined;
   showQr?: boolean;
 }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   const url = shareUrl(p);
   const mrz1 = `P<PRI${p.name.toUpperCase().replace(/[^A-Z]/g, "<")}`.padEnd(44, "<").slice(0, 44);
   const mrz2 = `${p.id.replace("-", "")}<${p.progress}RN${p.years}Y<<WEPA<CARE`
@@ -76,11 +76,11 @@ export function PassportDocument({
       <div className="relative flex items-center justify-between px-5 pt-5">
         <img
           src={logoAsset.url}
-          alt={t("WEPA.care")}
+          alt={tr("WEPA.care")}
           className="h-6 [filter:brightness(0)_invert(1)]"
         />
         <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary">
-          {t("Island Passport")}
+          {tr("Island Passport")}
         </span>
       </div>
       <div className="relative mx-3 mb-3 mt-4 rounded-2xl bg-ivory p-4 text-ivory-foreground">
@@ -92,71 +92,67 @@ export function PassportDocument({
               className="size-24 rounded-xl text-3xl sm:size-28"
             />
             <p className="mt-2 text-center font-mono text-[10px] font-bold tracking-wider">
-              {t(p.id)}
+              {tr(p.id)}
             </p>
           </div>
           <div className="min-w-0 flex-1 space-y-2 text-[11px]">
-            <Field k={t("Name / Nombre")} v={t(p.name)} big />
-            <Field k={t("Specialty")} v={t(`${p.specialty} · ${p.years} yrs`)} />
-            <Field k={t("Home")} v={t(p.city)} />
+            <Field k={tr("Name / Nombre")} v={tr(p.name)} big />
+            <Field k={tr("Specialty")} v={tr(`${p.specialty} · ${p.years} yrs`)} />
+            <Field k={tr("Home")} v={tr(p.city)} />
             <div className="flex gap-4">
-              <Field k={t("Issued")} v={t(p.issued)} />
-              <Field k={t("Prep")} v={t(`${p.progress}%`)} />
+              <Field k={tr("Issued")} v={tr(p.issued)} />
+              <Field k={tr("Prep")} v={tr(`${p.progress}%`)} />
             </div>
           </div>
-          {t(
-            showQr && (
-              <div className="hidden shrink-0 flex-col items-center sm:flex">
-                <div className="rounded-lg bg-white p-1.5">
-                  <QRCodeSVG value={url} size={92} fgColor={NAVY} />
-                </div>
-                <p className="mt-1 text-[9px] font-semibold uppercase tracking-wider">
-                  {t("Scan to verify")}
-                </p>
+          {showQr && (
+            <div className="hidden shrink-0 flex-col items-center sm:flex">
+              <div className="rounded-lg bg-white p-1.5">
+                <QRCodeSVG value={url} size={92} fgColor={NAVY} />
               </div>
-            ),
+              <p className="mt-1 text-[9px] font-semibold uppercase tracking-wider">
+                {tr("Scan to verify")}
+              </p>
+            </div>
           )}
         </div>
         <div className="mt-3 flex flex-wrap gap-1.5">
-          <Stamp tone="teal">{t(p.pathway)}</Stamp>
-          <Stamp tone="coral">{t(`Spanish: ${p.spanish}`)}</Stamp>
-          {t(p.pool && <Stamp tone="navy">{t("In the WEPA gig pool")}</Stamp>)}
+          <Stamp tone="teal">{tr(p.pathway)}</Stamp>
+          <Stamp tone="coral">{tr(`Spanish: ${p.spanish}`)}</Stamp>
+          {p.pool && <Stamp tone="navy">{tr("In the WEPA gig pool")}</Stamp>}
         </div>
-        {t(
-          showQr && (
-            <div className="mt-3 flex items-center gap-3 sm:hidden">
-              <div className="rounded-lg bg-white p-1.5">
-                <QRCodeSVG value={url} size={84} fgColor={NAVY} />
-              </div>
-              <p className="text-[11px] font-semibold">
-                {t("Scan to open this passport in any browser.")}
-              </p>
+        {showQr && (
+          <div className="mt-3 flex items-center gap-3 sm:hidden">
+            <div className="rounded-lg bg-white p-1.5">
+              <QRCodeSVG value={url} size={84} fgColor={NAVY} />
             </div>
-          ),
+            <p className="text-[11px] font-semibold">
+              {tr("Scan to open this passport in any browser.")}
+            </p>
+          </div>
         )}
         <div className="mt-3 overflow-hidden rounded-md bg-ivory-foreground/5 px-2 py-1.5 font-mono text-[9px] leading-tight tracking-[0.12em] text-ivory-foreground/70 sm:text-[10px]">
-          <p className="truncate">{t(mrz1)}</p>
-          <p className="truncate">{t(mrz2)}</p>
+          <p className="truncate">{tr(mrz1)}</p>
+          <p className="truncate">{tr(mrz2)}</p>
         </div>
       </div>
       <p className="relative px-5 pb-4 text-[10px] opacity-70">
-        {t("Candidate-reported preparation record — not a license or authorization to practice.")}
+        {tr("Candidate-reported preparation record — not a license or authorization to practice.")}
       </p>
     </article>
   );
 }
 
 function Field({ k, v, big }: { k: string; v: string; big?: boolean }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   return (
     <div className="min-w-0">
-      <p className="text-[9px] font-bold uppercase tracking-wider text-accent-deep">{t(k)}</p>
-      <p className={cn("truncate font-semibold", big && "font-display text-base")}>{t(v)}</p>
+      <p className="text-[9px] font-bold uppercase tracking-wider text-accent-deep">{tr(k)}</p>
+      <p className={cn("truncate font-semibold", big && "font-display text-base")}>{tr(v)}</p>
     </div>
   );
 }
 function Stamp({ tone, children }: { tone: "teal" | "coral" | "navy"; children: string }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   return (
     <span
       className={cn(
@@ -166,14 +162,14 @@ function Stamp({ tone, children }: { tone: "teal" | "coral" | "navy"; children: 
         tone === "navy" && "border-ivory-foreground text-ivory-foreground",
       )}
     >
-      {t(children)}
+      {tr(children)}
     </span>
   );
 }
 
 /** Share bar: copy link, open in browser, native share, wallet pass image, badge. */
 export function PassportShare({ p, photo }: { p: SharedPassport; photo?: string | undefined }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   const url = shareUrl(p);
   const [walletOpen, setWalletOpen] = useState(false);
   const [badgeOpen, setBadgeOpen] = useState(false);
@@ -186,7 +182,7 @@ export function PassportShare({ p, photo }: { p: SharedPassport; photo?: string 
       }
     } else {
       await navigator.clipboard.writeText(url);
-      toast.success(t("Passport link copied."));
+      toast.success(tr("Passport link copied."));
     }
   }
   return (
@@ -194,22 +190,22 @@ export function PassportShare({ p, photo }: { p: SharedPassport; photo?: string 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         <Button variant="outline" onClick={share}>
           <Share2 />
-          {t(" Share")}
+          {tr(" Share")}
         </Button>
         <Button
           variant="outline"
           onClick={async () => {
             await navigator.clipboard.writeText(url);
-            toast.success(t("Passport link copied."));
+            toast.success(tr("Passport link copied."));
           }}
         >
           <Copy />
-          {t(" Copy link")}
+          {tr(" Copy link")}
         </Button>
         <Button variant="outline" asChild>
           <a href={url} target="_blank" rel="noreferrer">
             <ExternalLink />
-            {t(" Open in browser")}
+            {tr(" Open in browser")}
           </a>
         </Button>
         <Button
@@ -217,7 +213,7 @@ export function PassportShare({ p, photo }: { p: SharedPassport; photo?: string 
           onClick={() => setWalletOpen(true)}
         >
           <Wallet />
-          {t(" Add to Wallet")}
+          {tr(" Add to Wallet")}
         </Button>
       </div>
       <Button
@@ -226,15 +222,15 @@ export function PassportShare({ p, photo }: { p: SharedPassport; photo?: string 
         onClick={() => setBadgeOpen(true)}
       >
         <Award />
-        {t(" Get my WEPA badge")}
+        {tr(" Get my WEPA badge")}
       </Button>
 
       <Dialog open={walletOpen} onOpenChange={setWalletOpen}>
         <DialogContent className="sm:max-w-sm">
-          <DialogTitle>{t("Your wallet pass")}</DialogTitle>
+          <DialogTitle>{tr("Your wallet pass")}</DialogTitle>
           <WalletPass p={p} photo={photo} />
           <p className="text-xs text-muted-foreground">
-            {t(
+            {tr(
               "Save this pass to your phone's photos or home screen and show the QR at interviews. One-tap Apple Wallet is coming soon.",
             )}
           </p>
@@ -246,7 +242,7 @@ export function PassportShare({ p, photo }: { p: SharedPassport; photo?: string 
 }
 
 function WalletPass({ p, photo }: { p: SharedPassport; photo?: string | undefined }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   const ref = useRef<HTMLDivElement>(null);
   async function download() {
     const qr = ref.current?.querySelector("canvas");
@@ -292,27 +288,27 @@ function WalletPass({ p, photo }: { p: SharedPassport; photo?: string | undefine
     <div ref={ref} className="space-y-3">
       <div className="rounded-3xl bg-surface-dark p-5 text-surface-dark-foreground">
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
-          {t("WEPA.care · Island Passport")}
+          {tr("WEPA.care · Island Passport")}
         </p>
         <div className="mt-3 flex items-center gap-3">
           <Avatar photo={photo} name={p.name} className="size-14 text-lg" />
           <div className="min-w-0">
-            <p className="truncate font-display text-lg font-bold">{t(p.name)}</p>
-            <p className="truncate text-xs opacity-75">{t(p.specialty)}</p>
+            <p className="truncate font-display text-lg font-bold">{tr(p.name)}</p>
+            <p className="truncate text-xs opacity-75">{tr(p.specialty)}</p>
           </div>
         </div>
         <p className="mt-3 text-sm font-bold text-coral">
-          {t(p.progress)}
-          {t("% Puerto Rico ready")}
+          {tr(p.progress)}
+          {tr("% Puerto Rico ready")}
         </p>
         <div className="mx-auto mt-4 w-fit rounded-xl bg-white p-3">
           <QRCodeCanvas value={shareUrl(p)} size={180} fgColor={NAVY} marginSize={0} />
         </div>
-        <p className="mt-2 text-center font-mono text-xs tracking-wider">{t(p.id)}</p>
+        <p className="mt-2 text-center font-mono text-xs tracking-wider">{tr(p.id)}</p>
       </div>
       <Button className="w-full" onClick={download}>
         <Download />
-        {t(" Save pass to phone")}
+        {tr(" Save pass to phone")}
       </Button>
     </div>
   );
@@ -330,7 +326,7 @@ function BadgeDialog({
   p: SharedPassport;
   photo?: string | undefined;
 }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   const [style, setStyle] = useState<BadgeStyle>("seal");
   const url = shareUrl(p);
   async function download() {
@@ -341,42 +337,40 @@ function BadgeDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-md">
-        <DialogTitle>{t("Your WEPA Island Nurse badge")}</DialogTitle>
+        <DialogTitle>{tr("Your WEPA Island Nurse badge")}</DialogTitle>
         <div className="grid grid-cols-2 gap-2">
-          {t(
-            (["seal", "banner"] as const).map((s) => (
-              <button
-                key={s}
-                onClick={() => setStyle(s)}
-                className={cn(
-                  "rounded-xl border-2 px-3 py-2 text-sm font-semibold",
-                  style === s ? "border-primary bg-primary/10" : "border-border",
-                )}
-              >
-                {t(s === "seal" ? "Seal · profiles & résumés" : "Banner · LinkedIn & socials")}
-              </button>
-            )),
-          )}
+          {(["seal", "banner"] as const).map((s) => (
+            <button
+              key={s}
+              onClick={() => setStyle(s)}
+              className={cn(
+                "rounded-xl border-2 px-3 py-2 text-sm font-semibold",
+                style === s ? "border-primary bg-primary/10" : "border-border",
+              )}
+            >
+              {tr(s === "seal" ? "Seal · profiles & résumés" : "Banner · LinkedIn & socials")}
+            </button>
+          ))}
         </div>
-        {t(style === "seal" ? <SealPreview p={p} /> : <BannerPreview p={p} photo={photo} />)}
+        {tr(style === "seal" ? <SealPreview p={p} /> : <BannerPreview p={p} photo={photo} />)}
         <Button onClick={download}>
           <Download />
-          {t(" Download badge")}
+          {tr(" Download badge")}
         </Button>
         <div className="rounded-xl bg-muted p-3 text-xs">
-          <p className="font-semibold">{t("Suggested post")}</p>
-          <p className="mt-1 text-muted-foreground">{t(caption)}</p>
+          <p className="font-semibold">{tr("Suggested post")}</p>
+          <p className="mt-1 text-muted-foreground">{tr(caption)}</p>
           <div className="mt-2 flex flex-wrap gap-2">
             <Button
               size="sm"
               variant="outline"
               onClick={async () => {
                 await navigator.clipboard.writeText(caption);
-                toast.success(t("Caption copied."));
+                toast.success(tr("Caption copied."));
               }}
             >
               <Copy />
-              {t(" Copy caption")}
+              {tr(" Copy caption")}
             </Button>
             <Button size="sm" variant="outline" asChild>
               <a
@@ -385,15 +379,15 @@ function BadgeDialog({
                 rel="noreferrer"
               >
                 <ExternalLink />
-                {t(" Share on LinkedIn")}
+                {tr(" Share on LinkedIn")}
               </a>
             </Button>
           </div>
           <p className="mt-2 text-muted-foreground">
-            {t(
+            {tr(
               "Résumé tip: add the seal next to your certifications and list “WEPA Island Passport ",
             )}
-            {t(p.id)}”.
+            {tr(p.id)}”.
           </p>
         </div>
       </DialogContent>
@@ -402,30 +396,30 @@ function BadgeDialog({
 }
 
 function SealPreview({ p }: { p: SharedPassport }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   return (
     <div className="mx-auto grid size-56 place-items-center rounded-full border-[6px] border-coral bg-surface-dark p-3 text-center text-surface-dark-foreground shadow-xl">
       <div className="grid size-full place-items-center rounded-full border-2 border-dashed border-primary">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary">
-            {t("WEPA.care")}
+            {tr("WEPA.care")}
           </p>
           <p className="font-display text-2xl font-bold leading-tight">
-            {t("Island")}
+            {tr("Island")}
             <br />
-            {t("Nurse")}
+            {tr("Nurse")}
           </p>
           <p className="mt-1 text-[10px] font-semibold uppercase tracking-widest text-coral">
-            {t("Puerto Rico Ready")}
+            {tr("Puerto Rico Ready")}
           </p>
-          <p className="mt-1 font-mono text-[10px] opacity-70">{t(p.id)}</p>
+          <p className="mt-1 font-mono text-[10px] opacity-70">{tr(p.id)}</p>
         </div>
       </div>
     </div>
   );
 }
 function BannerPreview({ p, photo }: { p: SharedPassport; photo?: string | undefined }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   return (
     <div
       className="flex aspect-[1200/627] items-center gap-3 overflow-hidden rounded-xl bg-surface-dark p-4 text-surface-dark-foreground"
@@ -438,15 +432,15 @@ function BannerPreview({ p, photo }: { p: SharedPassport; photo?: string | undef
       />
       <div className="min-w-0">
         <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-primary">
-          {t("WEPA Island Nurse · Puerto Rico Ready")}
+          {tr("WEPA Island Nurse · Puerto Rico Ready")}
         </p>
-        <p className="truncate font-display text-lg font-bold">{t(p.name)}</p>
+        <p className="truncate font-display text-lg font-bold">{tr(p.name)}</p>
         <p className="truncate text-xs opacity-80">
-          {t(p.specialty)} · {t(p.years)}
-          {t(" yrs")}
+          {tr(p.specialty)} · {tr(p.years)}
+          {tr(" yrs")}
         </p>
         <p className="mt-1 text-[10px] font-semibold text-coral">
-          {t("Come for the Island. Care for its People.")}
+          {tr("Come for the Island. Care for its People.")}
         </p>
       </div>
     </div>

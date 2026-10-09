@@ -70,7 +70,7 @@ const money = (n: number) => `$${n.toLocaleString()}`;
 const locName = (id: LocationId) => LOCATIONS.find((l) => l.id === id)?.name ?? id;
 
 export function HospitalExperience() {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   const { state, update, reset } = useHospital();
   const [tab, setTab] = useState<Tab>("dashboard");
   const facility = FACILITIES.find((f) => f.id === state.facilityId) ?? FACILITIES[0]!;
@@ -105,15 +105,15 @@ export function HospitalExperience() {
         <div className="flex items-center gap-3">
           <img
             src={hospitalIconAsset.url}
-            alt={t("")}
+            alt={tr("")}
             aria-hidden
             className="size-12 object-contain"
           />
           <div>
-            <h2 className="text-2xl font-black sm:text-3xl">{t(facility.name)}</h2>
+            <h2 className="text-2xl font-black sm:text-3xl">{tr(facility.name)}</h2>
             <p className="flex items-center gap-1 text-sm text-muted-foreground">
-              <MapPin className="size-3.5" /> {t(locName(facility.location))} · {t(facility.beds)}
-              {t(" beds")}
+              <MapPin className="size-3.5" /> {tr(locName(facility.location))} · {tr(facility.beds)}
+              {tr(" beds")}
             </p>
           </div>
         </div>
@@ -123,11 +123,11 @@ export function HospitalExperience() {
             size="sm"
             onClick={() => {
               reset();
-              toast.success(t("Demo data restored."));
+              toast.success(tr("Demo data restored."));
             }}
           >
             <RotateCcw />
-            {t(" Reset demo")}
+            {tr(" Reset demo")}
           </Button>
           <Button
             variant="ghost"
@@ -135,43 +135,39 @@ export function HospitalExperience() {
             onClick={() => update((s) => ({ ...s, loggedIn: false }))}
           >
             <LogOut />
-            {t(" Log out")}
+            {tr(" Log out")}
           </Button>
         </div>
       </div>
 
       <nav className="mt-6 flex gap-1 overflow-x-auto border-b border-border">
-        {t(
-          tabs.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => setTab(t.id)}
-              className={cn(
-                "flex shrink-0 items-center gap-2 border-b-2 px-4 py-3 text-sm font-bold transition-colors",
-                tab === t.id
-                  ? "border-primary text-foreground"
-                  : "border-transparent text-muted-foreground hover:text-foreground",
-              )}
-            >
-              <t.icon className="size-4" /> {t(t.label)}
-            </button>
-          )),
-        )}
+        {tabs.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => setTab(t.id)}
+            className={cn(
+              "flex shrink-0 items-center gap-2 border-b-2 px-4 py-3 text-sm font-bold transition-colors",
+              tab === t.id
+                ? "border-primary text-foreground"
+                : "border-transparent text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <t.icon className="size-4" /> {tr(t.label)}
+          </button>
+        ))}
       </nav>
 
       <div className="mt-6">
-        {t(tab === "dashboard" && <Dashboard facilityLocation={facility.location} onGo={setTab} />)}
-        {t(tab === "pool" && <NursePool facilityLocation={facility.location} />)}
-        {t(tab === "pipeline" && <Pipeline facilityLocation={facility.location} />)}
-        {t(
-          tab === "build" && (
-            <GigBuilder
-              facilityName={facility.name}
-              facilityLocation={facility.location}
-              onDone={() => setTab("dashboard")}
-            />
-          ),
+        {tab === "dashboard" && <Dashboard facilityLocation={facility.location} onGo={setTab} />}
+        {tab === "pool" && <NursePool facilityLocation={facility.location} />}
+        {tab === "pipeline" && <Pipeline facilityLocation={facility.location} />}
+        {tab === "build" && (
+          <GigBuilder
+            facilityName={facility.name}
+            facilityLocation={facility.location}
+            onDone={() => setTab("dashboard")}
+          />
         )}
       </div>
     </section>
@@ -181,14 +177,14 @@ export function HospitalExperience() {
 /* ---------------- Landing ---------------- */
 
 function HospitalLanding({ onLogin }: { onLogin: (facilityId: string) => void }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   const [open, setOpen] = useState(false);
   return (
     <>
       <section className="relative isolate overflow-hidden bg-surface-dark text-surface-dark-foreground">
         <img
           src={heroImage}
-          alt={t("Puerto Rico hospital at golden hour with mountains behind")}
+          alt={tr("Puerto Rico hospital at golden hour with mountains behind")}
           width={1600}
           height={912}
           className="absolute inset-0 -z-20 h-full w-full object-cover"
@@ -196,119 +192,113 @@ function HospitalLanding({ onLogin }: { onLogin: (facilityId: string) => void })
         <div className="absolute inset-0 -z-10 bg-hero-wash" />
         <div className="mx-auto max-w-[1440px] px-4 pb-14 pt-20 sm:px-6 lg:px-8 lg:pb-20">
           <h1 className="max-w-2xl text-4xl font-black leading-[1.02] sm:text-6xl lg:text-7xl">
-            {t("Pay local.")}
+            {tr("Pay local.")}
             <br />
-            <span className="text-primary">{t("Let the island recruit.")}</span>
+            <span className="text-primary">{tr("Let the island recruit.")}</span>
           </h1>
           <p className="mt-5 max-w-xl text-base leading-relaxed text-surface-dark-foreground/85 sm:text-lg">
-            {t(
+            {tr(
               "You can’t outbid mainland travel contracts — and you don’t have to. Pair honest local pay with travel, lodging and adventures from partners near you, and ",
             )}
             <strong className="text-surface-dark-foreground">
-              {t("reach nurses who are already Puerto Rico ready.")}
+              {tr("reach nurses who are already Puerto Rico ready.")}
             </strong>
           </p>
           <div className="mt-6 grid max-w-lg grid-cols-3 gap-3">
             <Stat
               value={String(POOL.filter((n) => n.status === "Passport ready").length)}
-              label={t("passported nurses in pool")}
+              label={tr("passported nurses in pool")}
             />
             <Stat
               value={String(new Set(POOL.flatMap((n) => n.regions)).size)}
-              label={t("regions nurses want")}
+              label={tr("regions nurses want")}
             />
-            <Stat value="~60%" label={t("perk value at partner cost")} />
+            <Stat value="~60%" label={tr("perk value at partner cost")} />
           </div>
           <Button size="lg" className="mt-7" onClick={() => setOpen(true)}>
             <LogIn />
-            {t(" Log in")}
+            {tr(" Log in")}
           </Button>
         </div>
       </section>
 
       <section className="mx-auto max-w-[1440px] px-4 py-12 sm:px-6 lg:px-8">
-        <h2 className="text-3xl font-black sm:text-4xl">{t("Your location is your offer.")}</h2>
+        <h2 className="text-3xl font-black sm:text-4xl">{tr("Your location is your offer.")}</h2>
         <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
-          {t(
+          {tr(
             "Utuado sells mountains, coffee and rivers. Dorado sells resort beaches. Ponce sells culture and sun. WEPA shows you the partners and perks that make sense where you are.",
           )}
         </p>
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {t(
-            LOCATIONS.slice(0, 4).map((l) => (
-              <div key={l.id} className="border border-border bg-card p-5">
-                <p className="text-[10px] font-black uppercase text-muted-foreground">
-                  {t(l.region)}
-                </p>
-                <h3 className="mt-1 text-xl font-black">{t(l.name)}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{t(l.vibe)}</p>
-                <p className="mt-3 text-xs font-bold text-primary">
-                  {t(perksFor(l.id).length)}
-                  {t(" perks available")}
-                </p>
-              </div>
-            )),
-          )}
+          {LOCATIONS.slice(0, 4).map((l) => (
+            <div key={l.id} className="border border-border bg-card p-5">
+              <p className="text-[10px] font-black uppercase text-muted-foreground">
+                {tr(l.region)}
+              </p>
+              <h3 className="mt-1 text-xl font-black">{tr(l.name)}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{tr(l.vibe)}</p>
+              <p className="mt-3 text-xs font-bold text-primary">
+                {tr(perksFor(l.id).length)}
+                {tr(" perks available")}
+              </p>
+            </div>
+          ))}
         </div>
         <div className="mt-10 grid gap-4 md:grid-cols-3">
-          {t(
+          {[
             [
-              [
-                "Explore",
-                "Browse nurses who finished their Puerto Rico Readiness Passport, filtered by the island regions they want.",
-              ],
-              [
-                "Build",
-                "Assemble a gig package from dozens of partner perks — at partner cost, or free from your own facility.",
-              ],
-              [
-                "Compete & hire",
-                "See how your pay + perks rank against other facilities, then message, negotiate and send offers.",
-              ],
-            ].map(([t, d], i) => (
-              <div key={t} className="border-l-4 border-primary bg-primary/5 p-5">
-                <p className="text-xs font-black text-primary">0{t(i + 1)}</p>
-                <h3 className="text-lg font-black">{t(t)}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{t(d)}</p>
-              </div>
-            )),
-          )}
+              "Explore",
+              "Browse nurses who finished their Puerto Rico Readiness Passport, filtered by the island regions they want.",
+            ],
+            [
+              "Build",
+              "Assemble a gig package from dozens of partner perks — at partner cost, or free from your own facility.",
+            ],
+            [
+              "Compete & hire",
+              "See how your pay + perks rank against other facilities, then message, negotiate and send offers.",
+            ],
+          ].map(([t, d], i) => (
+            <div key={t} className="border-l-4 border-primary bg-primary/5 p-5">
+              <p className="text-xs font-black text-primary">0{i + 1}</p>
+              <h3 className="text-lg font-black">{tr(t)}</h3>
+              <p className="mt-1 text-sm text-muted-foreground">{tr(d)}</p>
+            </div>
+          ))}
         </div>
       </section>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t("Log in to your facility")}</DialogTitle>
+            <DialogTitle>{tr("Log in to your facility")}</DialogTitle>
             <DialogDescription>
-              {t(
+              {tr(
                 "Demo access — no password needed. Pick a facility to see how location changes everything.",
               )}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-2">
-            {t(
-              FACILITIES.map((f) => (
-                <button
-                  key={f.id}
-                  type="button"
-                  onClick={() => onLogin(f.id)}
-                  className="flex items-center justify-between border border-border bg-card p-4 text-left hover:border-primary"
-                >
-                  <span>
-                    <strong className="block">{t(f.name)}</strong>
-                    <span className="text-xs text-muted-foreground">
-                      {t(locName(f.location))} · {t(f.beds)}
-                      {t(" beds")}
-                    </span>
+            {FACILITIES.map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => onLogin(f.id)}
+                className="flex items-center justify-between border border-border bg-card p-4 text-left hover:border-primary"
+              >
+                <span>
+                  <strong className="block">{tr(f.name)}</strong>
+                  <span className="text-xs text-muted-foreground">
+                    {tr(locName(f.location))} · {tr(f.beds)}
+                    {tr(" beds")}
                   </span>
-                  <ArrowRight className="size-4 text-primary" />
-                </button>
-              )),
-            )}
+                </span>
+                <ArrowRight className="size-4 text-primary" />
+              </button>
+            ))}
           </div>
           <p className="text-xs text-muted-foreground">
-            {t("All facilities are fictional demo accounts.")}
+            {tr("All facilities are fictional demo accounts.")}
           </p>
         </DialogContent>
       </Dialog>
@@ -317,11 +307,11 @@ function HospitalLanding({ onLogin }: { onLogin: (facilityId: string) => void })
 }
 
 function Stat({ value, label }: { value: string; label: string }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   return (
     <div className="border-l-2 border-primary pl-3">
-      <strong className="block text-2xl font-black">{t(value)}</strong>
-      <span className="text-[11px] leading-tight text-surface-dark-foreground/75">{t(label)}</span>
+      <strong className="block text-2xl font-black">{tr(value)}</strong>
+      <span className="text-[11px] leading-tight text-surface-dark-foreground/75">{tr(label)}</span>
     </div>
   );
 }
@@ -335,7 +325,7 @@ function Dashboard({
   facilityLocation: LocationId;
   onGo: (t: Tab) => void;
 }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   const { state } = useHospital();
   const c = state.candidates;
   const accepted = c.filter((x) => x.stage === "Accepted").length;
@@ -363,128 +353,120 @@ function Dashboard({
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-6">
         <Kpi
-          label={t("Live gigs")}
+          label={tr("Live gigs")}
           value={String(state.gigs.filter((g) => g.status === "Published").length)}
         />
-        <Kpi label={t("Strong pool matches")} value={String(matches)} />
-        <Kpi label={t("In pipeline")} value={String(c.length)} />
-        <Kpi label={t("Offers out")} value={String(offers)} />
+        <Kpi label={tr("Strong pool matches")} value={String(matches)} />
+        <Kpi label={tr("In pipeline")} value={String(c.length)} />
+        <Kpi label={tr("Offers out")} value={String(offers)} />
         <Kpi
-          label={t("Acceptance rate")}
+          label={tr("Acceptance rate")}
           value={offers ? `${Math.round((accepted / offers) * 100)}%` : "—"}
         />
-        <Kpi label={t("Avg package cost")} value={money(avgCost)} />
+        <Kpi label={tr("Avg package cost")} value={money(avgCost)} />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Panel title={t("Hiring funnel")}>
+        <Panel title={tr("Hiring funnel")}>
           <div className="space-y-2">
-            {t(
-              funnel.map((f) => (
-                <div key={f.s} className="flex items-center gap-3 text-sm">
-                  <span className="w-24 shrink-0 text-muted-foreground">{t(f.s)}</span>
-                  <div className="h-6 flex-1 bg-muted">
-                    <div
-                      className="flex h-full items-center bg-primary px-2 text-xs font-bold text-primary-foreground"
-                      style={{ width: `${(f.n / maxF) * 100}%` }}
-                    >
-                      {t(f.n)}
-                    </div>
+            {funnel.map((f) => (
+              <div key={f.s} className="flex items-center gap-3 text-sm">
+                <span className="w-24 shrink-0 text-muted-foreground">{tr(f.s)}</span>
+                <div className="h-6 flex-1 bg-muted">
+                  <div
+                    className="flex h-full items-center bg-primary px-2 text-xs font-bold text-primary-foreground"
+                    style={{ width: `${(f.n / maxF) * 100}%` }}
+                  >
+                    {tr(f.n)}
                   </div>
                 </div>
-              )),
-            )}
+              </div>
+            ))}
           </div>
         </Panel>
-        <Panel title={t("Where passported nurses want to go")}>
+        <Panel title={tr("Where passported nurses want to go")}>
           <div className="space-y-2">
-            {t(
-              regionDemand.map(({ l, n }) => (
-                <div key={l.id} className="flex items-center gap-3 text-sm">
-                  <span
+            {regionDemand.map(({ l, n }) => (
+              <div key={l.id} className="flex items-center gap-3 text-sm">
+                <span
+                  className={cn(
+                    "w-24 shrink-0",
+                    l.id === facilityLocation ? "font-black text-primary" : "text-muted-foreground",
+                  )}
+                >
+                  {tr(l.name)}
+                </span>
+                <div className="h-6 flex-1 bg-muted">
+                  <div
                     className={cn(
-                      "w-24 shrink-0",
+                      "flex h-full items-center px-2 text-xs font-bold",
                       l.id === facilityLocation
-                        ? "font-black text-primary"
-                        : "text-muted-foreground",
+                        ? "bg-coral text-primary-foreground"
+                        : "bg-primary/60 text-primary-foreground",
                     )}
+                    style={{ width: `${(n / maxR) * 100}%` }}
                   >
-                    {t(l.name)}
-                  </span>
-                  <div className="h-6 flex-1 bg-muted">
-                    <div
-                      className={cn(
-                        "flex h-full items-center px-2 text-xs font-bold",
-                        l.id === facilityLocation
-                          ? "bg-coral text-primary-foreground"
-                          : "bg-primary/60 text-primary-foreground",
-                      )}
-                      style={{ width: `${(n / maxR) * 100}%` }}
-                    >
-                      {t(n)}
-                    </div>
+                    {tr(n)}
                   </div>
                 </div>
-              )),
-            )}
+              </div>
+            ))}
           </div>
         </Panel>
       </div>
 
       <Panel
-        title={t("Your gigs")}
+        title={tr("Your gigs")}
         action={
           <Button size="sm" onClick={() => onGo("build")}>
             <Plus />
-            {t(" Build a gig")}
+            {tr(" Build a gig")}
           </Button>
         }
       >
         <div className="divide-y divide-border">
-          {t(
-            state.gigs.map((g) => {
-              const t = packageTotals(g.perks);
-              const wv = weeklyValue(g.weeklyPay, t.retail, g.weeks);
-              const rank = competitiveRank(g.location, wv);
-              const applicants = c.filter((x) => x.gigId === g.id).length;
-              return (
-                <div
-                  key={g.id}
-                  className="grid gap-2 py-3 text-sm sm:grid-cols-[2fr_repeat(4,1fr)] sm:items-center"
-                >
-                  <div>
-                    <strong>{t(g.title)}</strong>
-                    <p className="text-xs text-muted-foreground">
-                      {t(g.specialty)} · {t(locName(g.location))} · {t(g.weeks)}
-                      {t(" wks · ")}
-                      <span className={g.status === "Published" ? "text-primary" : ""}>
-                        {t(g.status)}
-                      </span>
-                    </p>
-                  </div>
-                  <span>
-                    {t(money(g.weeklyPay))}
-                    {t("/wk")}
-                  </span>
-                  <span className="text-primary">
-                    {t(money(wv))}
-                    {t("/wk value")}
-                  </span>
-                  <span>
-                    {t(g.views)}
-                    {t(" views · ")}
-                    {t(applicants)}
-                    {t(" in pipeline")}
-                  </span>
-                  <span className="flex items-center gap-1 font-bold">
-                    <Trophy className="size-4 text-coral" /> #{t(rank.rank)}
-                    {t(" of ")}
-                    {t(rank.total)}
-                  </span>
+          {state.gigs.map((g) => {
+            const t = packageTotals(g.perks);
+            const wv = weeklyValue(g.weeklyPay, t.retail, g.weeks);
+            const rank = competitiveRank(g.location, wv);
+            const applicants = c.filter((x) => x.gigId === g.id).length;
+            return (
+              <div
+                key={g.id}
+                className="grid gap-2 py-3 text-sm sm:grid-cols-[2fr_repeat(4,1fr)] sm:items-center"
+              >
+                <div>
+                  <strong>{tr(g.title)}</strong>
+                  <p className="text-xs text-muted-foreground">
+                    {tr(g.specialty)} · {tr(locName(g.location))} · {tr(g.weeks)}
+                    {tr(" wks · ")}
+                    <span className={g.status === "Published" ? "text-primary" : ""}>
+                      {tr(g.status)}
+                    </span>
+                  </p>
                 </div>
-              );
-            }),
-          )}
+                <span>
+                  {tr(money(g.weeklyPay))}
+                  {tr("/wk")}
+                </span>
+                <span className="text-primary">
+                  {tr(money(wv))}
+                  {tr("/wk value")}
+                </span>
+                <span>
+                  {tr(g.views)}
+                  {tr(" views · ")}
+                  {tr(applicants)}
+                  {tr(" in pipeline")}
+                </span>
+                <span className="flex items-center gap-1 font-bold">
+                  <Trophy className="size-4 text-coral" /> #{tr(rank.rank)}
+                  {tr(" of ")}
+                  {tr(rank.total)}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </Panel>
     </div>
@@ -492,11 +474,11 @@ function Dashboard({
 }
 
 function Kpi({ label, value }: { label: string; value: string }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   return (
     <div className="border border-border bg-card p-4">
-      <strong className="block text-2xl font-black">{t(value)}</strong>
-      <span className="text-[11px] uppercase text-muted-foreground">{t(label)}</span>
+      <strong className="block text-2xl font-black">{tr(value)}</strong>
+      <span className="text-[11px] uppercase text-muted-foreground">{tr(label)}</span>
     </div>
   );
 }
@@ -510,14 +492,14 @@ function Panel({
   action?: ReactNode;
   children: ReactNode;
 }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   return (
     <div className="border border-border bg-card p-5">
       <div className="mb-4 flex items-center justify-between gap-2">
-        <h3 className="text-lg font-black">{t(title)}</h3>
-        {t(action)}
+        <h3 className="text-lg font-black">{tr(title)}</h3>
+        {tr(action)}
       </div>
-      {t(children)}
+      {tr(children)}
     </div>
   );
 }
@@ -531,7 +513,7 @@ function competitiveRank(loc: LocationId, mine: number) {
 /* ---------------- Nurse pool ---------------- */
 
 function NursePool({ facilityLocation }: { facilityLocation: LocationId }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   const { state, update } = useHospital();
   const [q, setQ] = useState("");
   const [region, setRegion] = useState<LocationId | "any">(facilityLocation);
@@ -551,11 +533,11 @@ function NursePool({ facilityLocation }: { facilityLocation: LocationId }) {
 
   function shortlist(n: PoolNurse) {
     if (!gig) {
-      toast.error(t("Build a gig first."));
+      toast.error(tr("Build a gig first."));
       return;
     }
     if (state.candidates.some((c) => c.nurseId === n.id)) {
-      toast(t(`${n.name} is already in your pipeline.`));
+      toast(tr(`${n.name} is already in your pipeline.`));
       return;
     }
     update((s) => ({
@@ -571,7 +553,7 @@ function NursePool({ facilityLocation }: { facilityLocation: LocationId }) {
         },
       ],
     }));
-    toast.success(t(`${n.name} added to your pipeline.`));
+    toast.success(tr(`${n.name} added to your pipeline.`));
   }
 
   const sel = "h-10 rounded-md border border-input bg-card px-3 text-sm";
@@ -583,7 +565,7 @@ function NursePool({ facilityLocation }: { facilityLocation: LocationId }) {
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder={t("Search nurses")}
+            placeholder={tr("Search nurses")}
             className="pl-9"
           />
         </div>
@@ -592,18 +574,20 @@ function NursePool({ facilityLocation }: { facilityLocation: LocationId }) {
           value={region}
           onChange={(e) => setRegion(e.target.value as LocationId | "any")}
         >
-          <option value="any">{t("Any region")}</option>
-          {t(
-            LOCATIONS.map((l) => (
-              <option key={l.id} value={l.id}>
-                {t("Wants ")}
-                {t(l.name)}
-              </option>
-            )),
-          )}
+          <option value="any">{tr("Any region")}</option>
+          {LOCATIONS.map((l) => (
+            <option key={l.id} value={l.id}>
+              {tr("Wants ")}
+              {tr(l.name)}
+            </option>
+          ))}
         </select>
         <select className={sel} value={specialty} onChange={(e) => setSpecialty(e.target.value)}>
-          {t(specialties.map((s) => <option key={s}>{t(s)}</option>))}
+          {specialties.map((s) => (
+            <option key={s} value={s}>
+              {tr(s)}
+            </option>
+          ))}
         </select>
         <label className="flex items-center gap-2 text-sm">
           <input
@@ -611,112 +595,104 @@ function NursePool({ facilityLocation }: { facilityLocation: LocationId }) {
             checked={readyOnly}
             onChange={(e) => setReadyOnly(e.target.checked)}
           />
-          {t(" Passport ready only")}
+          {tr(" Passport ready only")}
         </label>
       </div>
       <p className="mt-3 text-xs text-muted-foreground">
-        {t(list.length)}
-        {t(
+        {tr(list.length)}
+        {tr(
           " nurses · readiness is preparation progress, not license approval. Only Puerto Rico’s licensing authority authorizes practice.",
         )}
       </p>
       <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {t(
-          list.slice(0, limit).map((n) => {
-            const m = matchScore(n, facilityLocation);
-            const inPipe = state.candidates.some((c) => c.nurseId === n.id);
-            return (
-              <div key={n.id} className="flex flex-col border border-border bg-card p-5">
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <h3 className="text-lg font-black">{t(n.name)}</h3>
-                    <p className="text-xs text-muted-foreground">
-                      {t(n.specialty)} · {t(n.years)}
-                      {t(" yrs · ")}
-                      {t(n.home)}
-                    </p>
-                  </div>
-                  <span className="bg-primary px-2 py-1 text-xs font-black text-primary-foreground">
-                    {t(m)}
-                    {t("% match")}
-                  </span>
+        {list.slice(0, limit).map((n) => {
+          const m = matchScore(n, facilityLocation);
+          const inPipe = state.candidates.some((c) => c.nurseId === n.id);
+          return (
+            <div key={n.id} className="flex flex-col border border-border bg-card p-5">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <h3 className="text-lg font-black">{tr(n.name)}</h3>
+                  <p className="text-xs text-muted-foreground">
+                    {tr(n.specialty)} · {tr(n.years)}
+                    {tr(" yrs · ")}
+                    {tr(n.home)}
+                  </p>
                 </div>
-                <div className="mt-3">
-                  <div className="flex justify-between text-xs">
-                    <span>{t(n.status)}</span>
-                    <span>{t(n.readiness)}%</span>
-                  </div>
-                  <Progress value={n.readiness} className="mt-1 h-1.5" />
-                </div>
-                <dl className="mt-3 grid grid-cols-2 gap-1 text-xs">
-                  <dt className="text-muted-foreground">{t("Spanish")}</dt>
-                  <dd>{t(n.spanish)}</dd>
-                  <dt className="text-muted-foreground">{t("Length")}</dt>
-                  <dd>
-                    {t(n.length)}
-                    {t(" weeks")}
-                  </dd>
-                  <dt className="text-muted-foreground">{t("Traveling")}</dt>
-                  <dd>{t(n.family)}</dd>
-                </dl>
-                <div className="mt-3 flex flex-wrap gap-1">
-                  {t(
-                    n.regions.map((r) => (
-                      <span
-                        key={r}
-                        className={cn(
-                          "px-2 py-0.5 text-[11px] font-bold",
-                          r === facilityLocation ? "bg-coral text-primary-foreground" : "bg-muted",
-                        )}
-                      >
-                        {t(locName(r))}
-                      </span>
-                    )),
-                  )}
-                  {t(
-                    n.experiences.map((x) => (
-                      <span key={x} className="border border-border px-2 py-0.5 text-[11px]">
-                        {t(x)}
-                      </span>
-                    )),
-                  )}
-                </div>
-                <div className="mt-3">
-                  <PassportThumb nurse={n} onOpen={() => setPassport(n)} />
-                </div>
-                <Button
-                  className="mt-4"
-                  variant={inPipe ? "outline" : "default"}
-                  disabled={inPipe}
-                  onClick={() => shortlist(n)}
-                >
-                  {t(
-                    inPipe ? (
-                      <>
-                        <Check />
-                        {t(" In pipeline")}
-                      </>
-                    ) : (
-                      <>
-                        <Plus />
-                        {t(" Shortlist & contact")}
-                      </>
-                    ),
-                  )}
-                </Button>
+                <span className="bg-primary px-2 py-1 text-xs font-black text-primary-foreground">
+                  {tr(m)}
+                  {tr("% match")}
+                </span>
               </div>
-            );
-          }),
-        )}
+              <div className="mt-3">
+                <div className="flex justify-between text-xs">
+                  <span>{tr(n.status)}</span>
+                  <span>{tr(n.readiness)}%</span>
+                </div>
+                <Progress value={n.readiness} className="mt-1 h-1.5" />
+              </div>
+              <dl className="mt-3 grid grid-cols-2 gap-1 text-xs">
+                <dt className="text-muted-foreground">{tr("Spanish")}</dt>
+                <dd>{tr(n.spanish)}</dd>
+                <dt className="text-muted-foreground">{tr("Length")}</dt>
+                <dd>
+                  {tr(n.length)}
+                  {tr(" weeks")}
+                </dd>
+                <dt className="text-muted-foreground">{tr("Traveling")}</dt>
+                <dd>{tr(n.family)}</dd>
+              </dl>
+              <div className="mt-3 flex flex-wrap gap-1">
+                {n.regions.map((r) => (
+                  <span
+                    key={r}
+                    className={cn(
+                      "px-2 py-0.5 text-[11px] font-bold",
+                      r === facilityLocation ? "bg-coral text-primary-foreground" : "bg-muted",
+                    )}
+                  >
+                    {tr(locName(r))}
+                  </span>
+                ))}
+                {n.experiences.map((x) => (
+                  <span key={x} className="border border-border px-2 py-0.5 text-[11px]">
+                    {tr(x)}
+                  </span>
+                ))}
+              </div>
+              <div className="mt-3">
+                <PassportThumb nurse={n} onOpen={() => setPassport(n)} />
+              </div>
+              <Button
+                className="mt-4"
+                variant={inPipe ? "outline" : "default"}
+                disabled={inPipe}
+                onClick={() => shortlist(n)}
+              >
+                {tr(
+                  inPipe ? (
+                    <>
+                      <Check />
+                      {tr(" In pipeline")}
+                    </>
+                  ) : (
+                    <>
+                      <Plus />
+                      {tr(" Shortlist & contact")}
+                    </>
+                  ),
+                )}
+              </Button>
+            </div>
+          );
+        })}
       </div>
-      {t(
-        list.length > limit && (
-          <Button variant="outline" className="mt-4 w-full" onClick={() => setLimit((l) => l + 24)}>
-            {t("Show more nurses (")}
-            {t(list.length - limit)}
-            {t(" left)")}
-          </Button>
-        ),
+      {list.length > limit && (
+        <Button variant="outline" className="mt-4 w-full" onClick={() => setLimit((l) => l + 24)}>
+          {tr("Show more nurses (")}
+          {list.length - limit}
+          {tr(" left)")}
+        </Button>
       )}
       <PassportViewer nurse={passport} onClose={() => setPassport(null)} />
     </div>
@@ -762,7 +738,7 @@ function GigBuilder({
   facilityLocation: LocationId;
   onDone: () => void;
 }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   const { update } = useHospital();
   const [title, setTitle] = useState("");
   const [specialty, setSpecialty] = useState("ICU / Critical Care");
@@ -827,7 +803,7 @@ function GigBuilder({
       service,
     };
     update((s) => ({ ...s, gigs: [gig, ...s.gigs] }));
-    toast.success(t(status === "Published" ? "Gig published to the nurse pool." : "Draft saved."));
+    toast.success(tr(status === "Published" ? "Gig published to the nurse pool." : "Draft saved."));
     onDone();
   }
 
@@ -835,49 +811,49 @@ function GigBuilder({
   return (
     <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
       <div className="space-y-6">
-        <Panel title={t("1 · The gig")}>
+        <Panel title={tr("1 · The gig")}>
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="text-sm sm:col-span-2">
-              {t("Title")}
+              {tr("Title")}
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder={t(`${specialty} in ${town}`)}
+                placeholder={tr(`${specialty} in ${town}`)}
               />
             </label>
             <label className="text-sm">
-              {t("Specialty")}
+              {tr("Specialty")}
               <select
                 className={field}
                 value={specialty}
                 onChange={(e) => setSpecialty(e.target.value)}
               >
-                {t(
-                  Array.from(new Set(POOL.map((n) => n.specialty))).map((s) => (
-                    <option key={s}>{t(s)}</option>
-                  )),
-                )}
+                {Array.from(new Set(POOL.map((n) => n.specialty))).map((s) => (
+                  <option key={s} value={s}>
+                    {tr(s)}
+                  </option>
+                ))}
               </select>
             </label>
             <label className="text-sm">
-              {t("Shift")}
+              {tr("Shift")}
               <select className={field} value={shift} onChange={(e) => setShift(e.target.value)}>
-                {t(
-                  ["3 × 12 nights", "3 × 12 days", "3 × 12 rotating", "4 × 10 days"].map((s) => (
-                    <option key={s}>{t(s)}</option>
-                  )),
-                )}
+                {["3 × 12 nights", "3 × 12 days", "3 × 12 rotating", "4 × 10 days"].map((s) => (
+                  <option key={s} value={s}>
+                    {tr(s)}
+                  </option>
+                ))}
               </select>
             </label>
-            {t(
+            {tr(
               service ? (
                 <div className="text-sm">
-                  {t("Weekly pay")}
-                  <p className="mt-2 text-muted-foreground">{t("Unpaid community service")}</p>
+                  {tr("Weekly pay")}
+                  <p className="mt-2 text-muted-foreground">{tr("Unpaid community service")}</p>
                 </div>
               ) : (
                 <label className="text-sm">
-                  {t("Weekly pay (local)")}
+                  {tr("Weekly pay (local)")}
                   <Input
                     type="number"
                     value={weeklyPay}
@@ -894,81 +870,79 @@ function GigBuilder({
                 onChange={(e) => setService(e.target.checked)}
               />{" "}
               <span>
-                {t(
+                {tr(
                   "Make this an unpaid community service gig (rural or underserved outreach, faith-based or secular). It's shown only to nurses who opt in, with lodging and meals covered by you or partners.",
                 )}
               </span>
             </label>
             <label className="text-sm">
-              {t("Length")}
+              {tr("Length")}
               <select
                 className={field}
                 value={weeks}
                 onChange={(e) => setWeeks(Number(e.target.value))}
               >
-                {t(
-                  [4, 8, 13, 26].map((w) => (
-                    <option key={w} value={w}>
-                      {t(w)}
-                      {t(" weeks")}
-                    </option>
-                  )),
-                )}
+                {[4, 8, 13, 26].map((w) => (
+                  <option key={w} value={w}>
+                    {tr(w)}
+                    {tr(" weeks")}
+                  </option>
+                ))}
               </select>
             </label>
             <label className="text-sm">
-              {t("Start date")}
+              {tr("Start date")}
               <Input type="date" value={start} onChange={(e) => setStart(e.target.value)} />
             </label>
           </div>
         </Panel>
 
-        <Panel title={t("2 · Location shapes the package")}>
+        <Panel title={tr("2 · Location shapes the package")}>
           <label className="text-sm">
-            {t("Town or city (any of Puerto Rico’s 78 municipalities) ")}
+            {tr("Town or city (any of Puerto Rico’s 78 municipalities) ")}
             <Input
               list="pr-towns"
               value={town}
               onChange={(e) => setTown(e.target.value)}
-              placeholder={t("Start typing — Utuado, Rincón, Vieques…")}
+              placeholder={tr("Start typing — Utuado, Rincón, Vieques…")}
             />
             <datalist id="pr-towns">
-              {t(MUNICIPALITIES.map((m) => <option key={m.name} value={m.name} />))}
+              {MUNICIPALITIES.map((m) => (
+                <option key={m.name} value={m.name} />
+              ))}
             </datalist>
           </label>
           <div className="mt-4 border-l-4 border-coral bg-coral/5 p-4 text-sm">
             <p className="font-black">
-              {t(town || "—")} · {t(loc.region)}{" "}
+              {town || "—"} · {tr(loc.region)}{" "}
               <span className="font-normal text-muted-foreground">
-                {t("(perks from the ")}
-                {t(loc.name)}
-                {t(" area)")}
+                {tr("(perks from the ")}
+                {tr(loc.name)}
+                {tr(" area)")}
               </span>
             </p>
-            <p className="mt-1 text-muted-foreground">{t(loc.vibe)}</p>
+            <p className="mt-1 text-muted-foreground">{tr(loc.vibe)}</p>
             <p className="mt-2 text-xs">
-              <strong>{t("Housing:")}</strong> {t(loc.housingNote)}
+              <strong>{tr("Housing:")}</strong> {tr(loc.housingNote)}
             </p>
             <div className="mt-2 flex flex-wrap gap-1">
-              {t(
-                loc.draws.map((d) => (
-                  <span key={d} className="bg-card px-2 py-0.5 text-[11px]">
-                    {t(d)}
-                  </span>
-                )),
-              )}
+              {loc.draws.map((d) => (
+                <span key={d} className="bg-card px-2 py-0.5 text-[11px]">
+                  {tr(d)}
+                </span>
+              ))}
             </div>
             <p className="mt-2 text-xs font-bold text-primary">
-              {t(interested)}
-              {t(" passported nurses want the ")}
-              {t(loc.region.toLowerCase())}
-              {t(" region")}
+              {tr(interested)}
+              {tr(" passported nurses want the ")}
+              {tr(loc.region.toLowerCase())}
+              {tr(" region")}
             </p>
           </div>
         </Panel>
 
         <Panel
-          title={t(`3 · Add perks (${perksFor(location).length} available here)`)}
+          title={tr(`3 · Add perks (${perksFor(location).length} available here)`)}
           action={
             <label className="flex items-center gap-2 text-xs">
               <input
@@ -976,148 +950,132 @@ function GigBuilder({
                 checked={freeOnly}
                 onChange={(e) => setFreeOnly(e.target.checked)}
               />
-              {t(" Free only")}
+              {tr(" Free only")}
             </label>
           }
         >
           <div className="mb-4 flex gap-1 overflow-x-auto">
-            {t(
-              (["All", ...CATS] as const).map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setCat(c)}
-                  className={cn(
-                    "shrink-0 px-3 py-1 text-xs font-bold",
-                    cat === c ? "bg-foreground text-background" : "bg-muted",
-                  )}
-                >
-                  {t(c)}
-                </button>
-              )),
-            )}
+            {(["All", ...CATS] as const).map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setCat(c)}
+                className={cn(
+                  "shrink-0 px-3 py-1 text-xs font-bold",
+                  cat === c ? "bg-foreground text-background" : "bg-muted",
+                )}
+              >
+                {tr(c)}
+              </button>
+            ))}
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            {t(
-              available.map((p) => {
-                const on = perks.includes(p.id);
-                const o = offerOf(p.id);
-                const off = p.retail ? Math.round((1 - p.cost / p.retail) * 100) : 0;
-                return (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => toggle(p.id)}
-                    aria-pressed={on}
-                    className={cn(
-                      "group flex flex-col overflow-hidden border text-left transition-colors",
-                      on
-                        ? "border-primary ring-2 ring-primary"
-                        : "border-border bg-card hover:border-primary/50",
+            {available.map((p) => {
+              const on = perks.includes(p.id);
+              const o = offerOf(p.id);
+              const off = p.retail ? Math.round((1 - p.cost / p.retail) * 100) : 0;
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => toggle(p.id)}
+                  aria-pressed={on}
+                  className={cn(
+                    "group flex flex-col overflow-hidden border text-left transition-colors",
+                    on
+                      ? "border-primary ring-2 ring-primary"
+                      : "border-border bg-card hover:border-primary/50",
+                  )}
+                >
+                  <div className="relative h-36 overflow-hidden">
+                    <img
+                      src={perkImage(p)}
+                      alt={tr("")}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-surface-dark/90 via-surface-dark/20 to-transparent" />
+                    <span
+                      className={cn(
+                        "absolute left-2 top-2 px-2 py-0.5 text-[10px] font-black uppercase",
+                        o.offerType === "Limited time"
+                          ? "bg-coral text-primary-foreground"
+                          : o.offerType === "Special"
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-card text-foreground",
+                      )}
+                    >
+                      {tr(o.offerType)}
+                    </span>
+                    <span
+                      className={cn(
+                        "absolute right-2 top-2 flex size-6 items-center justify-center rounded-full border-2",
+                        on
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-surface-dark-foreground/80 bg-surface-dark/40 text-transparent",
+                      )}
+                    >
+                      <Check className="size-3.5" />
+                    </span>
+                    <div className="absolute inset-x-3 bottom-2 text-surface-dark-foreground">
+                      <p className="text-[10px] font-bold uppercase opacity-80">
+                        {tr(p.partner)} · {tr(p.category)}
+                      </p>
+                      <strong className="block leading-tight">{tr(p.title)}</strong>
+                    </div>
+                  </div>
+                  <div className="flex flex-1 flex-col p-3">
+                    {o.headline && (
+                      <p className="text-sm font-black text-coral">{tr(o.headline)}</p>
                     )}
-                  >
-                    <div className="relative h-36 overflow-hidden">
-                      <img
-                        src={perkImage(p)}
-                        alt={t("")}
-                        loading="lazy"
-                        className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-surface-dark/90 via-surface-dark/20 to-transparent" />
-                      <span
-                        className={cn(
-                          "absolute left-2 top-2 px-2 py-0.5 text-[10px] font-black uppercase",
-                          o.offerType === "Limited time"
-                            ? "bg-coral text-primary-foreground"
-                            : o.offerType === "Special"
-                              ? "bg-primary text-primary-foreground"
-                              : "bg-card text-foreground",
+                    {o.endsAt && (
+                      <p className="text-[11px] text-muted-foreground">
+                        {tr("Ends ")}
+                        {tr(
+                          new Date(o.endsAt).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          }),
                         )}
-                      >
-                        {t(o.offerType)}
-                      </span>
-                      <span
-                        className={cn(
-                          "absolute right-2 top-2 flex size-6 items-center justify-center rounded-full border-2",
-                          on
-                            ? "border-primary bg-primary text-primary-foreground"
-                            : "border-surface-dark-foreground/80 bg-surface-dark/40 text-transparent",
-                        )}
-                      >
-                        <Check className="size-3.5" />
-                      </span>
-                      <div className="absolute inset-x-3 bottom-2 text-surface-dark-foreground">
-                        <p className="text-[10px] font-bold uppercase opacity-80">
-                          {t(p.partner)} · {t(p.category)}
-                        </p>
-                        <strong className="block leading-tight">{t(p.title)}</strong>
-                      </div>
-                    </div>
-                    <div className="flex flex-1 flex-col p-3">
-                      {t(
-                        o.headline && (
-                          <p className="text-sm font-black text-coral">{t(o.headline)}</p>
-                        ),
-                      )}
-                      {t(
-                        o.endsAt && (
-                          <p className="text-[11px] text-muted-foreground">
-                            {t("Ends ")}
-                            {t(
-                              new Date(o.endsAt).toLocaleDateString("en-US", {
-                                month: "short",
-                                day: "numeric",
-                                year: "numeric",
-                              }),
-                            )}
-                          </p>
-                        ),
-                      )}
-                      {t(
-                        o.requirement && (
-                          <p className="mt-1 border-l-2 border-primary bg-primary/5 px-2 py-1 text-[11px]">
-                            <strong>{t("Requires:")}</strong> {t(o.requirement)}
-                          </p>
-                        ),
-                      )}
-                      {t(
-                        p.note && (
-                          <p className="mt-1 text-[11px] text-muted-foreground">{t(p.note)}</p>
-                        ),
-                      )}
-                      <div className="mt-auto flex items-end justify-between pt-2">
-                        <span>
-                          {t(
-                            p.cost === 0 ? (
-                              <strong className="text-lg text-primary">{t("FREE")}</strong>
-                            ) : (
-                              <strong className="text-lg">{t(money(p.cost))}</strong>
-                            ),
-                          )}{" "}
-                          <span className="text-[11px] text-muted-foreground line-through">
-                            {t(money(p.retail))}
-                          </span>
-                        </span>
-                        {t(
-                          off > 0 && (
-                            <span className="text-xs font-black text-primary">
-                              {t(off)}
-                              {t("% off")}
-                            </span>
+                      </p>
+                    )}
+                    {o.requirement && (
+                      <p className="mt-1 border-l-2 border-primary bg-primary/5 px-2 py-1 text-[11px]">
+                        <strong>{tr("Requires:")}</strong> {tr(o.requirement)}
+                      </p>
+                    )}
+                    {p.note && (
+                      <p className="mt-1 text-[11px] text-muted-foreground">{tr(p.note)}</p>
+                    )}
+                    <div className="mt-auto flex items-end justify-between pt-2">
+                      <span>
+                        {tr(
+                          p.cost === 0 ? (
+                            <strong className="text-lg text-primary">{tr("FREE")}</strong>
+                          ) : (
+                            <strong className="text-lg">{tr(money(p.cost))}</strong>
                           ),
-                        )}
-                      </div>
+                        )}{" "}
+                        <span className="text-[11px] text-muted-foreground line-through">
+                          {tr(money(p.retail))}
+                        </span>
+                      </span>
+                      {off > 0 && (
+                        <span className="text-xs font-black text-primary">
+                          {tr(off)}
+                          {tr("% off")}
+                        </span>
+                      )}
                     </div>
-                  </button>
-                );
-              }),
-            )}
-            {t(
-              available.length === 0 && (
-                <p className="text-sm text-muted-foreground">
-                  {t("No perks match these filters here.")}
-                </p>
-              ),
+                  </div>
+                </button>
+              );
+            })}
+            {available.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                {tr("No perks match these filters here.")}
+              </p>
             )}
           </div>
         </Panel>
@@ -1126,43 +1084,39 @@ function GigBuilder({
       <aside className="h-fit space-y-4 lg:sticky lg:top-24">
         <div className="border-2 border-primary bg-primary/5">
           <div className="bg-primary px-5 py-4 text-primary-foreground">
-            <h3 className="text-lg font-black">{t("Your gig package")}</h3>
+            <h3 className="text-lg font-black">{tr("Your gig package")}</h3>
             <p className="text-xs opacity-80">
-              {t(specialty)} · {t(weeks)}
-              {t(" wks · ")}
-              {t(town)}
+              {tr(specialty)} · {tr(weeks)}
+              {tr(" wks · ")}
+              {tr(town)}
             </p>
           </div>
           <ul className="max-h-56 space-y-1.5 overflow-y-auto p-5 text-sm">
-            {t(
-              totals.list.map((p) => (
-                <li key={p.id} className="flex items-start gap-2">
-                  <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" /> {t(p.title)}
-                </li>
-              )),
-            )}
-            {t(
-              totals.list.length === 0 && (
-                <li className="text-muted-foreground">{t("Add perks to build the package.")}</li>
-              ),
+            {totals.list.map((p) => (
+              <li key={p.id} className="flex items-start gap-2">
+                <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" /> {tr(p.title)}
+              </li>
+            ))}
+            {totals.list.length === 0 && (
+              <li className="text-muted-foreground">{tr("Add perks to build the package.")}</li>
             )}
           </ul>
           <div className="grid grid-cols-2 border-t border-primary/20 text-center">
             <div className="border-r border-primary/20 p-3">
-              <strong className="block text-xl">{t(money(totals.cost))}</strong>
-              <span className="text-[11px] uppercase text-muted-foreground">{t("your cost")}</span>
+              <strong className="block text-xl">{tr(money(totals.cost))}</strong>
+              <span className="text-[11px] uppercase text-muted-foreground">{tr("your cost")}</span>
             </div>
             <div className="p-3">
-              <strong className="block text-xl text-primary">{t(money(totals.retail))}</strong>
+              <strong className="block text-xl text-primary">{tr(money(totals.retail))}</strong>
               <span className="text-[11px] uppercase text-muted-foreground">
-                {t("nurse value")}
+                {tr("nurse value")}
               </span>
             </div>
           </div>
           <div className="border-t border-primary/20 p-3 text-center">
-            <strong className="text-2xl">{t(money(mine))}</strong>
+            <strong className="text-2xl">{tr(money(mine))}</strong>
             <span className="ml-1 text-xs text-muted-foreground">
-              {t("/wk total value (pay + perks)")}
+              {tr("/wk total value (pay + perks)")}
             </span>
           </div>
         </div>
@@ -1170,50 +1124,48 @@ function GigBuilder({
         <div className="border border-border bg-card p-5">
           <h3 className="flex items-center gap-2 text-lg font-black">
             <Trophy className="size-5 text-coral" />
-            {t(" Competitive rating: #")}
-            {t(rank)}
-            {t(" of ")}
-            {t(board.length)}
+            {tr(" Competitive rating: #")}
+            {tr(rank)}
+            {tr(" of ")}
+            {tr(board.length)}
           </h3>
           <p className="text-xs text-muted-foreground">
-            {t("Weekly pay + perk value per week vs other PR facilities (demo benchmarks).")}
+            {tr("Weekly pay + perk value per week vs other PR facilities (demo benchmarks).")}
           </p>
           <div className="mt-3 space-y-1.5">
-            {t(
-              board.map((b) => (
-                <div key={b.name} className="text-xs">
-                  <div className="flex justify-between">
-                    <span className={cn(b.me && "font-black text-primary")}>
-                      {t(b.name)}{" "}
-                      <span className="text-muted-foreground">· {t(locName(b.loc))}</span>
-                    </span>
-                    <span className="font-bold">{t(money(b.value))}</span>
-                  </div>
-                  <div className="mt-0.5 flex h-2 bg-muted">
-                    <div
-                      className={b.me ? "bg-coral" : "bg-primary/50"}
-                      style={{ width: `${(b.pay / maxV) * 100}%` }}
-                    />
-                    <div
-                      className={b.me ? "bg-coral/50" : "bg-primary/25"}
-                      style={{ width: `${((b.value - b.pay) / maxV) * 100}%` }}
-                    />
-                  </div>
+            {board.map((b) => (
+              <div key={b.name} className="text-xs">
+                <div className="flex justify-between">
+                  <span className={cn(b.me && "font-black text-primary")}>
+                    {tr(b.name)}{" "}
+                    <span className="text-muted-foreground">· {tr(locName(b.loc))}</span>
+                  </span>
+                  <span className="font-bold">{tr(money(b.value))}</span>
                 </div>
-              )),
-            )}
+                <div className="mt-0.5 flex h-2 bg-muted">
+                  <div
+                    className={b.me ? "bg-coral" : "bg-primary/50"}
+                    style={{ width: `${(b.pay / maxV) * 100}%` }}
+                  />
+                  <div
+                    className={b.me ? "bg-coral/50" : "bg-primary/25"}
+                    style={{ width: `${((b.value - b.pay) / maxV) * 100}%` }}
+                  />
+                </div>
+              </div>
+            ))}
           </div>
           <p className="mt-3 text-[11px] text-muted-foreground">
-            {t("Solid = pay · light = perks")}
+            {tr("Solid = pay · light = perks")}
           </p>
         </div>
 
         <div className="grid grid-cols-2 gap-2">
           <Button variant="outline" onClick={() => save("Draft")}>
-            {t("Save draft")}
+            {tr("Save draft")}
           </Button>
           <Button onClick={() => save("Published")}>
-            {t("Publish ")}
+            {tr("Publish ")}
             <ArrowRight />
           </Button>
         </div>

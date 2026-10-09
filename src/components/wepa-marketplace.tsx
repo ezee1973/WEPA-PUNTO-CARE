@@ -61,7 +61,7 @@ const jingleUrl = jingleAsset.url;
 type MarketRole = "nurse" | "hospital" | "tourism";
 
 export function WepaMarketplace({ home }: { home?: MarketRole | undefined } = {}) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   const [selectedGig, setSelectedGig] = useState<DemoGig | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
   // Every land opens with the anthem takeover; it plays, fades, and you're in.
@@ -79,20 +79,18 @@ export function WepaMarketplace({ home }: { home?: MarketRole | undefined } = {}
 
   async function signOut() {
     await supabase.auth.signOut();
-    toast.success(t("You’re signed out."));
+    toast.success(tr("You’re signed out."));
   }
 
   return (
     <main className="min-h-screen bg-background text-foreground">
-      {t(
-        anthemPlaying && (
-          <AnthemTakeover
-            onDone={(chosen) => {
-              setRole(chosen);
-              setAnthemPlaying(false);
-            }}
-          />
-        ),
+      {anthemPlaying && (
+        <AnthemTakeover
+          onDone={(chosen) => {
+            setRole(chosen);
+            setAnthemPlaying(false);
+          }}
+        />
       )}
       <Header
         signedInEmail={signedInEmail}
@@ -101,9 +99,9 @@ export function WepaMarketplace({ home }: { home?: MarketRole | undefined } = {}
         role={role}
         onRole={setRole}
       />
-      {t(role === "nurse" && <NurseExperience onSelectGig={setSelectedGig} />)}
-      {t(role === "hospital" && <HospitalExperience />)}
-      {t(role === "tourism" && <TourismExperience />)}
+      {role === "nurse" && <NurseExperience onSelectGig={setSelectedGig} />}
+      {role === "hospital" && <HospitalExperience />}
+      {role === "tourism" && <TourismExperience />}
       <GigDialog
         gig={selectedGig}
         onClose={() => setSelectedGig(null)}
@@ -143,7 +141,7 @@ const JOURNEY_DOORS: { id: MarketRole; audience: string; title: string; copy: st
 ];
 
 function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [fading, setFading] = useState(false);
   const [started, setStarted] = useState(false);
@@ -181,7 +179,7 @@ function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
         fading && "pointer-events-none opacity-0",
       )}
       role="dialog"
-      aria-label={t("Welcome to WEPA.care — choose your journey")}
+      aria-label={tr("Welcome to WEPA.care — choose your journey")}
     >
       <div className="absolute right-4 top-4 z-10">
         <LanguageToggle dark />
@@ -189,7 +187,7 @@ function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
       {/* Restrained coast: a soft masked sea band low on the screen, never a backdrop */}
       <img
         src={coastImage}
-        alt={t("")}
+        alt={tr("")}
         aria-hidden
         className={cn(
           "absolute inset-x-0 bottom-0 h-[48%] w-full object-cover object-center [mask-image:linear-gradient(to_top,black_4%,transparent_88%)] transition-opacity duration-700",
@@ -209,71 +207,67 @@ function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
           started ? "opacity-100" : "opacity-0",
         )}
       />
-      {t(
-        !started && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-7 overflow-y-auto px-5 py-8 sm:gap-9 sm:py-12">
-            <div className="flex w-full max-w-3xl flex-col items-center gap-3 text-center sm:gap-4">
-              <img
-                src={logoUrl}
-                alt={t("WEPA.care")}
-                className="h-11 w-auto object-contain [filter:brightness(0)_invert(1)_drop-shadow(0_10px_24px_rgba(9,45,55,0.55))] sm:h-16"
-              />
-              <h1 className="max-w-2xl text-balance text-[1.85rem] font-black leading-[1.06] tracking-tight text-ocean-foreground sm:text-5xl">
-                {t(" Come for the Island. ")}
-                <span className="block text-primary">{t("Care for its People.")}</span>
-              </h1>
-              <p className="max-w-xl text-sm leading-relaxed text-ocean-foreground/90 sm:text-base">
-                {t(
-                  " The travel nursing marketplace connecting Puerto Rico’s hospitals, nurses, and tourism partners — bringing care, island stays, and local experiences together. ",
-                )}
-              </p>
-            </div>
-
-            <div className="w-full max-w-4xl">
-              <p className="mb-3 text-center text-[0.66rem] font-extrabold uppercase tracking-[0.22em] text-ocean-foreground/75">
-                {t(" Find your place ")}
-              </p>
-              <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
-                {t(
-                  JOURNEY_DOORS.map((door) => (
-                    <button
-                      key={door.id}
-                      type="button"
-                      onClick={() => enter(door.id)}
-                      className="group relative flex items-center gap-4 rounded-2xl bg-ivory p-4 text-left shadow-[0_20px_45px_-24px_rgba(9,45,55,0.9)] ring-1 ring-ocean/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_60px_-24px_rgba(255,117,99,0.6)] hover:ring-coral/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral sm:flex-col sm:items-start sm:gap-4 sm:p-5"
-                    >
-                      <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-secondary/55 ring-1 ring-primary/15 sm:h-[4.25rem] sm:w-[4.25rem]">
-                        <img
-                          src={ROLE_ICONS[door.id]}
-                          alt={t("")}
-                          aria-hidden
-                          className="h-12 w-12 object-contain transition-transform duration-300 group-hover:scale-110 sm:h-[3.75rem] sm:w-[3.75rem]"
-                        />
-                      </span>
-                      <span className="min-w-0 sm:min-h-[8.5rem] sm:flex-1">
-                        <span className="block text-[0.62rem] font-extrabold uppercase tracking-[0.18em] text-accent-deep">
-                          {t(door.audience)}
-                        </span>
-                        <span className="mt-1 block text-base font-black leading-tight text-ivory-foreground sm:text-lg">
-                          {t(door.title)}
-                        </span>
-                        <span className="mt-1 block text-xs leading-snug text-ivory-foreground/75 sm:text-sm">
-                          {t(door.copy)}
-                        </span>
-                      </span>
-                      <span className="ml-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-coral/15 text-coral ring-1 ring-coral/35 transition-all duration-300 group-hover:translate-x-0.5 group-hover:bg-coral group-hover:text-ivory sm:mt-1 sm:self-end sm:ml-0">
-                        <ArrowRight className="h-4 w-4" />
-                      </span>
-                    </button>
-                  )),
-                )}
-              </div>
-              <p className="mt-4 text-center text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-ocean-foreground/85">
-                {t(" No account needed to look around ")}
-              </p>
-            </div>
+      {!started && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-7 overflow-y-auto px-5 py-8 sm:gap-9 sm:py-12">
+          <div className="flex w-full max-w-3xl flex-col items-center gap-3 text-center sm:gap-4">
+            <img
+              src={logoUrl}
+              alt={tr("WEPA.care")}
+              className="h-11 w-auto object-contain [filter:brightness(0)_invert(1)_drop-shadow(0_10px_24px_rgba(9,45,55,0.55))] sm:h-16"
+            />
+            <h1 className="max-w-2xl text-balance text-[1.85rem] font-black leading-[1.06] tracking-tight text-ocean-foreground sm:text-5xl">
+              {tr(" Come for the Island. ")}
+              <span className="block text-primary">{tr("Care for its People.")}</span>
+            </h1>
+            <p className="max-w-xl text-sm leading-relaxed text-ocean-foreground/90 sm:text-base">
+              {tr(
+                " The travel nursing marketplace connecting Puerto Rico’s hospitals, nurses, and tourism partners — bringing care, island stays, and local experiences together. ",
+              )}
+            </p>
           </div>
-        ),
+
+          <div className="w-full max-w-4xl">
+            <p className="mb-3 text-center text-[0.66rem] font-extrabold uppercase tracking-[0.22em] text-ocean-foreground/75">
+              {tr(" Find your place ")}
+            </p>
+            <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
+              {JOURNEY_DOORS.map((door) => (
+                <button
+                  key={door.id}
+                  type="button"
+                  onClick={() => enter(door.id)}
+                  className="group relative flex items-center gap-4 rounded-2xl bg-ivory p-4 text-left shadow-[0_20px_45px_-24px_rgba(9,45,55,0.9)] ring-1 ring-ocean/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_60px_-24px_rgba(255,117,99,0.6)] hover:ring-coral/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral sm:flex-col sm:items-start sm:gap-4 sm:p-5"
+                >
+                  <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-secondary/55 ring-1 ring-primary/15 sm:h-[4.25rem] sm:w-[4.25rem]">
+                    <img
+                      src={ROLE_ICONS[door.id]}
+                      alt={tr("")}
+                      aria-hidden
+                      className="h-12 w-12 object-contain transition-transform duration-300 group-hover:scale-110 sm:h-[3.75rem] sm:w-[3.75rem]"
+                    />
+                  </span>
+                  <span className="min-w-0 sm:min-h-[8.5rem] sm:flex-1">
+                    <span className="block text-[0.62rem] font-extrabold uppercase tracking-[0.18em] text-accent-deep">
+                      {tr(door.audience)}
+                    </span>
+                    <span className="mt-1 block text-base font-black leading-tight text-ivory-foreground sm:text-lg">
+                      {tr(door.title)}
+                    </span>
+                    <span className="mt-1 block text-xs leading-snug text-ivory-foreground/75 sm:text-sm">
+                      {tr(door.copy)}
+                    </span>
+                  </span>
+                  <span className="ml-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-coral/15 text-coral ring-1 ring-coral/35 transition-all duration-300 group-hover:translate-x-0.5 group-hover:bg-coral group-hover:text-ivory sm:mt-1 sm:self-end sm:ml-0">
+                    <ArrowRight className="h-4 w-4" />
+                  </span>
+                </button>
+              ))}
+            </div>
+            <p className="mt-4 text-center text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-ocean-foreground/85">
+              {tr(" No account needed to look around ")}
+            </p>
+          </div>
+        </div>
       )}
     </div>
   );
@@ -298,45 +292,43 @@ function Header({
   role: MarketRole;
   onRole: (role: MarketRole) => void;
 }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   return (
     <header className="sticky top-0 z-40 border-b border-border/80 bg-background/95 backdrop-blur-xl">
       <div className="mx-auto flex min-h-16 max-w-[1440px] flex-wrap items-center gap-2 px-4 py-2 sm:px-6 lg:px-8">
-        <img src={logoUrl} alt={t("WEPA.care")} className="h-11 w-auto object-contain" />
+        <img src={logoUrl} alt={tr("WEPA.care")} className="h-11 w-auto object-contain" />
         <div className="hidden h-7 w-px bg-border sm:block" />
         <p className="hidden text-xs font-semibold uppercase text-muted-foreground lg:block">
-          {t("Come for the Island.")}
+          {tr("Come for the Island.")}
           <br />
-          {t("Care for its People.")}
+          {tr("Care for its People.")}
         </p>
         <nav
-          aria-label={t("Marketplace sides")}
+          aria-label={tr("Marketplace sides")}
           className="order-3 mx-auto flex w-full justify-center sm:order-none sm:w-auto items-center gap-1 rounded-full border border-border bg-muted/60 p-1"
         >
-          {t(
-            ROLE_TABS.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => onRole(tab.id)}
-                aria-pressed={role === tab.id}
-                className={cn(
-                  "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-colors sm:px-4 sm:text-sm",
-                  role === tab.id
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                <img
-                  src={ROLE_ICONS[tab.id]}
-                  alt={t("")}
-                  aria-hidden
-                  className="h-5 w-5 object-contain sm:h-6 sm:w-6"
-                />
-                {t(tab.label)}
-              </button>
-            )),
-          )}
+          {ROLE_TABS.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => onRole(tab.id)}
+              aria-pressed={role === tab.id}
+              className={cn(
+                "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-colors sm:px-4 sm:text-sm",
+                role === tab.id
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <img
+                src={ROLE_ICONS[tab.id]}
+                alt={tr("")}
+                aria-hidden
+                className="h-5 w-5 object-contain sm:h-6 sm:w-6"
+              />
+              {tr(tab.label)}
+            </button>
+          ))}
         </nav>
         <div className="ml-auto flex items-center gap-1 sm:ml-0">
           <LanguageToggle />
@@ -344,11 +336,11 @@ function Header({
             variant="ghost"
             size="icon"
             className="hidden xl:inline-flex"
-            aria-label={t("Notifications")}
+            aria-label={tr("Notifications")}
           >
             <Bell />
           </Button>
-          {t(
+          {tr(
             signedInEmail ? (
               <Button
                 variant="outline"
@@ -356,15 +348,15 @@ function Header({
                 onClick={onSignOut}
                 className="hidden sm:inline-flex"
               >
-                {t("Sign out")}
+                {tr("Sign out")}
               </Button>
             ) : (
               <Button size="sm" onClick={onAuth}>
-                {t("Sign in")}
+                {tr("Sign in")}
               </Button>
             ),
           )}
-          <Button variant="ghost" size="icon" className="hidden" aria-label={t("Open menu")}>
+          <Button variant="ghost" size="icon" className="hidden" aria-label={tr("Open menu")}>
             <Menu />
           </Button>
         </div>
@@ -374,7 +366,7 @@ function Header({
 }
 
 function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   const [specialty, setSpecialty] = useState("All specialties");
   const { state } = useReadiness();
   const progress = preparationProgress(state);
@@ -398,26 +390,26 @@ function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void 
       <section className="relative isolate overflow-hidden bg-surface-dark text-surface-dark-foreground">
         <img
           src={coastImage}
-          alt={t("Puerto Rico coast and turquoise Caribbean water")}
+          alt={tr("Puerto Rico coast and turquoise Caribbean water")}
           className="absolute inset-0 -z-20 h-full w-full object-cover object-center"
         />
         <div className="absolute inset-0 -z-10 bg-hero-wash" />
         <div className="mx-auto max-w-[1440px] px-4 pb-12 pt-20 sm:px-6 lg:px-8 lg:pb-16">
           <div>
             <h1 className="max-w-2xl text-4xl font-black leading-[1.02] sm:text-6xl lg:text-7xl">
-              {t("Come for the Island.")}
+              {tr("Come for the Island.")}
               <br />
-              <span className="text-primary">{t("Care for its People.")}</span>
+              <span className="text-primary">{tr("Care for its People.")}</span>
             </h1>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-surface-dark-foreground/85 sm:text-lg">
-              {t(
+              {tr(
                 "The travel nursing marketplace connecting Puerto Rico’s hospitals, nurses, and tourism partners—bringing care, island stays, and local experiences together.",
               )}
             </p>
             <div className="mt-6 grid max-w-lg grid-cols-3 gap-3">
-              <HeroStat value="$1,850" label={t("weekly, local hospital pay")} />
-              <HeroStat value="+$1,400" label={t("island living covered")} />
-              <HeroStat value="100%" label={t("turnkey arrival")} />
+              <HeroStat value="$1,850" label={tr("weekly, local hospital pay")} />
+              <HeroStat value="+$1,400" label={tr("island living covered")} />
+              <HeroStat value="100%" label={tr("turnkey arrival")} />
             </div>
             <div className="mt-7 flex flex-wrap gap-3">
               <Button
@@ -426,7 +418,7 @@ function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void 
                   document.getElementById("gigs")?.scrollIntoView({ behavior: "smooth" })
                 }
               >
-                {t("Explore live gigs ")}
+                {tr("Explore live gigs ")}
                 <ArrowRight />
               </Button>
               <Button
@@ -435,7 +427,7 @@ function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void 
                 variant="outline"
                 className="border-surface-dark-foreground/30 bg-surface-dark/30 text-surface-dark-foreground hover:bg-surface-dark-foreground/10 hover:text-surface-dark-foreground"
               >
-                <Link to="/ready">{t("Get Puerto Rico ready")}</Link>
+                <Link to="/ready">{tr("Get Puerto Rico ready")}</Link>
               </Button>
             </div>
           </div>
@@ -444,12 +436,12 @@ function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void 
 
       <section id="formula" className="mx-auto max-w-[1440px] px-4 py-12 sm:px-6 lg:px-8">
         <div className="max-w-2xl">
-          <p className="eyebrow">{t("The WEPA formula")}</p>
+          <p className="eyebrow">{tr("The WEPA formula")}</p>
           <h2 className="mt-1 text-3xl font-black sm:text-4xl">
-            {t("Free travel, lodging, and fun — instead of high pay.")}
+            {tr("Free travel, lodging, and fun — instead of high pay.")}
           </h2>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            {t(
+            {tr(
               "Mainland travel contracts pay big, then quietly take it back in rent, overtime, and burnout. Here you make a little money while you’re here — and the island picks up almost everything else.",
             )}
           </p>
@@ -457,50 +449,50 @@ function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void 
         <div className="mt-7 grid gap-5 lg:grid-cols-2">
           <div className="border border-border bg-card">
             <div className="flex items-baseline justify-between border-b border-border bg-muted px-5 py-4">
-              <h3 className="text-lg font-black">{t("The mainland contract")}</h3>
+              <h3 className="text-lg font-black">{tr("The mainland contract")}</h3>
               <span className="text-sm font-bold text-muted-foreground line-through decoration-coral decoration-2">
-                {t("$3,800/wk")}
+                {tr("$3,800/wk")}
               </span>
             </div>
             <ul className="space-y-3 p-5">
               <li className="flex items-start gap-3 text-sm">
                 <X className="mt-0.5 size-4 shrink-0 text-coral" />
-                {t(" Gouged short-term rent swallows most of the paycheck")}
+                {tr(" Gouged short-term rent swallows most of the paycheck")}
               </li>
               <li className="flex items-start gap-3 text-sm">
                 <X className="mt-0.5 size-4 shrink-0 text-coral" />
-                {t(" Crisis overtime just to break even")}
+                {tr(" Crisis overtime just to break even")}
               </li>
               <li className="flex items-start gap-3 text-sm">
                 <X className="mt-0.5 size-4 shrink-0 text-coral" />
-                {t(" Winter shifts in a city you never see")}
+                {tr(" Winter shifts in a city you never see")}
               </li>
             </ul>
             <p className="border-t border-border px-5 py-3 text-xs font-bold uppercase text-muted-foreground">
-              {t("Bottom line: a paycheck that disappears")}
+              {tr("Bottom line: a paycheck that disappears")}
             </p>
           </div>
           <div className="border-2 border-primary bg-primary/5">
             <div className="flex items-baseline justify-between border-b border-primary/20 bg-primary px-5 py-4 text-primary-foreground">
-              <h3 className="text-lg font-black">{t("The WEPA island chapter")}</h3>
-              <span className="text-sm font-bold">{t("$1,850/wk + island")}</span>
+              <h3 className="text-lg font-black">{tr("The WEPA island chapter")}</h3>
+              <span className="text-sm font-bold">{tr("$1,850/wk + island")}</span>
             </div>
             <ul className="space-y-3 p-5">
               <li className="flex items-start gap-3 text-sm">
                 <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" />
-                {t(" Honest local pay from Puerto Rico hospitals")}
+                {tr(" Honest local pay from Puerto Rico hospitals")}
               </li>
               <li className="flex items-start gap-3 text-sm">
                 <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" />
-                {t(" Travel, lodging, and food covered by island partners")}
+                {tr(" Travel, lodging, and food covered by island partners")}
               </li>
               <li className="flex items-start gap-3 text-sm">
                 <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" />
-                {t(" Bio-bay weekends, surf, and rainforest built into the gig")}
+                {tr(" Bio-bay weekends, surf, and rainforest built into the gig")}
               </li>
             </ul>
             <p className="border-t border-primary/20 bg-primary/10 px-5 py-3 text-xs font-bold uppercase text-primary">
-              {t("Bottom line: you keep the island — and still bank savings")}
+              {tr("Bottom line: you keep the island — and still bank savings")}
             </p>
           </div>
         </div>
@@ -513,26 +505,26 @@ function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void 
           <div className="flex min-w-0 flex-1 items-center gap-4">
             <img
               src={nurseIconAsset.url}
-              alt={t("")}
+              alt={tr("")}
               aria-hidden
               className="size-12 shrink-0 object-contain"
             />
             <div className="min-w-0">
               <p className="text-sm font-bold sm:text-base">
-                {t("Puerto Rico Readiness Passport · ")}
-                {t(progress)}
-                {t("% ready")}
+                {tr("Puerto Rico Readiness Passport · ")}
+                {tr(progress)}
+                {tr("% ready")}
               </p>
               <Progress value={progress} className="mt-2 h-1.5 max-w-md" />
               <p className="mt-2 truncate text-xs text-muted-foreground sm:text-sm">
-                {t("Next: ")}
-                {t(nextAction)}
+                {tr("Next: ")}
+                {tr(nextAction)}
               </p>
             </div>
           </div>
           <Button asChild size="lg" className="shrink-0">
             <Link to="/ready">
-              {t("Open your passport ")}
+              {tr("Open your passport ")}
               <ArrowRight />
             </Link>
           </Button>
@@ -542,9 +534,9 @@ function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void 
       <section id="gigs" className="mx-auto max-w-[1440px] px-4 py-12 sm:px-6 lg:px-8">
         <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
           <div>
-            <p className="eyebrow">{t("Live opportunities")}</p>
+            <p className="eyebrow">{tr("Live opportunities")}</p>
             <h2 className="mt-1 text-3xl font-black sm:text-4xl">
-              {t("Gigs with more life in them.")}
+              {tr("Gigs with more life in them.")}
             </h2>
           </div>
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
@@ -555,7 +547,11 @@ function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void 
                 onChange={(event) => setSpecialty(event.target.value)}
                 className="h-11 w-full appearance-none rounded-md border border-input bg-card pl-10 pr-4 text-sm font-medium outline-none focus:ring-2 focus:ring-ring"
               >
-                {t(specialties.map((s) => <option key={s}>{t(s)}</option>))}
+                {specialties.map((s) => (
+                  <option key={s} value={s}>
+                    {tr(s)}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="relative sm:w-52">
@@ -565,28 +561,30 @@ function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void 
                 onChange={(event) => setRegion(event.target.value)}
                 className="h-11 w-full appearance-none rounded-md border border-input bg-card pl-10 pr-4 text-sm font-medium outline-none focus:ring-2 focus:ring-ring"
               >
-                {t(regions.map((r) => <option key={r}>{t(r)}</option>))}
+                {regions.map((r) => (
+                  <option key={r} value={r}>
+                    {tr(r)}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
         </div>
         <p className="mt-3 text-sm text-muted-foreground">
-          {t(filtered.length)}
-          {t(" gigs at ")}
-          {t(new Set(filtered.map((g) => g.hospital)).size)}
-          {t(" Puerto Rico hospitals")}
+          {tr(filtered.length)}
+          {tr(" gigs at ")}
+          {tr(new Set(filtered.map((g) => g.hospital)).size)}
+          {tr(" Puerto Rico hospitals")}
         </p>
         <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {t(
-            filtered.map((gig, index) => (
-              <GigCard
-                key={gig.id}
-                gig={gig}
-                featured={index === 0}
-                onOpen={() => onSelectGig(gig)}
-              />
-            )),
-          )}
+          {filtered.map((gig, index) => (
+            <GigCard
+              key={gig.id}
+              gig={gig}
+              featured={index === 0}
+              onOpen={() => onSelectGig(gig)}
+            />
+          ))}
         </div>
         <div className="mt-10 border-t border-border pt-6">
           <button
@@ -594,32 +592,28 @@ function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void 
             onClick={() => setShowService((v) => !v)}
             className="text-sm font-semibold text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
           >
-            {t(showService ? "Hide" : "Also open:")} {t(service.length)}
-            {t(" unpaid community service gigs in rural and underserved areas ")}
-            {t(showService ? "" : "→")}
+            {tr(showService ? "Hide" : "Also open:")} {tr(service.length)}
+            {tr(" unpaid community service gigs in rural and underserved areas ")}
+            {tr(showService ? "" : "→")}
           </button>
-          {t(
-            showService && (
-              <>
-                <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-                  {t(
-                    "Short, unpaid stays where the reward is the work itself: bringing care and know-how to communities that need it. Faith-based and secular hosts. Lodging, meals and transport are covered.",
-                  )}
-                </p>
-                <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                  {t(
-                    service.map((gig) => (
-                      <GigCard
-                        key={gig.id}
-                        gig={gig}
-                        featured={false}
-                        onOpen={() => onSelectGig(gig)}
-                      />
-                    )),
-                  )}
-                </div>
-              </>
-            ),
+          {showService && (
+            <>
+              <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+                {tr(
+                  "Short, unpaid stays where the reward is the work itself: bringing care and know-how to communities that need it. Faith-based and secular hosts. Lodging, meals and transport are covered.",
+                )}
+              </p>
+              <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {service.map((gig) => (
+                  <GigCard
+                    key={gig.id}
+                    gig={gig}
+                    featured={false}
+                    onOpen={() => onSelectGig(gig)}
+                  />
+                ))}
+              </div>
+            </>
           )}
         </div>
       </section>
@@ -630,7 +624,7 @@ function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void 
 }
 
 function TourismExperience() {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   const [offers, setOffers] = useState(demoOffers);
   const [formOpen, setFormOpen] = useState(false);
 
@@ -638,41 +632,39 @@ function TourismExperience() {
     setOffers((current) =>
       current.map((offer) => (offer.id === id ? { ...offer, selected: true } : offer)),
     );
-    toast.success(t("Offer is now visible to hospitals."));
+    toast.success(tr("Offer is now visible to hospitals."));
   }
 
   return (
     <section className="mx-auto max-w-[1440px] px-4 py-12 sm:px-6 lg:px-8">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div className="max-w-2xl">
-          <p className="eyebrow">{t("Travel & tourism workspace")}</p>
+          <p className="eyebrow">{tr("Travel & tourism workspace")}</p>
           <h2 className="mt-1 text-3xl font-black sm:text-4xl">
-            {t("Put your experience in front of hospitals.")}
+            {tr("Put your experience in front of hospitals.")}
           </h2>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            {t(
+            {tr(
               "Your offers stay private to hospitals until one selects them into a nurse-facing gig package. Compete on what makes your corner of the island unforgettable.",
             )}
           </p>
         </div>
         <Button size="lg" onClick={() => setFormOpen(true)}>
-          {t("Create an offer ")}
+          {tr("Create an offer ")}
           <ArrowRight />
         </Button>
       </div>
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {t(
-          offers.map((offer) => (
-            <TourismOfferCard key={offer.id} offer={offer} onPublish={() => markLive(offer.id)} />
-          )),
-        )}
+        {offers.map((offer) => (
+          <TourismOfferCard key={offer.id} offer={offer} onPublish={() => markLive(offer.id)} />
+        ))}
       </div>
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-2xl font-black">{t("New partner offer")}</DialogTitle>
+            <DialogTitle className="text-2xl font-black">{tr("New partner offer")}</DialogTitle>
             <DialogDescription>
-              {t("Hospitals see this privately. Nurses only see it once it's in a gig package.")}
+              {tr("Hospitals see this privately. Nurses only see it once it's in a gig package.")}
             </DialogDescription>
           </DialogHeader>
           <form
@@ -680,25 +672,25 @@ function TourismExperience() {
             onSubmit={(event) => {
               event.preventDefault();
               setFormOpen(false);
-              toast.success(t("Offer submitted for hospital review."));
+              toast.success(tr("Offer submitted for hospital review."));
             }}
           >
-            <Field label={t("Experience title")}>
-              <Input required placeholder={t("e.g. Sunset sail for two")} />
+            <Field label={tr("Experience title")}>
+              <Input required placeholder={tr("e.g. Sunset sail for two")} />
             </Field>
-            <Field label={t("Location")}>
-              <Input required placeholder={t("e.g. Fajardo")} />
+            <Field label={tr("Location")}>
+              <Input required placeholder={tr("e.g. Fajardo")} />
             </Field>
             <div className="grid grid-cols-2 gap-3">
-              <Field label={t("Retail value ($)")}>
-                <Input required type="number" min={0} placeholder={t("740")} />
+              <Field label={tr("Retail value ($)")}>
+                <Input required type="number" min={0} placeholder={tr("740")} />
               </Field>
-              <Field label={t("Partner price ($)")}>
-                <Input required type="number" min={0} placeholder={t("180")} />
+              <Field label={tr("Partner price ($)")}>
+                <Input required type="number" min={0} placeholder={tr("180")} />
               </Field>
             </div>
             <Button type="submit" className="w-full">
-              {t("Submit offer")}
+              {tr("Submit offer")}
             </Button>
           </form>
         </DialogContent>
@@ -708,12 +700,12 @@ function TourismExperience() {
 }
 
 function TourismOfferCard({ offer, onPublish }: { offer: DemoOffer; onPublish: () => void }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   return (
     <article className="flex flex-col border border-border bg-card p-5">
       <div className="flex items-center justify-between">
         <span className="text-[10px] font-black uppercase text-muted-foreground">
-          {t(offer.category)}
+          {tr(offer.category)}
         </span>
         <span
           className={cn(
@@ -721,36 +713,34 @@ function TourismOfferCard({ offer, onPublish }: { offer: DemoOffer; onPublish: (
             offer.selected ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground",
           )}
         >
-          {t(offer.selected ? "Live" : "Draft")}
+          {tr(offer.selected ? "Live" : "Draft")}
         </span>
       </div>
-      <h3 className="mt-3 text-lg font-extrabold leading-tight">{t(offer.title)}</h3>
+      <h3 className="mt-3 text-lg font-extrabold leading-tight">{tr(offer.title)}</h3>
       <p className="mt-1 text-xs font-bold text-primary">
-        {t(offer.partner)} · {t(offer.location)}
+        {tr(offer.partner)} · {tr(offer.location)}
       </p>
       <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
-        {t(offer.description)}
+        {tr(offer.description)}
       </p>
       <p className="mt-4 border-t border-border pt-3 text-sm">
-        <strong className="text-lg">${t(offer.price.toLocaleString())}</strong>{" "}
+        <strong className="text-lg">${tr(offer.price.toLocaleString())}</strong>{" "}
         <span className="text-xs text-muted-foreground">
-          {t("to hospitals · retail $")}
-          {t(offer.retail.toLocaleString())}
+          {tr("to hospitals · retail $")}
+          {tr(offer.retail.toLocaleString())}
         </span>
       </p>
-      {t(
-        !offer.selected && (
-          <Button variant="outline" size="sm" className="mt-3" onClick={onPublish}>
-            {t("Publish to hospitals")}
-          </Button>
-        ),
+      {!offer.selected && (
+        <Button variant="outline" size="sm" className="mt-3" onClick={onPublish}>
+          {tr("Publish to hospitals")}
+        </Button>
       )}
     </article>
   );
 }
 
 function PartnerCarousel() {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   const trackRef = useRef<HTMLDivElement>(null);
 
   function scrollBy(direction: 1 | -1) {
@@ -770,12 +760,12 @@ function PartnerCarousel() {
       <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div className="max-w-2xl">
-            <p className="eyebrow text-primary">{t("The island partners")}</p>
+            <p className="eyebrow text-primary">{tr("The island partners")}</p>
             <h2 className="mt-1 text-3xl font-black sm:text-4xl">
-              {t("Real Puerto Rico, built into every gig.")}
+              {tr("Real Puerto Rico, built into every gig.")}
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-surface-dark-foreground/75">
-              {t(
+              {tr(
                 "Hotels, sails, spas, and adventures from the island's best travel & tourism names — bundled into your package instead of a bigger paycheck.",
               )}
             </p>
@@ -784,7 +774,7 @@ function PartnerCarousel() {
             <Button
               variant="outline"
               size="icon"
-              aria-label={t("Scroll partners back")}
+              aria-label={tr("Scroll partners back")}
               className="border-surface-dark-foreground/30 bg-transparent text-surface-dark-foreground hover:bg-surface-dark-foreground/10 hover:text-surface-dark-foreground"
               onClick={() => scrollBy(-1)}
             >
@@ -793,7 +783,7 @@ function PartnerCarousel() {
             <Button
               variant="outline"
               size="icon"
-              aria-label={t("Scroll partners forward")}
+              aria-label={tr("Scroll partners forward")}
               className="border-surface-dark-foreground/30 bg-transparent text-surface-dark-foreground hover:bg-surface-dark-foreground/10 hover:text-surface-dark-foreground"
               onClick={() => scrollBy(1)}
             >
@@ -806,19 +796,21 @@ function PartnerCarousel() {
         ref={trackRef}
         className="mt-7 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 [scrollbar-width:none] sm:px-6 lg:px-8 [&::-webkit-scrollbar]:hidden"
       >
-        {t(demoPartners.map((partner) => <PartnerCard key={partner.name} partner={partner} />))}
+        {demoPartners.map((partner) => (
+          <PartnerCard key={partner.name} partner={partner} />
+        ))}
       </div>
     </section>
   );
 }
 
 function PartnerCard({ partner }: { partner: DemoPartner }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   return (
     <article className="group relative flex h-96 w-72 shrink-0 snap-start flex-col justify-end overflow-hidden border border-surface-dark-foreground/15 sm:w-80">
       <img
         src={partner.image}
-        alt={t(partner.name)}
+        alt={tr(partner.name)}
         loading="lazy"
         width={1024}
         height={768}
@@ -827,21 +819,21 @@ function PartnerCard({ partner }: { partner: DemoPartner }) {
       <div className="absolute inset-0 bg-gradient-to-t from-surface-dark via-surface-dark/35 to-transparent" />
       <div className="absolute left-4 top-4 flex items-center gap-2">
         <span className="bg-primary px-2 py-1 text-[10px] font-black uppercase text-primary-foreground">
-          {t(partner.category)}
+          {tr(partner.category)}
         </span>
         <span className="flex items-center gap-1 bg-surface-dark/60 px-2 py-1 text-[10px] font-bold uppercase text-surface-dark-foreground backdrop-blur">
-          <MapPin className="size-3" /> {t(partner.location)}
+          <MapPin className="size-3" /> {tr(partner.location)}
         </span>
       </div>
       <div className="relative p-5">
         <h3 className="text-2xl font-black leading-tight text-surface-dark-foreground">
-          {t(partner.name)}
+          {tr(partner.name)}
         </h3>
         <p className="mt-2 text-sm leading-relaxed text-surface-dark-foreground/80">
-          {t(partner.blurb)}
+          {tr(partner.blurb)}
         </p>
         <p className="mt-3 flex items-start gap-2 border-t border-surface-dark-foreground/25 pt-3 text-sm font-bold text-primary">
-          <Sparkles className="mt-0.5 size-4 shrink-0" /> {t(partner.perk)}
+          <Sparkles className="mt-0.5 size-4 shrink-0" /> {tr(partner.perk)}
         </p>
       </div>
     </article>
@@ -857,7 +849,7 @@ function GigCard({
   featured: boolean;
   onOpen: () => void;
 }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   return (
     <article
       className={cn(
@@ -866,15 +858,13 @@ function GigCard({
       )}
     >
       <div className="relative aspect-[16/10] overflow-hidden bg-muted">
-        {t(
-          gig.image && (
-            <img
-              src={gig.image}
-              alt={t(gig.hospital)}
-              loading="lazy"
-              className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-          ),
+        {gig.image && (
+          <img
+            src={gig.image}
+            alt={tr(gig.hospital)}
+            loading="lazy"
+            className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-surface-dark via-surface-dark/30 to-transparent" />
         <span
@@ -887,7 +877,7 @@ function GigCard({
                 : "bg-card/90 text-foreground",
           )}
         >
-          {t(
+          {tr(
             gig.service
               ? "Community service · unpaid"
               : featured
@@ -897,79 +887,67 @@ function GigCard({
         </span>
         <div className="absolute inset-x-0 bottom-0 p-4 text-surface-dark-foreground">
           <p className="flex items-center gap-1 text-xs font-semibold opacity-90">
-            <MapPin className="size-3.5" /> {t(gig.city)} · {t(gig.region)}
+            <MapPin className="size-3.5" /> {tr(gig.city)} · {tr(gig.region)}
           </p>
-          <p className="mt-0.5 text-lg font-black leading-tight">{t(gig.hospital)}</p>
+          <p className="mt-0.5 text-lg font-black leading-tight">{tr(gig.hospital)}</p>
         </div>
       </div>
       <div className="flex flex-1 flex-col p-5">
-        <h3 className="text-xl font-extrabold leading-tight">{t(gig.title)}</h3>
-        {t(
-          gig.hospitalPitch && (
-            <p className="mt-2 text-sm text-muted-foreground">{t(gig.hospitalPitch)}</p>
-          ),
+        <h3 className="text-xl font-extrabold leading-tight">{tr(gig.title)}</h3>
+        {gig.hospitalPitch && (
+          <p className="mt-2 text-sm text-muted-foreground">{tr(gig.hospitalPitch)}</p>
         )}
-        {t(
-          gig.area && (
-            <p className="mt-3 border-l-2 border-coral pl-3 text-sm font-medium">{t(gig.area)}</p>
-          ),
+        {gig.area && (
+          <p className="mt-3 border-l-2 border-coral pl-3 text-sm font-medium">{tr(gig.area)}</p>
         )}
-        {t(
-          gig.areaHighlights && (
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {t(
-                gig.areaHighlights.map((h) => (
-                  <span key={h} className="bg-muted px-2 py-0.5 text-[11px] font-semibold">
-                    {t(h)}
-                  </span>
-                )),
-              )}
-            </div>
-          ),
+        {gig.areaHighlights && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {gig.areaHighlights.map((h) => (
+              <span key={h} className="bg-muted px-2 py-0.5 text-[11px] font-semibold">
+                {tr(h)}
+              </span>
+            ))}
+          </div>
         )}
         <div className="my-4 grid grid-cols-3 border-y border-border py-3 text-center">
           <div>
             <strong className="block text-base">
-              {t(gig.service ? "Unpaid" : `$${gig.pay.toLocaleString()}`)}
+              {tr(gig.service ? "Unpaid" : `$${gig.pay.toLocaleString()}`)}
             </strong>
             <span className="text-[10px] uppercase text-muted-foreground">
-              {t(gig.service ? "service" : "weekly")}
+              {tr(gig.service ? "service" : "weekly")}
             </span>
           </div>
           <div className="border-x border-border">
-            <strong className="block text-base">{t(gig.duration)}</strong>
-            <span className="text-[10px] uppercase text-muted-foreground">{t("weeks")}</span>
+            <strong className="block text-base">{tr(gig.duration)}</strong>
+            <span className="text-[10px] uppercase text-muted-foreground">{tr("weeks")}</span>
           </div>
           <div>
-            <strong className="block text-base">{t(gig.start)}</strong>
-            <span className="text-[10px] uppercase text-muted-foreground">{t("starts")}</span>
+            <strong className="block text-base">{tr(gig.start)}</strong>
+            <span className="text-[10px] uppercase text-muted-foreground">{tr("starts")}</span>
           </div>
         </div>
         <p className="text-[11px] font-bold uppercase text-muted-foreground">
-          {t(gig.service ? "Covered for you" : "Your island package")}
+          {tr(gig.service ? "Covered for you" : "Your island package")}
         </p>
         <ul className="mt-2 space-y-1.5">
-          {t(
-            gig.benefits.map((benefit) => (
-              <li key={benefit} className="flex items-center gap-2 text-sm">
-                <CheckCircle2 className="size-4 text-primary" /> {t(benefit)}
-              </li>
-            )),
-          )}
+          {gig.benefits.map((benefit) => (
+            <li key={benefit} className="flex items-center gap-2 text-sm">
+              <CheckCircle2 className="size-4 text-primary" /> {tr(benefit)}
+            </li>
+          ))}
         </ul>
         <div className="mt-auto pt-5">
           <Button className="w-full" variant={featured ? "default" : "outline"} onClick={onOpen}>
-            {t("See the full gig ")}
+            {tr("See the full gig ")}
             <ArrowRight />
           </Button>
         </div>
-        {t(
-          gig.photoCredit && (
-            <p className="mt-2 text-[10px] text-muted-foreground">
-              {t("Photo: ")}
-              {t(gig.photoCredit)}
-            </p>
-          ),
+        {gig.photoCredit && (
+          <p className="mt-2 text-[10px] text-muted-foreground">
+            {tr("Photo: ")}
+            {tr(gig.photoCredit)}
+          </p>
         )}
       </div>
     </article>
@@ -977,12 +955,12 @@ function GigCard({
 }
 
 function HeroStat({ value, label }: { value: string; label: string }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   return (
     <div className="border border-surface-dark-foreground/20 bg-surface-dark/50 px-3 py-3 backdrop-blur">
-      <strong className="block text-lg font-black text-primary sm:text-xl">{t(value)}</strong>
+      <strong className="block text-lg font-black text-primary sm:text-xl">{tr(value)}</strong>
       <span className="mt-0.5 block text-[11px] leading-tight text-surface-dark-foreground/70">
-        {t(label)}
+        {tr(label)}
       </span>
     </div>
   );
@@ -999,90 +977,85 @@ function GigDialog({
   signedIn: boolean;
   onAuth: () => void;
 }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   const [applied, setApplied] = useState(false);
   useEffect(() => setApplied(false), [gig?.id]);
   if (!gig) return null;
   return (
     <Dialog open={Boolean(gig)} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-2xl">
-        {t(
-          gig.image && (
-            <img
-              src={gig.image}
-              alt={t(gig.hospital)}
-              className="-mx-6 -mt-6 aspect-[16/7] w-[calc(100%+3rem)] max-w-none object-cover"
-            />
-          ),
+        {gig.image && (
+          <img
+            src={gig.image}
+            alt={tr(gig.hospital)}
+            className="-mx-6 -mt-6 aspect-[16/7] w-[calc(100%+3rem)] max-w-none object-cover"
+          />
         )}
         <DialogHeader>
           <p className="eyebrow">
-            {t(gig.service ? "Community service · unpaid" : `${gig.match}% match`)} · {t(gig.city)}
+            {tr(gig.service ? "Community service · unpaid" : `${gig.match}% match`)} ·{" "}
+            {tr(gig.city)}
           </p>
-          <DialogTitle className="text-3xl font-black">{t(gig.title)}</DialogTitle>
+          <DialogTitle className="text-3xl font-black">{tr(gig.title)}</DialogTitle>
           <DialogDescription>
-            {t(gig.hospital)} · {t(gig.specialty)}
+            {tr(gig.hospital)} · {tr(gig.specialty)}
           </DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-3 border-y border-border py-4 text-center">
           <div>
             <strong className="text-xl">
-              {t(gig.service ? "Unpaid" : `$${gig.pay.toLocaleString()}`)}
+              {tr(gig.service ? "Unpaid" : `$${gig.pay.toLocaleString()}`)}
             </strong>
             <span className="block text-xs text-muted-foreground">
-              {t(gig.service ? "service" : "per week")}
+              {tr(gig.service ? "service" : "per week")}
             </span>
           </div>
           <div className="border-x border-border">
-            <strong className="text-xl">{t(gig.duration)}</strong>
-            <span className="block text-xs text-muted-foreground">{t("weeks")}</span>
+            <strong className="text-xl">{tr(gig.duration)}</strong>
+            <span className="block text-xs text-muted-foreground">{tr("weeks")}</span>
           </div>
           <div>
-            <strong className="text-xl">{t(gig.start)}</strong>
-            <span className="block text-xs text-muted-foreground">{t("start")}</span>
+            <strong className="text-xl">{tr(gig.start)}</strong>
+            <span className="block text-xs text-muted-foreground">{tr("start")}</span>
           </div>
         </div>
-        <p className="text-sm leading-relaxed text-muted-foreground">{t(gig.description)}</p>
-        {t(
-          gig.hospitalPitch && (
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="border border-border p-4">
-                <p className="text-xs font-bold uppercase text-muted-foreground">
-                  {t("The hospital")}
-                </p>
-                <p className="mt-1 text-sm">{t(gig.hospitalPitch)}</p>
-              </div>
-              <div className="border border-border p-4">
-                <p className="text-xs font-bold uppercase text-muted-foreground">
-                  {t("Life in ")}
-                  {t(gig.city)}
-                </p>
-                <p className="mt-1 text-sm">{t(gig.area)}</p>
-              </div>
+        <p className="text-sm leading-relaxed text-muted-foreground">{tr(gig.description)}</p>
+        {gig.hospitalPitch && (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="border border-border p-4">
+              <p className="text-xs font-bold uppercase text-muted-foreground">
+                {tr("The hospital")}
+              </p>
+              <p className="mt-1 text-sm">{tr(gig.hospitalPitch)}</p>
             </div>
-          ),
+            <div className="border border-border p-4">
+              <p className="text-xs font-bold uppercase text-muted-foreground">
+                {tr("Life in ")}
+                {tr(gig.city)}
+              </p>
+              <p className="mt-1 text-sm">{tr(gig.area)}</p>
+            </div>
+          </div>
         )}
-        {t(gig.serviceFocus && <p className="text-sm font-semibold">{t(gig.serviceFocus)}</p>)}
+        {gig.serviceFocus && <p className="text-sm font-semibold">{tr(gig.serviceFocus)}</p>}
         <div className="bg-primary/8 p-5">
-          <p className="text-xs font-bold uppercase text-primary">{t("Built into this gig")}</p>
+          <p className="text-xs font-bold uppercase text-primary">{tr("Built into this gig")}</p>
           <ul className="mt-3 grid gap-2 sm:grid-cols-2">
-            {t(
-              gig.benefits.map((item) => (
-                <li key={item} className="flex items-center gap-2 text-sm font-medium">
-                  <CheckCircle2 className="size-4 text-primary" /> {t(item)}
-                </li>
-              )),
-            )}
+            {gig.benefits.map((item) => (
+              <li key={item} className="flex items-center gap-2 text-sm font-medium">
+                <CheckCircle2 className="size-4 text-primary" /> {tr(item)}
+              </li>
+            ))}
           </ul>
         </div>
-        {t(
+        {tr(
           applied ? (
             <div className="flex items-center gap-3 bg-primary p-4 text-primary-foreground">
               <CheckCircle2 />
               <div>
-                <strong className="block">{t("Application sent")}</strong>
+                <strong className="block">{tr("Application sent")}</strong>
                 <span className="text-sm text-primary-foreground/75">
-                  {t("The hospital can now review your Puerto Rico readiness.")}
+                  {tr("The hospital can now review your Puerto Rico readiness.")}
                 </span>
               </div>
             </div>
@@ -1097,10 +1070,10 @@ function GigDialog({
                   return;
                 }
                 setApplied(true);
-                toast.success(t("Application sent to the hospital."));
+                toast.success(tr("Application sent to the hospital."));
               }}
             >
-              {t("Apply to this gig ")}
+              {tr("Apply to this gig ")}
               <ArrowRight />
             </Button>
           ),
@@ -1117,7 +1090,7 @@ function AuthDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -1136,13 +1109,13 @@ function AuthDialog({
           });
     setBusy(false);
     if (result.error) {
-      toast.error(t(result.error.message));
+      toast.error(tr(result.error.message));
       return;
     }
     if (mode === "signup" && !result.data.session)
-      toast.success(t("Check your email to confirm your WEPA.care account."));
+      toast.success(tr("Check your email to confirm your WEPA.care account."));
     else {
-      toast.success(t("Welcome to WEPA.care."));
+      toast.success(tr("Welcome to WEPA.care."));
       onOpenChange(false);
     }
   }
@@ -1153,7 +1126,7 @@ function AuthDialog({
       redirect_uri: window.location.origin,
     });
     setBusy(false);
-    if (result.error) toast.error(t(result.error.message));
+    if (result.error) toast.error(tr(result.error.message));
     else if (!result.redirected) onOpenChange(false);
   }
 
@@ -1162,10 +1135,10 @@ function AuthDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="text-2xl font-black">
-            {t(mode === "signin" ? "Welcome back." : "Start your Puerto Rico journey.")}
+            {tr(mode === "signin" ? "Welcome back." : "Start your Puerto Rico journey.")}
           </DialogTitle>
           <DialogDescription>
-            {t("One account. Your role and workspace follow you.")}
+            {tr("One account. Your role and workspace follow you.")}
           </DialogDescription>
         </DialogHeader>
         <Button variant="outline" className="w-full" disabled={busy} onClick={() => void google()}>
@@ -1175,18 +1148,18 @@ function AuthDialog({
               d="M21.35 11.1h-9.17v2.98h5.26c-.23 1.5-1.73 4.4-5.26 4.4A6.48 6.48 0 1 1 12.18 5c2.01 0 3.36.86 4.13 1.6l2.82-2.73A10.3 10.3 0 0 0 12.18 1.2a10.8 10.8 0 1 0 0 21.6c6.23 0 10.36-4.38 10.36-10.54 0-.7-.08-1.23-.17-1.76z"
             />
           </svg>
-          {t("Continue with Google")}
+          {tr("Continue with Google")}
         </Button>
         <div className="flex items-center gap-3 text-xs uppercase text-muted-foreground">
           <span className="h-px flex-1 bg-border" />
-          {t(" or ")}
+          {tr(" or ")}
           <span className="h-px flex-1 bg-border" />
         </div>
         <form onSubmit={submit} className="space-y-4">
-          <Field label={t("Email")}>
+          <Field label={tr("Email")}>
             <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
           </Field>
-          <Field label={t("Password")}>
+          <Field label={tr("Password")}>
             <Input
               type="password"
               required
@@ -1196,7 +1169,7 @@ function AuthDialog({
             />
           </Field>
           <Button type="submit" className="w-full" disabled={busy}>
-            {t(busy ? "One moment…" : mode === "signin" ? "Sign in" : "Create account")}
+            {tr(busy ? "One moment…" : mode === "signin" ? "Sign in" : "Create account")}
           </Button>
         </form>
         <Button
@@ -1204,7 +1177,7 @@ function AuthDialog({
           className="w-full"
           onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
         >
-          {t(
+          {tr(
             mode === "signin"
               ? "New to WEPA.care? Create an account"
               : "Already have an account? Sign in",
@@ -1216,17 +1189,17 @@ function AuthDialog({
 }
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   return (
     <Label className="flex flex-col gap-1.5">
-      <span>{t(label)}</span>
-      {t(children)}
+      <span>{tr(label)}</span>
+      {tr(children)}
     </Label>
   );
 }
 
 function MobileNurseNav() {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   return (
     <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-border bg-card/95 px-2 pb-[max(.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur md:hidden">
       <Button
@@ -1235,7 +1208,7 @@ function MobileNurseNav() {
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
       >
         <HeartPulse />
-        {t(" Home")}
+        {tr(" Home")}
       </Button>
       <Button
         variant="ghost"
@@ -1243,18 +1216,18 @@ function MobileNurseNav() {
         onClick={() => document.getElementById("gigs")?.scrollIntoView({ behavior: "smooth" })}
       >
         <Search />
-        {t(" Gigs")}
+        {tr(" Gigs")}
       </Button>
       <Button asChild variant="ghost" className="h-auto flex-col gap-1 text-[10px]">
         <Link to="/ready">
           <ClipboardCheck />
-          {t(" Ready")}
+          {tr(" Ready")}
         </Link>
       </Button>
       <Button asChild variant="ghost" className="h-auto flex-col gap-1 text-[10px]">
         <Link to="/ready">
           <FileCheck2 />
-          {t(" Passport")}
+          {tr(" Passport")}
         </Link>
       </Button>
     </nav>
@@ -1262,12 +1235,12 @@ function MobileNurseNav() {
 }
 
 function HospitalCandidate() {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   const { state, update } = useReadiness();
   if (!state.applied) {
     return (
       <div className="mt-6 rounded-2xl border border-dashed border-border bg-card p-4 text-sm text-muted-foreground">
-        {t(
+        {tr(
           "No Candidate Passports in the gig pool yet. When Elena finishes her Readiness Passport and joins the pool, she appears here as a match.",
         )}
       </div>
@@ -1280,58 +1253,50 @@ function HospitalCandidate() {
     <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_320px]">
       <CandidatePassport state={state} />
       <div className="rounded-3xl border border-border bg-card p-4">
-        <p className="font-display text-lg font-bold">{t("Application stage")}</p>
+        <p className="font-display text-lg font-bold">{tr("Application stage")}</p>
         <ol className="mt-3 space-y-1.5 text-sm">
-          {t(
-            STAGES.map((s, i) => (
-              <li
-                key={s}
-                className={cn(
-                  "flex items-center gap-2",
-                  i <= idx ? "font-semibold" : "text-muted-foreground",
-                )}
-              >
-                <span
-                  className={cn(
-                    "size-2.5 rounded-full",
-                    i < idx ? "bg-primary" : i === idx ? "bg-coral" : "bg-border",
-                  )}
-                />
-                {t(s)}
-              </li>
-            )),
-          )}
-        </ol>
-        {t(
-          next && (
-            <Button
-              className="mt-4 w-full"
-              disabled={blocked}
-              onClick={() => {
-                update((s) => ({ ...s, stage: next }));
-                toast.success(t(`Elena advanced to ${next}.`));
-              }}
-            >
-              {t("Advance to ")}
-              {t(next)}
-            </Button>
-          ),
-        )}
-        {t(
-          blocked && (
-            <p className="mt-2 text-xs text-muted-foreground">
-              {t(
-                "Official authorization pending — “Cleared to start” unlocks only once Puerto Rico issues authorization.",
+          {STAGES.map((s, i) => (
+            <li
+              key={s}
+              className={cn(
+                "flex items-center gap-2",
+                i <= idx ? "font-semibold" : "text-muted-foreground",
               )}
-            </p>
-          ),
+            >
+              <span
+                className={cn(
+                  "size-2.5 rounded-full",
+                  i < idx ? "bg-primary" : i === idx ? "bg-coral" : "bg-border",
+                )}
+              />
+              {tr(s)}
+            </li>
+          ))}
+        </ol>
+        {next && (
+          <Button
+            className="mt-4 w-full"
+            disabled={blocked}
+            onClick={() => {
+              update((s) => ({ ...s, stage: next }));
+              toast.success(tr(`Elena advanced to ${next}.`));
+            }}
+          >
+            {tr("Advance to ")}
+            {tr(next)}
+          </Button>
         )}
-        {t(
-          next && idx < 2 && (
-            <p className="mt-2 text-xs text-muted-foreground">
-              {t("You can move to Clinical review while Puerto Rico authorization is pending.")}
-            </p>
-          ),
+        {blocked && (
+          <p className="mt-2 text-xs text-muted-foreground">
+            {tr(
+              "Official authorization pending — “Cleared to start” unlocks only once Puerto Rico issues authorization.",
+            )}
+          </p>
+        )}
+        {next && idx < 2 && (
+          <p className="mt-2 text-xs text-muted-foreground">
+            {tr("You can move to Clinical review while Puerto Rico authorization is pending.")}
+          </p>
         )}
       </div>
     </div>

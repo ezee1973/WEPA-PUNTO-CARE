@@ -32,7 +32,7 @@ export const Route = createFileRoute("/passport")({
 });
 
 function PublicPassport() {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   const { d } = Route.useSearch();
   const p = d ? decodePassport(d) : null;
   return (
@@ -41,36 +41,34 @@ function PublicPassport() {
         <div className="flex justify-end">
           <LanguageToggle dark />
         </div>
-        {t(
+        {tr(
           p ? (
             <>
               <PassportDocument p={p} />
               <div className="rounded-2xl bg-ivory p-4 text-sm text-ivory-foreground">
-                <p className="font-semibold">{t("Certifications")}</p>
-                <p>{t(p.certs.join(", ") || "—")}</p>
-                <p className="mt-2 font-semibold">{t("Availability")}</p>
-                <p>{t(p.availability)}</p>
-                {t(
-                  p.regions.length > 0 && (
-                    <>
-                      <p className="mt-2 font-semibold">{t("Wants to work in")}</p>
-                      <p>{t(p.regions.join(", "))}</p>
-                    </>
-                  ),
+                <p className="font-semibold">{tr("Certifications")}</p>
+                <p>{p.certs.join(", ") || "—"}</p>
+                <p className="mt-2 font-semibold">{tr("Availability")}</p>
+                <p>{tr(p.availability)}</p>
+                {p.regions.length > 0 && (
+                  <>
+                    <p className="mt-2 font-semibold">{tr("Wants to work in")}</p>
+                    <p>{tr(p.regions.join(", "))}</p>
+                  </>
                 )}
                 <p className="mt-3 text-xs opacity-70">
-                  {t(
+                  {tr(
                     "Candidate-reported. WEPA provides preparation and process guidance. Only the appropriate Puerto Rico licensing authority can determine eligibility or authorize practice.",
                   )}
                 </p>
               </div>
             </>
           ) : (
-            <p className="text-center">{t("This passport link is incomplete or expired.")}</p>
+            <p className="text-center">{tr("This passport link is incomplete or expired.")}</p>
           ),
         )}
         <Button asChild className="w-full bg-coral text-coral-foreground hover:bg-coral/90">
-          <Link to="/">{t("Discover WEPA.care")}</Link>
+          <Link to="/">{tr("Discover WEPA.care")}</Link>
         </Button>
       </div>
     </main>

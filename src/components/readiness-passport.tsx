@@ -88,7 +88,7 @@ function guideContext(s: ReadinessState) {
 }
 
 export function ReadinessPassport() {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   const { state, update, reset } = useReadiness();
   const [tab, setTab] = useState<Tab>("overview");
   const [guide, setGuide] = useState({ text: "", busy: false, error: "" });
@@ -175,7 +175,7 @@ export function ReadinessPassport() {
   function preparePacket() {
     if (!pathwayComplete(state.pathway)) {
       toast.info(
-        t(
+        tr(
           "First answer the pathway questions — your document list depends on your authorization route.",
         ),
       );
@@ -240,7 +240,7 @@ export function ReadinessPassport() {
         c.status === "Ready for review" ? { ...c, status: "Nurse confirmed", next: "None" } : c,
       ),
     }));
-    toast.success(t("Confirmed. Preparation progress is now 92%."));
+    toast.success(tr("Confirmed. Preparation progress is now 92%."));
   }
 
   function setItem(id: string, patch: Partial<ChecklistItem>) {
@@ -253,7 +253,7 @@ export function ReadinessPassport() {
   function apply() {
     update((s) => ({ ...s, applied: new Date().toISOString(), stage: "Readiness review" }));
     toast.success(
-      t("You're in the gig pool. Matching Puerto Rico hospitals can now see your Passport."),
+      tr("You're in the gig pool. Matching Puerto Rico hospitals can now see your Passport."),
     );
     setTab("passport");
   }
@@ -262,12 +262,12 @@ export function ReadinessPassport() {
     <div className="min-h-dvh bg-background pb-32 lg:pb-12">
       <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3 px-4 py-3">
-          <Button asChild variant="ghost" size="icon" aria-label={t("Back to WEPA.care")}>
+          <Button asChild variant="ghost" size="icon" aria-label={tr("Back to WEPA.care")}>
             <Link to="/" search={{ home: "nurse" }}>
               <ArrowLeft />
             </Link>
           </Button>
-          <button onClick={() => setEditProfile(true)} aria-label={t("Edit profile photo")}>
+          <button onClick={() => setEditProfile(true)} aria-label={tr("Edit profile photo")}>
             <Avatar
               photo={state.profile.photo}
               name={state.profile.name}
@@ -276,327 +276,293 @@ export function ReadinessPassport() {
           </button>
           <div className="min-w-0 flex-1">
             <p className="truncate font-display text-lg font-bold leading-tight">
-              {t("Puerto Rico Readiness Passport")}
+              {tr("Puerto Rico Readiness Passport")}
             </p>
             <p className="truncate text-xs text-muted-foreground">
-              {t(state.profile.name)} · {t(state.profile.specialty)}
+              {tr(state.profile.name)} · {tr(state.profile.specialty)}
             </p>
           </div>
           <LanguageToggle />
           <span className="rounded-full bg-surface-dark px-3 py-1 text-sm font-bold text-surface-dark-foreground">
-            {t(progress)}%
+            {tr(progress)}%
           </span>
         </div>
         <nav className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-4 pb-2 [scrollbar-width:none]">
-          {t(
-            TABS.map((t) => (
-              <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
-                className={cn(
-                  "flex shrink-0 items-center gap-1 rounded-full px-4 py-1.5 text-sm font-semibold transition",
-                  tab === t.id
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted",
-                )}
-              >
-                {t(t.label)}
-                {t(stepDone[t.id] && <CheckCircle2 className="size-3.5" aria-label={t("Done")} />)}
-              </button>
-            )),
-          )}
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className={cn(
+                "flex shrink-0 items-center gap-1 rounded-full px-4 py-1.5 text-sm font-semibold transition",
+                tab === t.id
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-muted",
+              )}
+            >
+              {tr(t.label)}
+              {stepDone[t.id] && <CheckCircle2 className="size-3.5" aria-label={tr("Done")} />}
+            </button>
+          ))}
         </nav>
       </header>
 
       <main className="mx-auto grid max-w-6xl gap-6 px-4 py-6 lg:grid-cols-[1fr_380px]">
         <div className="min-w-0 space-y-4">
-          {t(
-            tab === "overview" && (
-              <>
-                <section className="overflow-hidden rounded-3xl bg-surface-dark p-6 text-surface-dark-foreground">
-                  <p className="text-sm opacity-75">{t("Preparation progress")}</p>
-                  <p className="font-display text-6xl font-black">{t(progress)}%</p>
-                  <Progress value={progress} className="mt-3 h-2" />
-                  <p className="mt-4 text-sm opacity-75">{t("Current phase")}</p>
-                  <p className="font-semibold">
-                    {t(
-                      state.applied
-                        ? "Matching with gigs"
-                        : !pathwayDone
-                          ? "Pathway check"
-                          : state.packetConfirmed
-                            ? "Final documents & Spanish"
-                            : "Packet preparation",
-                    )}
-                  </p>
-                  <button
-                    onClick={() => setTab(actionTab)}
-                    className="mt-4 block w-full rounded-2xl bg-background/10 p-4 text-left transition hover:bg-background/20"
-                  >
-                    <p className="text-xs uppercase tracking-wide opacity-70">
-                      {t("Next best action")}
-                    </p>
-                    <p className="mt-1 font-semibold">{t(nextAction)} →</p>
-                  </button>
-                  {t(
-                    !pathwayDone && (
-                      <Button
-                        onClick={() => setTab("pathway")}
-                        className="mt-4 w-full bg-coral text-coral-foreground hover:bg-coral/90"
-                        size="lg"
-                      >
-                        {t("Start with the pathway questions")}
-                      </Button>
-                    ),
-                  )}
-                  {t(
-                    pathwayDone && !state.packetPrepared && (
-                      <Button
-                        onClick={preparePacket}
-                        className="mt-4 w-full bg-coral text-coral-foreground hover:bg-coral/90"
-                        size="lg"
-                      >
-                        <Bot />
-                        {t(" Prepare my packet")}
-                      </Button>
-                    ),
-                  )}
-                  {t(
-                    pathwayDone && state.packetPrepared && !state.packetConfirmed && (
-                      <Button
-                        onClick={() => setTab("checklist")}
-                        className="mt-4 w-full bg-coral text-coral-foreground hover:bg-coral/90"
-                        size="lg"
-                      >
-                        {t("Ready for nurse review")}
-                      </Button>
-                    ),
-                  )}
-                </section>
-                <section className="rounded-3xl border border-border bg-card p-5">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    {t("Your goal")}
-                  </p>
-                  <p className="mt-1 font-display text-xl font-bold">
-                    {t("Get ready once. Match with every gig.")}
-                  </p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {t(
-                      "Finish your Puerto Rico readiness and interests, join the WEPA gig pool, and we match you with hospital gigs and island packages that fit how you want to live.",
-                    )}
-                  </p>
-                </section>
-                <section className="grid gap-3 sm:grid-cols-2">
-                  {t(
-                    tracks.map((t, i) => (
-                      <div key={t.label} className="rounded-2xl border border-border bg-card p-4">
-                        <p className="text-xs font-bold text-muted-foreground">
-                          {t("ABCD"[i])}. {t(t.label)}
-                        </p>
-                        <p className="mt-2 font-display text-3xl font-black">{t(t.value)}%</p>
-                        <Progress value={t.value} className="mt-2 h-1.5" />
-                        <p className="mt-2 text-xs text-muted-foreground">{t(t.note)}</p>
-                      </div>
-                    )),
-                  )}
-                </section>
-                <button onClick={reset} className="text-xs text-muted-foreground underline">
-                  {t("Reset demo")}
-                </button>
-              </>
-            ),
-          )}
-
-          {t(
-            tab === "pathway" && (
-              <PathwayCheck
-                pathway={state.pathway}
-                onChange={(p) => update((s) => ({ ...s, pathway: p }))}
-                onContinue={() => setTab("checklist")}
-              />
-            ),
-          )}
-
-          {t(
-            tab === "checklist" && (
-              <>
-                {t(
-                  state.packetPrepared && !state.packetConfirmed && (
-                    <section className="rounded-3xl border-2 border-primary bg-card p-5">
-                      <p className="font-display text-xl font-bold">
-                        {t("Ready for nurse review")}
-                      </p>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {t(
-                          "Wepa Guide prepared these answers from your profile. Nothing is submitted until you confirm.",
-                        )}
-                      </p>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-3"
-                        onClick={() => setEditProfile(true)}
-                      >
-                        <Pencil />
-                        {t(" Edit profile")}
-                      </Button>
-                      <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
-                        {t(
-                          [
-                            ["Name", state.profile.name],
-                            ["License", state.profile.license],
-                            ["Issued", state.profile.licenseIssued],
-                            ["Expires", state.profile.licenseExpires],
-                            ["Category", state.pathway.category],
-                            ["Certifications", state.profile.certs.join(", ")],
-                          ].map(([k, v]) => (
-                            <div key={k} className="rounded-xl bg-muted p-3">
-                              <dt className="text-xs text-muted-foreground">{t(k)}</dt>
-                              <dd className="font-semibold">{t(v)}</dd>
-                            </div>
-                          )),
-                        )}
-                      </dl>
-                      <p className="mt-3 rounded-xl bg-coral/10 p-3 text-sm">
-                        <strong>{t("Still missing:")}</strong>
-                        {t(
-                          " notarized sworn declaration — draft it below, then sign before a notary.",
-                        )}
-                      </p>
-                      <Button onClick={confirmPacket} size="lg" className="mt-4 w-full">
-                        <CheckCircle2 />
-                        {t(" I confirm this information is accurate")}
-                      </Button>
-                    </section>
-                  ),
-                )}
-                {t(
-                  state.checklist.map((item) => (
-                    <ChecklistCard
-                      key={item.id}
-                      item={item}
-                      state={state}
-                      onExplain={() => ask("explain", item.title)}
-                      onDraft={() =>
-                        ask("draft", "", (t) => update((s) => ({ ...s, declarationDraft: t })))
-                      }
-                      onDraftChange={(t) => update((s) => ({ ...s, declarationDraft: t }))}
-                      onSet={(p) => setItem(item.id, p)}
-                    />
-                  )),
-                )}
-                <p className="text-xs text-muted-foreground">{t(DISCLAIMER)}</p>
-                <ContinueButton
-                  label={t("Continue to the Spanish check")}
-                  onClick={() => setTab("spanish")}
-                />
-              </>
-            ),
-          )}
-
-          {t(
-            tab === "spanish" && (
-              <>
-                <SpanishScenario
-                  result={state.spanish}
-                  onResult={(r) => update((s) => ({ ...s, spanish: r }))}
-                />
-                <ContinueButton
-                  label={t("Continue to your interests")}
-                  onClick={() => setTab("interests")}
-                />
-              </>
-            ),
-          )}
-
-          {t(
-            tab === "interests" && (
-              <>
-                <InterestsPicker
-                  interests={state.interests}
-                  onChange={(i) => update((s) => ({ ...s, interests: i }))}
-                />
-                <ContinueButton
-                  label={t("Continue to hospital credentials")}
-                  onClick={() => setTab("hospital")}
-                />
-              </>
-            ),
-          )}
-
-          {t(
-            tab === "hospital" && (
-              <section className="rounded-3xl border border-border bg-card p-5">
-                <p className="font-display text-xl font-bold">{t("Common hospital credentials")}</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {t(
-                    "What most Puerto Rico partner hospitals ask for. Each hospital may add its own items once you match — these are not Puerto Rico licensing requirements.",
+          {tab === "overview" && (
+            <>
+              <section className="overflow-hidden rounded-3xl bg-surface-dark p-6 text-surface-dark-foreground">
+                <p className="text-sm opacity-75">{tr("Preparation progress")}</p>
+                <p className="font-display text-6xl font-black">{tr(progress)}%</p>
+                <Progress value={progress} className="mt-3 h-2" />
+                <p className="mt-4 text-sm opacity-75">{tr("Current phase")}</p>
+                <p className="font-semibold">
+                  {tr(
+                    state.applied
+                      ? "Matching with gigs"
+                      : !pathwayDone
+                        ? "Pathway check"
+                        : state.packetConfirmed
+                          ? "Final documents & Spanish"
+                          : "Packet preparation",
                   )}
                 </p>
-                <ul className="mt-4 space-y-2">
-                  {t(
-                    state.credentialing.map((c) => (
-                      <li key={c.id}>
-                        <button
-                          onClick={() =>
-                            update((s) => ({
-                              ...s,
-                              credentialing: s.credentialing.map((x) =>
-                                x.id === c.id ? { ...x, done: !x.done } : x,
-                              ),
-                            }))
-                          }
-                          className="flex w-full items-center gap-3 rounded-xl bg-muted p-3 text-left text-sm font-medium"
-                        >
-                          {t(
-                            c.done ? (
-                              <CheckCircle2 className="size-5 text-accent-strong" />
-                            ) : (
-                              <Circle className="size-5 text-muted-foreground" />
-                            ),
-                          )}
-                          {t(c.title)}
-                          <span className="ml-auto text-xs text-muted-foreground">
-                            {t(c.done ? "Candidate-reported" : "To do")}
-                          </span>
-                        </button>
-                      </li>
-                    )),
-                  )}
-                </ul>
-                <ContinueButton
-                  label={t("Review your Candidate Passport")}
-                  onClick={() => setTab("passport")}
-                />
-              </section>
-            ),
-          )}
-
-          {t(
-            tab === "passport" && (
-              <section className="space-y-4">
-                <PassportDocument p={toShared(state)} photo={state.profile.photo} />
-                <PassportShare p={toShared(state)} photo={state.profile.photo} />
-                <CandidatePassport state={state} />
-                {t(
-                  !state.applied ? (
-                    <Button
-                      size="lg"
-                      className="w-full bg-coral text-coral-foreground hover:bg-coral/90"
-                      onClick={apply}
-                    >
-                      <Send />
-                      {t(" Join the gig pool & start matching")}
-                    </Button>
-                  ) : (
-                    <p className="rounded-xl bg-muted p-3 text-sm">
-                      {t("In the WEPA gig pool · Matching by your interests · Stage: ")}
-                      <strong>{t(state.stage)}</strong>
-                    </p>
-                  ),
+                <button
+                  onClick={() => setTab(actionTab)}
+                  className="mt-4 block w-full rounded-2xl bg-background/10 p-4 text-left transition hover:bg-background/20"
+                >
+                  <p className="text-xs uppercase tracking-wide opacity-70">
+                    {tr("Next best action")}
+                  </p>
+                  <p className="mt-1 font-semibold">{tr(nextAction)} →</p>
+                </button>
+                {!pathwayDone && (
+                  <Button
+                    onClick={() => setTab("pathway")}
+                    className="mt-4 w-full bg-coral text-coral-foreground hover:bg-coral/90"
+                    size="lg"
+                  >
+                    {tr("Start with the pathway questions")}
+                  </Button>
+                )}
+                {pathwayDone && !state.packetPrepared && (
+                  <Button
+                    onClick={preparePacket}
+                    className="mt-4 w-full bg-coral text-coral-foreground hover:bg-coral/90"
+                    size="lg"
+                  >
+                    <Bot />
+                    {tr(" Prepare my packet")}
+                  </Button>
+                )}
+                {pathwayDone && state.packetPrepared && !state.packetConfirmed && (
+                  <Button
+                    onClick={() => setTab("checklist")}
+                    className="mt-4 w-full bg-coral text-coral-foreground hover:bg-coral/90"
+                    size="lg"
+                  >
+                    {tr("Ready for nurse review")}
+                  </Button>
                 )}
               </section>
-            ),
+              <section className="rounded-3xl border border-border bg-card p-5">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {tr("Your goal")}
+                </p>
+                <p className="mt-1 font-display text-xl font-bold">
+                  {tr("Get ready once. Match with every gig.")}
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {tr(
+                    "Finish your Puerto Rico readiness and interests, join the WEPA gig pool, and we match you with hospital gigs and island packages that fit how you want to live.",
+                  )}
+                </p>
+              </section>
+              <section className="grid gap-3 sm:grid-cols-2">
+                {tracks.map((t, i) => (
+                  <div key={t.label} className="rounded-2xl border border-border bg-card p-4">
+                    <p className="text-xs font-bold text-muted-foreground">
+                      {tr("ABCD"[i])}. {tr(t.label)}
+                    </p>
+                    <p className="mt-2 font-display text-3xl font-black">{tr(t.value)}%</p>
+                    <Progress value={t.value} className="mt-2 h-1.5" />
+                    <p className="mt-2 text-xs text-muted-foreground">{tr(t.note)}</p>
+                  </div>
+                ))}
+              </section>
+              <button onClick={reset} className="text-xs text-muted-foreground underline">
+                {tr("Reset demo")}
+              </button>
+            </>
+          )}
+
+          {tab === "pathway" && (
+            <PathwayCheck
+              pathway={state.pathway}
+              onChange={(p) => update((s) => ({ ...s, pathway: p }))}
+              onContinue={() => setTab("checklist")}
+            />
+          )}
+
+          {tab === "checklist" && (
+            <>
+              {state.packetPrepared && !state.packetConfirmed && (
+                <section className="rounded-3xl border-2 border-primary bg-card p-5">
+                  <p className="font-display text-xl font-bold">{tr("Ready for nurse review")}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {tr(
+                      "Wepa Guide prepared these answers from your profile. Nothing is submitted until you confirm.",
+                    )}
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-3"
+                    onClick={() => setEditProfile(true)}
+                  >
+                    <Pencil />
+                    {tr(" Edit profile")}
+                  </Button>
+                  <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+                    {[
+                      ["Name", state.profile.name],
+                      ["License", state.profile.license],
+                      ["Issued", state.profile.licenseIssued],
+                      ["Expires", state.profile.licenseExpires],
+                      ["Category", state.pathway.category],
+                      ["Certifications", state.profile.certs.join(", ")],
+                    ].map(([k, v]) => (
+                      <div key={k} className="rounded-xl bg-muted p-3">
+                        <dt className="text-xs text-muted-foreground">{tr(k)}</dt>
+                        <dd className="font-semibold">{tr(v)}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                  <p className="mt-3 rounded-xl bg-coral/10 p-3 text-sm">
+                    <strong>{tr("Still missing:")}</strong>
+                    {tr(
+                      " notarized sworn declaration — draft it below, then sign before a notary.",
+                    )}
+                  </p>
+                  <Button onClick={confirmPacket} size="lg" className="mt-4 w-full">
+                    <CheckCircle2 />
+                    {tr(" I confirm this information is accurate")}
+                  </Button>
+                </section>
+              )}
+              {state.checklist.map((item) => (
+                <ChecklistCard
+                  key={item.id}
+                  item={item}
+                  state={state}
+                  onExplain={() => ask("explain", item.title)}
+                  onDraft={() =>
+                    ask("draft", "", (t) => update((s) => ({ ...s, declarationDraft: t })))
+                  }
+                  onDraftChange={(t) => update((s) => ({ ...s, declarationDraft: t }))}
+                  onSet={(p) => setItem(item.id, p)}
+                />
+              ))}
+              <p className="text-xs text-muted-foreground">{tr(DISCLAIMER)}</p>
+              <ContinueButton
+                label={tr("Continue to the Spanish check")}
+                onClick={() => setTab("spanish")}
+              />
+            </>
+          )}
+
+          {tab === "spanish" && (
+            <>
+              <SpanishScenario
+                result={state.spanish}
+                onResult={(r) => update((s) => ({ ...s, spanish: r }))}
+              />
+              <ContinueButton
+                label={tr("Continue to your interests")}
+                onClick={() => setTab("interests")}
+              />
+            </>
+          )}
+
+          {tab === "interests" && (
+            <>
+              <InterestsPicker
+                interests={state.interests}
+                onChange={(i) => update((s) => ({ ...s, interests: i }))}
+              />
+              <ContinueButton
+                label={tr("Continue to hospital credentials")}
+                onClick={() => setTab("hospital")}
+              />
+            </>
+          )}
+
+          {tab === "hospital" && (
+            <section className="rounded-3xl border border-border bg-card p-5">
+              <p className="font-display text-xl font-bold">{tr("Common hospital credentials")}</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {tr(
+                  "What most Puerto Rico partner hospitals ask for. Each hospital may add its own items once you match — these are not Puerto Rico licensing requirements.",
+                )}
+              </p>
+              <ul className="mt-4 space-y-2">
+                {state.credentialing.map((c) => (
+                  <li key={c.id}>
+                    <button
+                      onClick={() =>
+                        update((s) => ({
+                          ...s,
+                          credentialing: s.credentialing.map((x) =>
+                            x.id === c.id ? { ...x, done: !x.done } : x,
+                          ),
+                        }))
+                      }
+                      className="flex w-full items-center gap-3 rounded-xl bg-muted p-3 text-left text-sm font-medium"
+                    >
+                      {tr(
+                        c.done ? (
+                          <CheckCircle2 className="size-5 text-accent-strong" />
+                        ) : (
+                          <Circle className="size-5 text-muted-foreground" />
+                        ),
+                      )}
+                      {tr(c.title)}
+                      <span className="ml-auto text-xs text-muted-foreground">
+                        {tr(c.done ? "Candidate-reported" : "To do")}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <ContinueButton
+                label={tr("Review your Candidate Passport")}
+                onClick={() => setTab("passport")}
+              />
+            </section>
+          )}
+
+          {tab === "passport" && (
+            <section className="space-y-4">
+              <PassportDocument p={toShared(state)} photo={state.profile.photo} />
+              <PassportShare p={toShared(state)} photo={state.profile.photo} />
+              <CandidatePassport state={state} />
+              {tr(
+                !state.applied ? (
+                  <Button
+                    size="lg"
+                    className="w-full bg-coral text-coral-foreground hover:bg-coral/90"
+                    onClick={apply}
+                  >
+                    <Send />
+                    {tr(" Join the gig pool & start matching")}
+                  </Button>
+                ) : (
+                  <p className="rounded-xl bg-muted p-3 text-sm">
+                    {tr("In the WEPA gig pool · Matching by your interests · Stage: ")}
+                    <strong>{tr(state.stage)}</strong>
+                  </p>
+                ),
+              )}
+            </section>
           )}
         </div>
 
@@ -615,7 +581,7 @@ export function ReadinessPassport() {
         onSave={(p) => {
           update((s) => ({ ...s, profile: p }));
           setEditProfile(false);
-          toast.success(t("Profile updated everywhere — passport, checklist and Wepa Guide."));
+          toast.success(tr("Profile updated everywhere — passport, checklist and Wepa Guide."));
         }}
       />
     </div>
@@ -633,7 +599,7 @@ function ProfileDialog({
   profile: NurseProfile;
   onSave: (p: NurseProfile) => void;
 }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   const [draft, setDraft] = useState(profile);
   useEffect(() => {
     if (open) setDraft(profile);
@@ -668,13 +634,13 @@ function ProfileDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85dvh] overflow-y-auto sm:max-w-lg">
-        <DialogTitle>{t("Edit your profile")}</DialogTitle>
+        <DialogTitle>{tr("Edit your profile")}</DialogTitle>
         <div className="flex items-center gap-4">
           <Avatar photo={draft.photo} name={draft.name} className="size-20 text-2xl" />
           <div className="flex flex-wrap gap-2">
             <Button asChild variant="outline" size="sm">
               <label className="cursor-pointer">
-                <Upload /> {t(draft.photo ? "Change photo" : "Add photo")}
+                <Upload /> {tr(draft.photo ? "Change photo" : "Add photo")}
                 <input
                   type="file"
                   accept="image/*"
@@ -689,44 +655,40 @@ function ProfileDialog({
                 />
               </label>
             </Button>
-            {t(
-              draft.photo && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setDraft((d) => ({ ...d, photo: "" }))}
-                >
-                  {t("Remove")}
-                </Button>
-              ),
+            {draft.photo && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setDraft((d) => ({ ...d, photo: "" }))}
+              >
+                {tr("Remove")}
+              </Button>
             )}
           </div>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
-          {t(
-            fields.map(([k, label, type]) => (
-              <label
-                key={k}
-                className={cn(
-                  "text-xs font-semibold",
-                  (k === "license" || k === "certs" || k === "availability") && "sm:col-span-2",
-                )}
-              >
-                {t(label)}
-                <Input
-                  type={type ?? "text"}
-                  value={k === "certs" ? draft.certs.join(", ") : String(draft[k])}
-                  onChange={(e) => set(k, e.target.value)}
-                  className="mt-1"
-                />
-              </label>
-            )),
-          )}
+          {fields.map(([k, label, type]) => (
+            <label
+              key={k}
+              className={cn(
+                "text-xs font-semibold",
+                (k === "license" || k === "certs" || k === "availability") && "sm:col-span-2",
+              )}
+            >
+              {tr(label)}
+              <Input
+                type={type ?? "text"}
+                value={k === "certs" ? draft.certs.join(", ") : String(draft[k])}
+                onChange={(e) => set(k, e.target.value)}
+                className="mt-1"
+              />
+            </label>
+          ))}
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => onSave(draft)}>{t("Save profile")}</Button>
+          <Button onClick={() => onSave(draft)}>{tr("Save profile")}</Button>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            {t("Cancel")}
+            {tr("Cancel")}
           </Button>
         </div>
       </DialogContent>
@@ -769,7 +731,7 @@ function ContinueButton({
   onClick: () => void;
   disabled?: boolean;
 }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   return (
     <Button
       size="lg"
@@ -777,7 +739,7 @@ function ContinueButton({
       onClick={onClick}
       disabled={disabled}
     >
-      {t(label)}
+      {tr(label)}
     </Button>
   );
 }
@@ -791,7 +753,7 @@ function PathwayCheck({
   onChange: (p: Pathway) => void;
   onContinue: () => void;
 }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   const qs: [keyof Pathway, string][] = [
     ["active", "Do you hold an active license from a U.S. state or jurisdiction?"],
     ["oneYear", "Have you held it for at least one year?"],
@@ -806,48 +768,44 @@ function PathwayCheck({
   return (
     <section className="space-y-3">
       <div className="rounded-3xl bg-surface-dark p-5 text-surface-dark-foreground">
-        <p className="text-sm opacity-75">{t("Step 1 · Your authorization route")}</p>
+        <p className="text-sm opacity-75">{tr("Step 1 · Your authorization route")}</p>
         <p className="font-display text-2xl font-bold">
-          {t(complete ? result : "Answer the questions below to see your route")}
+          {tr(complete ? result : "Answer the questions below to see your route")}
         </p>
-        <p className="mt-2 text-xs opacity-75">{t(DISCLAIMER)}</p>
+        <p className="mt-2 text-xs opacity-75">{tr(DISCLAIMER)}</p>
       </div>
-      {t(
-        qs.map(([k, q]) => (
-          <div key={k} className="rounded-2xl border border-border bg-card p-4">
-            <p className="text-sm font-medium">{t(q)}</p>
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              {t(
-                [true, false].map((v) => (
-                  <button
-                    key={String(v)}
-                    onClick={() => onChange({ ...pathway, [k]: v })}
-                    className={cn(
-                      "rounded-xl border py-2 text-sm font-semibold",
-                      pathway[k] === v
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border",
-                    )}
-                  >
-                    {t(v ? "Yes" : "No")}
-                  </button>
-                )),
-              )}
-            </div>
+      {qs.map(([k, q]) => (
+        <div key={k} className="rounded-2xl border border-border bg-card p-4">
+          <p className="text-sm font-medium">{tr(q)}</p>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            {[true, false].map((v) => (
+              <button
+                key={String(v)}
+                onClick={() => onChange({ ...pathway, [k]: v })}
+                className={cn(
+                  "rounded-xl border py-2 text-sm font-semibold",
+                  pathway[k] === v
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border",
+                )}
+              >
+                {tr(v ? "Yes" : "No")}
+              </button>
+            ))}
           </div>
-        )),
-      )}
+        </div>
+      ))}
       <label className="block rounded-2xl border border-border bg-card p-4 text-sm font-medium">
-        {t("What license category and specialty do you hold? ")}
+        {tr("What license category and specialty do you hold? ")}
         <input
           value={pathway.category}
           onChange={(e) => onChange({ ...pathway, category: e.target.value })}
           className="mt-2 w-full rounded-xl border border-input bg-background px-3 py-2"
-          placeholder={t("e.g. RN — Emergency")}
+          placeholder={tr("e.g. RN — Emergency")}
         />
       </label>
       <ContinueButton
-        label={t(complete ? "Continue to your checklist" : "Answer all questions to continue")}
+        label={tr(complete ? "Continue to your checklist" : "Answer all questions to continue")}
         onClick={onContinue}
         disabled={!complete}
       />
@@ -898,7 +856,7 @@ function ChecklistCard({
   onDraftChange: (t: string) => void;
   onSet: (p: Partial<ChecklistItem>) => void;
 }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   const fileRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -923,24 +881,24 @@ function ChecklistCard({
       next: draft.next.trim() || "None",
     });
     setEditing(false);
-    toast.success(t("Saved."));
+    toast.success(tr("Saved."));
   }
   return (
     <article className="rounded-2xl border border-border bg-card p-4">
       <div className="flex items-start gap-3">
-        {t(
+        {tr(
           item.file ? (
             <button
               type="button"
               onClick={() => setPreview(true)}
-              aria-label={t(`View ${item.file}`)}
+              aria-label={tr(`View ${item.file}`)}
               className="group relative size-16 shrink-0 overflow-hidden rounded-xl border border-border bg-secondary"
             >
-              {t(
+              {tr(
                 isImage && item.fileData ? (
                   <img
                     src={item.fileData}
-                    alt={t("")}
+                    alt={tr("")}
                     className="size-full object-cover transition-transform group-hover:scale-110"
                   />
                 ) : (
@@ -953,25 +911,21 @@ function ChecklistCard({
           ),
         )}
         <div className="min-w-0 flex-1">
-          <p className="font-semibold">{t(item.title)}</p>
+          <p className="font-semibold">{tr(item.title)}</p>
           <p className="text-xs text-muted-foreground">
-            {t("Source: ")}
-            {t(item.source)}
-            {t(item.expires ? ` · Expires ${item.expires}` : "")}
+            {tr("Source: ")}
+            {tr(item.source)}
+            {tr(item.expires ? ` · Expires ${item.expires}` : "")}
           </p>
-          {t(
-            item.next !== "None" && (
-              <p className="mt-1 text-xs">
-                <strong>{t("Next:")}</strong> {t(item.next)}
-              </p>
-            ),
+          {item.next !== "None" && (
+            <p className="mt-1 text-xs">
+              <strong>{tr("Next:")}</strong> {tr(item.next)}
+            </p>
           )}
-          {t(
-            item.file && (
-              <p className="mt-1 flex items-center gap-1 truncate text-xs">
-                <Paperclip className="size-3 shrink-0" /> {t(item.file)}
-              </p>
-            ),
+          {item.file && (
+            <p className="mt-1 flex items-center gap-1 truncate text-xs">
+              <Paperclip className="size-3 shrink-0" /> {tr(item.file)}
+            </p>
           )}
         </div>
         <span
@@ -980,96 +934,88 @@ function ChecklistCard({
             statusTone[item.status],
           )}
         >
-          {t(item.status)}
+          {tr(item.status)}
         </span>
       </div>
-      {t(
-        editing && (
-          <div className="mt-3 grid gap-2 rounded-xl bg-secondary/50 p-3 sm:grid-cols-3">
-            <label className="text-xs font-semibold">
-              {t("Source")}
-              <Input
-                value={draft.source}
-                onChange={(e) => setDraft({ ...draft, source: e.target.value })}
-                className="mt-1"
-              />
-            </label>
-            <label className="text-xs font-semibold">
-              {t("Expires")}
-              <Input
-                type="date"
-                value={draft.expires}
-                onChange={(e) => setDraft({ ...draft, expires: e.target.value })}
-                className="mt-1"
-              />
-            </label>
-            <label className="text-xs font-semibold">
-              {t("Next step")}
-              <Input
-                value={draft.next}
-                onChange={(e) => setDraft({ ...draft, next: e.target.value })}
-                className="mt-1"
-              />
-            </label>
-            <div className="flex gap-2 sm:col-span-3">
-              <Button size="sm" onClick={saveEdit}>
-                {t("Save")}
-              </Button>
-              <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>
-                {t("Cancel")}
-              </Button>
-            </div>
+      {editing && (
+        <div className="mt-3 grid gap-2 rounded-xl bg-secondary/50 p-3 sm:grid-cols-3">
+          <label className="text-xs font-semibold">
+            {tr("Source")}
+            <Input
+              value={draft.source}
+              onChange={(e) => setDraft({ ...draft, source: e.target.value })}
+              className="mt-1"
+            />
+          </label>
+          <label className="text-xs font-semibold">
+            {tr("Expires")}
+            <Input
+              type="date"
+              value={draft.expires}
+              onChange={(e) => setDraft({ ...draft, expires: e.target.value })}
+              className="mt-1"
+            />
+          </label>
+          <label className="text-xs font-semibold">
+            {tr("Next step")}
+            <Input
+              value={draft.next}
+              onChange={(e) => setDraft({ ...draft, next: e.target.value })}
+              className="mt-1"
+            />
+          </label>
+          <div className="flex gap-2 sm:col-span-3">
+            <Button size="sm" onClick={saveEdit}>
+              {tr("Save")}
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>
+              {tr("Cancel")}
+            </Button>
           </div>
-        ),
+        </div>
       )}
       <details className="mt-2 text-sm text-muted-foreground">
-        <summary className="cursor-pointer text-xs font-semibold">{t("What is this?")}</summary>
-        <p className="mt-1">{t(item.help)}</p>
+        <summary className="cursor-pointer text-xs font-semibold">{tr("What is this?")}</summary>
+        <p className="mt-1">{tr(item.help)}</p>
       </details>
       <div className="mt-3 flex flex-wrap gap-2">
         <Button size="sm" variant="outline" onClick={onExplain}>
           <Bot />
-          {t(" Explain")}
+          {tr(" Explain")}
         </Button>
-        {t(
-          !editing && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                setDraft({ source: item.source, expires: item.expires ?? "", next: item.next });
-                setEditing(true);
-              }}
-            >
-              <Pencil />
-              {t(" Edit")}
-            </Button>
-          ),
+        {!editing && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              setDraft({ source: item.source, expires: item.expires ?? "", next: item.next });
+              setEditing(true);
+            }}
+          >
+            <Pencil />
+            {tr(" Edit")}
+          </Button>
         )}
-        {t(
-          isDecl && (
-            <Button size="sm" onClick={onDraft}>
-              <FileText /> {t(state.declarationDraft ? "Redraft" : "Draft with Wepa Guide")}
-            </Button>
-          ),
+        {isDecl && (
+          <Button size="sm" onClick={onDraft}>
+            <FileText /> {tr(state.declarationDraft ? "Redraft" : "Draft with Wepa Guide")}
+          </Button>
         )}
-        {t(
-          (!isDecl || state.declarationDraft || item.file) && (
-            <Button size="sm" variant="outline" onClick={() => fileRef.current?.click()}>
-              {t(
-                item.file ? (
-                  <>
-                    <RefreshCw />
-                    {t(" Replace")}
-                  </>
-                ) : (
-                  <>
-                    <Upload /> {t(isDecl ? "Attach notarized copy" : "Upload")}
-                  </>
-                ),
-              )}
-            </Button>
-          ),
+        {(!isDecl || state.declarationDraft || item.file) && (
+          <Button size="sm" variant="outline" onClick={() => fileRef.current?.click()}>
+            {tr(
+              item.file ? (
+                <>
+                  <RefreshCw />
+                  {tr(" Replace")}
+                </>
+              ) : (
+                <>
+                  <Upload /> {tr(isDecl ? "Attach notarized copy" : "Upload")}
+                </>
+              ),
+            )}
+          </Button>
         )}
         <input
           ref={fileRef}
@@ -1094,60 +1040,56 @@ function ChecklistCard({
                   : { ...base, status: "Ready for review", next: "Confirm the new document" },
               );
               toast.success(
-                t(`${f.name} ${item.file ? "replaced" : "uploaded"} — kept on this device.`),
+                tr(`${f.name} ${item.file ? "replaced" : "uploaded"} — kept on this device.`),
               );
             } catch {
-              toast.error(t("Couldn't read that file. Try a JPG, PNG or PDF."));
+              toast.error(tr("Couldn't read that file. Try a JPG, PNG or PDF."));
             }
           }}
         />
-        {t(
-          item.status === "Ready for review" && item.file && (
-            <Button size="sm" onClick={() => onSet({ status: "Nurse confirmed", next: "None" })}>
-              <CheckCircle2 />
-              {t(" Confirm")}
-            </Button>
-          ),
+        {item.status === "Ready for review" && item.file && (
+          <Button size="sm" onClick={() => onSet({ status: "Nurse confirmed", next: "None" })}>
+            <CheckCircle2 />
+            {tr(" Confirm")}
+          </Button>
         )}
       </div>
-      {t(
-        isDecl && state.declarationDraft && (
-          <div className="mt-3 space-y-2">
-            <Textarea
-              value={state.declarationDraft}
-              onChange={(e) => onDraftChange(e.target.value)}
-              rows={10}
-              className="font-mono text-xs"
-            />
-            <Button size="sm" variant="ghost" onClick={download}>
-              <Download />
-              {t(" Download draft to print for the notary")}
-            </Button>
-          </div>
-        ),
+      {isDecl && state.declarationDraft && (
+        <div className="mt-3 space-y-2">
+          <Textarea
+            value={state.declarationDraft}
+            onChange={(e) => onDraftChange(e.target.value)}
+            rows={10}
+            className="font-mono text-xs"
+          />
+          <Button size="sm" variant="ghost" onClick={download}>
+            <Download />
+            {tr(" Download draft to print for the notary")}
+          </Button>
+        </div>
       )}
       <Dialog open={preview} onOpenChange={setPreview}>
         <DialogContent className="max-w-3xl">
-          <DialogTitle>{t(item.title)}</DialogTitle>
-          {t(
+          <DialogTitle>{tr(item.title)}</DialogTitle>
+          {tr(
             item.fileData ? (
               isImage ? (
                 <img
                   src={item.fileData}
-                  alt={t(item.title)}
+                  alt={tr(item.title)}
                   className="max-h-[70vh] w-full rounded-xl object-contain"
                 />
               ) : (
                 <iframe
                   src={item.fileData}
-                  title={t(item.title)}
+                  title={tr(item.title)}
                   className="h-[70vh] w-full rounded-xl border border-border"
                 />
               )
             ) : (
               <p className="text-sm text-muted-foreground">
-                {t(item.file)}
-                {t(" is too large to preview here, but it is attached.")}
+                {tr(item.file)}
+                {tr(" is too large to preview here, but it is attached.")}
               </p>
             ),
           )}
@@ -1159,10 +1101,10 @@ function ChecklistCard({
               }}
             >
               <RefreshCw />
-              {t(" Replace")}
+              {tr(" Replace")}
             </Button>
             <Button variant="ghost" onClick={() => setPreview(false)}>
-              {t("Close")}
+              {tr("Close")}
             </Button>
           </div>
         </DialogContent>
@@ -1207,7 +1149,7 @@ function SpanishScenario({
   result?: ReadinessState["spanish"];
   onResult: (r: NonNullable<ReadinessState["spanish"]>) => void;
 }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   const [answers, setAnswers] = useState<number[]>([]);
   const [reviewed, setReviewed] = useState(false);
   const done = SCENARIO.every((_, i) => answers[i] !== undefined);
@@ -1231,117 +1173,104 @@ function SpanishScenario({
       <div className="rounded-3xl border border-border bg-card p-5">
         <p className="flex items-center gap-2 font-display text-xl font-bold">
           <Languages className="size-5 text-accent-strong" />
-          {t(" Clinical Spanish scenario")}
+          {tr(" Clinical Spanish scenario")}
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
-          {t("WEPA readiness indicator—not a language certification or licensing decision.")}
+          {tr("WEPA readiness indicator—not a language certification or licensing decision.")}
         </p>
-        {t(
+        {tr(
           reviewed ? (
             <div className="mt-3 rounded-xl bg-secondary p-4 text-secondary-foreground">
               <p className="font-display text-3xl font-bold">
-                {t(score)} / {t(SCENARIO.length)}
-                {t(" correct")}
+                {tr(score)} / {tr(SCENARIO.length)}
+                {tr(" correct")}
               </p>
-              <p className="mt-1 font-semibold">{t(result)}</p>
-              <p className="mt-1 text-sm opacity-80">{t("Review each answer below.")}</p>
+              <p className="mt-1 font-semibold">{tr(result)}</p>
+              <p className="mt-1 text-sm opacity-80">{tr("Review each answer below.")}</p>
             </div>
           ) : result ? (
             <p className="mt-3 rounded-xl bg-secondary p-3 text-sm text-secondary-foreground">
-              <span className="font-semibold">{t("Last result:")}</span> {t(result)}
-              {t(" — answer again to see your score and review.")}
+              <span className="font-semibold">{tr("Last result:")}</span> {tr(result)}
+              {tr(" — answer again to see your score and review.")}
             </p>
           ) : null,
         )}
       </div>
-      {t(
-        SCENARIO.map((s, i) => {
-          const right = answers[i] === s.correct;
-          return (
-            <div
-              key={i}
-              className={cn(
-                "rounded-2xl border bg-card p-4",
-                reviewed ? (right ? "border-primary" : "border-destructive") : "border-border",
-              )}
-            >
-              <p className="text-sm font-medium">
-                {t(i + 1)}. {t(s.q)}
-              </p>
-              <div className="mt-3 grid gap-2">
-                {t(
-                  s.options.map((o, j) => {
-                    const picked = answers[i] === j;
-                    const cls = reviewed
-                      ? j === s.correct
-                        ? "border-primary bg-primary/15 font-semibold"
-                        : picked
-                          ? "border-destructive bg-destructive/10 line-through"
-                          : "border-border opacity-60"
-                      : picked
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border";
-                    return (
-                      <button
-                        key={o}
-                        disabled={reviewed}
-                        onClick={() =>
-                          setAnswers((a) => {
-                            const n = [...a];
-                            n[i] = j;
-                            return n;
-                          })
-                        }
-                        className={cn(
-                          "flex items-center justify-between gap-2 rounded-xl border px-3 py-2 text-left text-sm",
-                          cls,
-                        )}
-                      >
-                        <span>{t(o)}</span>
-                        {t(
-                          reviewed && j === s.correct && (
-                            <span className="shrink-0 text-xs font-bold">{t("✓ Correct")}</span>
-                          ),
-                        )}
-                        {t(
-                          reviewed && picked && j !== s.correct && (
-                            <span className="shrink-0 text-xs font-bold text-destructive">
-                              {t("✗ Your answer")}
-                            </span>
-                          ),
-                        )}
-                      </button>
-                    );
-                  }),
-                )}
-              </div>
-              {t(
-                reviewed && (
-                  <p className="mt-3 text-sm text-muted-foreground">
-                    <span
-                      className={cn(
-                        "font-semibold",
-                        right ? "text-foreground" : "text-destructive",
-                      )}
-                    >
-                      {t(right ? "Right." : "Not quite.")}
-                    </span>{" "}
-                    {t(s.why)}
-                  </p>
-                ),
-              )}
+      {SCENARIO.map((s, i) => {
+        const right = answers[i] === s.correct;
+        return (
+          <div
+            key={i}
+            className={cn(
+              "rounded-2xl border bg-card p-4",
+              reviewed ? (right ? "border-primary" : "border-destructive") : "border-border",
+            )}
+          >
+            <p className="text-sm font-medium">
+              {i + 1}. {tr(s.q)}
+            </p>
+            <div className="mt-3 grid gap-2">
+              {s.options.map((o, j) => {
+                const picked = answers[i] === j;
+                const cls = reviewed
+                  ? j === s.correct
+                    ? "border-primary bg-primary/15 font-semibold"
+                    : picked
+                      ? "border-destructive bg-destructive/10 line-through"
+                      : "border-border opacity-60"
+                  : picked
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border";
+                return (
+                  <button
+                    key={o}
+                    disabled={reviewed}
+                    onClick={() =>
+                      setAnswers((a) => {
+                        const n = [...a];
+                        n[i] = j;
+                        return n;
+                      })
+                    }
+                    className={cn(
+                      "flex items-center justify-between gap-2 rounded-xl border px-3 py-2 text-left text-sm",
+                      cls,
+                    )}
+                  >
+                    <span>{tr(o)}</span>
+                    {reviewed && j === s.correct && (
+                      <span className="shrink-0 text-xs font-bold">{tr("✓ Correct")}</span>
+                    )}
+                    {reviewed && picked && j !== s.correct && (
+                      <span className="shrink-0 text-xs font-bold text-destructive">
+                        {tr("✗ Your answer")}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
-          );
-        }),
-      )}
-      {t(
+            {reviewed && (
+              <p className="mt-3 text-sm text-muted-foreground">
+                <span
+                  className={cn("font-semibold", right ? "text-foreground" : "text-destructive")}
+                >
+                  {tr(right ? "Right." : "Not quite.")}
+                </span>{" "}
+                {tr(s.why)}
+              </p>
+            )}
+          </div>
+        );
+      })}
+      {tr(
         reviewed ? (
           <Button size="lg" variant="outline" className="w-full" onClick={retake}>
-            {t("Retake the scenario")}
+            {tr("Retake the scenario")}
           </Button>
         ) : (
           <Button size="lg" className="w-full" disabled={!done} onClick={finish}>
-            {t("See my score")}
+            {tr("See my score")}
           </Button>
         ),
       )}
@@ -1356,7 +1285,7 @@ export function CandidatePassport({
   state: ReadinessState;
   compact?: boolean;
 }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   const outstanding = state.checklist
     .filter((c) => !["Nurse confirmed", "Submitted — self-reported", "Accepted"].includes(c.status))
     .map((c) => c.title);
@@ -1388,34 +1317,32 @@ export function CandidatePassport({
       <div className="flex items-center gap-3 bg-surface-dark p-4 text-surface-dark-foreground">
         <img
           src={nurseIconAsset.url}
-          alt={t("")}
+          alt={tr("")}
           aria-hidden
           className="size-11 rounded-full object-contain"
         />
         <div className="min-w-0">
-          <p className="font-display text-lg font-bold">{t(state.profile.name)}</p>
+          <p className="font-display text-lg font-bold">{tr(state.profile.name)}</p>
           <p className="text-xs opacity-75">
-            {t("Candidate Passport · ")}
-            {t(state.profile.city)}
+            {tr("Candidate Passport · ")}
+            {tr(state.profile.city)}
           </p>
         </div>
         <ShieldCheck className="ml-auto size-6 text-primary" />
       </div>
       <dl className={cn("grid gap-px bg-border", !compact && "sm:grid-cols-2")}>
-        {t(
-          rows.map(([k, v]) => (
-            <div key={k} className="bg-card p-3">
-              <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                {t(k)}
-              </dt>
-              <dd className="text-sm font-medium">{t(v)}</dd>
-            </div>
-          )),
-        )}
+        {rows.map(([k, v]) => (
+          <div key={k} className="bg-card p-3">
+            <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              {tr(k)}
+            </dt>
+            <dd className="text-sm font-medium">{tr(v)}</dd>
+          </div>
+        ))}
       </dl>
       <p className="p-3 text-[11px] text-muted-foreground">
-        {t("All information is candidate-reported. ")}
-        {t(DISCLAIMER)}
+        {tr("All information is candidate-reported. ")}
+        {tr(DISCLAIMER)}
       </p>
     </section>
   );
@@ -1432,7 +1359,7 @@ function GuidePanel({
   onPrepare?: (() => void) | undefined;
   onStop: () => void;
 }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const chips: [string, string][] = [
@@ -1445,50 +1372,46 @@ function GuidePanel({
       <div className="flex items-center gap-2">
         <GuideAvatar className="size-9" />
         <div>
-          <p className="font-display font-bold">{t("Wepa Guide")}</p>
+          <p className="font-display font-bold">{tr("Wepa Guide")}</p>
           <p className="text-[11px] text-muted-foreground">
-            {t("AI preparation help — never approves eligibility")}
+            {tr("AI preparation help — never approves eligibility")}
           </p>
         </div>
       </div>
-      {t(
-        onPrepare && (
-          <Button onClick={onPrepare} className="bg-coral text-coral-foreground hover:bg-coral/90">
-            {t("Prepare my packet")}
-          </Button>
-        ),
+      {onPrepare && (
+        <Button onClick={onPrepare} className="bg-coral text-coral-foreground hover:bg-coral/90">
+          {tr("Prepare my packet")}
+        </Button>
       )}
       <div className="flex flex-wrap gap-2">
-        {t(
-          chips.map(([t, l]) => (
-            <Button
-              key={t}
-              size="sm"
-              variant="outline"
-              onClick={() => onAsk(t)}
-              disabled={guide.busy}
-            >
-              {t(l)}
-            </Button>
-          )),
-        )}
+        {chips.map(([t, l]) => (
+          <Button
+            key={t}
+            size="sm"
+            variant="outline"
+            onClick={() => onAsk(t)}
+            disabled={guide.busy}
+          >
+            {tr(l)}
+          </Button>
+        ))}
       </div>
       <div className="min-h-32 flex-1 overflow-y-auto rounded-2xl bg-muted p-3 text-sm">
-        {t(
+        {tr(
           guide.error ? (
-            <p className="text-destructive">{t(guide.error)}</p>
+            <p className="text-destructive">{tr(guide.error)}</p>
           ) : guide.text ? (
             <div className="space-y-2 [&_h3]:mt-2 [&_h3]:font-bold [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5">
-              <ReactMarkdown>{t(guide.text)}</ReactMarkdown>
+              <ReactMarkdown>{tr(guide.text)}</ReactMarkdown>
             </div>
           ) : guide.busy ? (
             <span className="flex items-center gap-2 text-muted-foreground">
               <Loader2 className="size-4 animate-spin" />
-              {t(" Reviewing your information…")}
+              {tr(" Reviewing your information…")}
             </span>
           ) : (
             <span className="text-muted-foreground">
-              {t("Ask me what a document is, or let me prepare your packet.")}
+              {tr("Ask me what a document is, or let me prepare your packet.")}
             </span>
           ),
         )}
@@ -1506,16 +1429,16 @@ function GuidePanel({
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder={t("Ask about Puerto Rico prep…")}
+          placeholder={tr("Ask about Puerto Rico prep…")}
           className="min-w-0 flex-1 rounded-full border border-input bg-background px-4 text-sm"
         />
-        {t(
+        {tr(
           guide.busy ? (
             <Button type="button" variant="outline" onClick={onStop}>
-              {t("Stop")}
+              {tr("Stop")}
             </Button>
           ) : (
-            <Button type="submit" size="icon" aria-label={t("Ask Wepa Guide")}>
+            <Button type="submit" size="icon" aria-label={tr("Ask Wepa Guide")}>
               <Send />
             </Button>
           ),
@@ -1526,47 +1449,43 @@ function GuidePanel({
   return (
     <>
       <aside className="hidden h-[calc(100dvh-8rem)] rounded-3xl border border-border bg-card p-4 lg:sticky lg:top-28 lg:block">
-        {t(body)}
+        {tr(body)}
       </aside>
       <div className="lg:hidden">
-        {t(
-          !open && (
-            <button
-              onClick={() => setOpen(true)}
-              className="fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-40 flex items-center gap-3 rounded-full bg-surface-dark p-2 pr-5 text-left text-surface-dark-foreground shadow-lg"
-            >
-              {t(
-                guide.busy ? (
-                  <span className="grid size-10 place-items-center rounded-full bg-secondary">
-                    <Loader2 className="size-5 animate-spin text-foreground" />
-                  </span>
-                ) : (
-                  <GuideAvatar className="size-10" />
-                ),
+        {!open && (
+          <button
+            onClick={() => setOpen(true)}
+            className="fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-40 flex items-center gap-3 rounded-full bg-surface-dark p-2 pr-5 text-left text-surface-dark-foreground shadow-lg"
+          >
+            {tr(
+              guide.busy ? (
+                <span className="grid size-10 place-items-center rounded-full bg-secondary">
+                  <Loader2 className="size-5 animate-spin text-foreground" />
+                </span>
+              ) : (
+                <GuideAvatar className="size-10" />
+              ),
+            )}
+            <span className="min-w-0 flex-1 truncate text-sm font-semibold">
+              {tr(
+                guide.busy
+                  ? "Wepa Guide is working…"
+                  : guide.text
+                    ? "Wepa Guide replied — tap to read"
+                    : "Ask Wepa Guide",
               )}
-              <span className="min-w-0 flex-1 truncate text-sm font-semibold">
-                {t(
-                  guide.busy
-                    ? "Wepa Guide is working…"
-                    : guide.text
-                      ? "Wepa Guide replied — tap to read"
-                      : "Ask Wepa Guide",
-                )}
-              </span>
-            </button>
-          ),
+            </span>
+          </button>
         )}
-        {t(
-          open && (
-            <div className="fixed inset-x-0 bottom-0 z-50 h-[75dvh] rounded-t-3xl border-t border-border bg-card p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-2xl">
-              <button
-                onClick={() => setOpen(false)}
-                className="mx-auto mb-3 block h-1.5 w-12 rounded-full bg-border"
-                aria-label={t("Close Wepa Guide")}
-              />
-              {t(body)}
-            </div>
-          ),
+        {open && (
+          <div className="fixed inset-x-0 bottom-0 z-50 h-[75dvh] rounded-t-3xl border-t border-border bg-card p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-2xl">
+            <button
+              onClick={() => setOpen(false)}
+              className="mx-auto mb-3 block h-1.5 w-12 rounded-full bg-border"
+              aria-label={tr("Close Wepa Guide")}
+            />
+            {tr(body)}
+          </div>
         )}
       </div>
     </>
@@ -1574,7 +1493,7 @@ function GuidePanel({
 }
 
 function GuideAvatar({ className }: { className?: string }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   return (
     <span
       className={cn(
@@ -1582,7 +1501,7 @@ function GuideAvatar({ className }: { className?: string }) {
         className,
       )}
     >
-      <img src={logoAsset.url} alt={t("")} aria-hidden className="w-[86%] object-contain" />
+      <img src={logoAsset.url} alt={tr("")} aria-hidden className="w-[86%] object-contain" />
     </span>
   );
 }
@@ -1594,7 +1513,7 @@ function InterestsPicker({
   interests: ReadinessState["interests"];
   onChange: (i: ReadinessState["interests"]) => void;
 }) {
-  const { t } = useLanguage();
+  const { t: tr } = useLanguage();
   const toggle = (key: "regions" | "experiences", v: string) =>
     onChange({
       ...interests,
@@ -1619,7 +1538,7 @@ function InterestsPicker({
           className={chip(interests.regions.includes(r))}
           onClick={() => toggle("regions", r)}
         >
-          {t(r)}
+          {tr(r)}
         </button>
       )),
     },
@@ -1632,7 +1551,7 @@ function InterestsPicker({
           className={chip(interests.experiences.includes(r))}
           onClick={() => toggle("experiences", r)}
         >
-          {t(r)}
+          {tr(r)}
         </button>
       )),
     },
@@ -1645,7 +1564,7 @@ function InterestsPicker({
           className={chip(interests.length === r)}
           onClick={() => onChange({ ...interests, length: r })}
         >
-          {t(r)}
+          {tr(r)}
         </button>
       )),
     },
@@ -1658,7 +1577,7 @@ function InterestsPicker({
           className={chip(interests.housing === r)}
           onClick={() => onChange({ ...interests, housing: r })}
         >
-          {t(r)}
+          {tr(r)}
         </button>
       )),
     },
@@ -1666,32 +1585,28 @@ function InterestsPicker({
   return (
     <section className="space-y-3">
       <div className="rounded-3xl bg-surface-dark p-5 text-surface-dark-foreground">
-        <p className="font-display text-xl font-bold">{t("Your island, your way")}</p>
+        <p className="font-display text-xl font-bold">{tr("Your island, your way")}</p>
         <p className="mt-1 text-sm opacity-80">
-          {t(
+          {tr(
             "Once you're ready, WEPA matches you to every gig whose location and island package fit what you pick here.",
           )}
         </p>
-        {t(
-          interestsComplete(interests) && (
-            <p className="mt-3 flex items-center gap-2 text-sm font-semibold">
-              <CheckCircle2 className="size-4 text-primary" />
-              {t(" Interests saved — ready to match")}
-            </p>
-          ),
+        {interestsComplete(interests) && (
+          <p className="mt-3 flex items-center gap-2 text-sm font-semibold">
+            <CheckCircle2 className="size-4 text-primary" />
+            {tr(" Interests saved — ready to match")}
+          </p>
         )}
       </div>
-      {t(
-        groups.map((g) => (
-          <div key={g.title} className="rounded-2xl border border-border bg-card p-4">
-            <p className="font-semibold">
-              {t(g.title)}{" "}
-              <span className="text-xs font-normal text-muted-foreground">· {t(g.hint)}</span>
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">{t(g.body)}</div>
-          </div>
-        )),
-      )}
+      {groups.map((g) => (
+        <div key={g.title} className="rounded-2xl border border-border bg-card p-4">
+          <p className="font-semibold">
+            {tr(g.title)}{" "}
+            <span className="text-xs font-normal text-muted-foreground">· {tr(g.hint)}</span>
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">{tr(g.body)}</div>
+        </div>
+      ))}
       <label className="flex items-start gap-3 rounded-2xl border border-dashed border-border p-4 text-sm">
         <input
           type="checkbox"
@@ -1700,9 +1615,9 @@ function InterestsPicker({
           onChange={(e) => onChange({ ...interests, service: e.target.checked })}
         />
         <span>
-          <span className="font-semibold">{t("Open to unpaid community service gigs")}</span>
+          <span className="font-semibold">{tr("Open to unpaid community service gigs")}</span>
           <span className="block text-xs text-muted-foreground">
-            {t(
+            {tr(
               "Short stays serving rural and underserved communities, with faith-based or secular hosts. Lodging and meals are covered; the reward is the work itself.",
             )}
           </span>
