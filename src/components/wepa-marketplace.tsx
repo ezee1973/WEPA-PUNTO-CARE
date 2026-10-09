@@ -265,13 +265,28 @@ function NurseExperience({ onSelectGig, soundOn, onSound, anthemAuto, onAnthemEn
               <span className="text-[11px] font-bold uppercase tracking-widest text-surface-dark-foreground/70">The WEPA anthem</span>
               <span className="text-[11px] text-surface-dark-foreground/50">6 seconds of island</span>
             </div>
-            <button type="button" onClick={onSound} aria-label={soundOn ? "Pause the WEPA anthem" : "Play the WEPA anthem"} className="group relative block w-full cursor-pointer">
-              {jingleMedia}
+            <button type="button" onClick={onSound} aria-label={soundOn ? "Pause the WEPA anthem" : "Play the WEPA anthem with sound"} className="group relative block w-full cursor-pointer">
+              {anthemAuto ? (
+                <video ref={mediaRef} src={jingleUrl} autoPlay muted loop playsInline onEnded={onAnthemEnded} className="aspect-video w-full object-cover" />
+              ) : (
+                <>
+                  <img src={anthemPoster} alt="Frame from the WEPA.care anthem video" className="aspect-video w-full object-cover" />
+                  <video ref={mediaRef} src={jingleUrl} playsInline onEnded={onAnthemEnded} className="hidden" />
+                </>
+              )}
               {soundOn ? (
                 <span className="absolute inset-x-0 bottom-0 flex items-end justify-center gap-1.5 bg-gradient-to-t from-black/60 to-transparent p-4" aria-hidden>
                   {[10, 18, 26, 14, 22, 8, 16, 24, 12].map((h, i) => (
                     <span key={i} className="w-1.5 animate-pulse rounded-full bg-primary" style={{ height: `${h}px`, animationDelay: `${i * 90}ms` }} />
                   ))}
+                </span>
+              ) : anthemAuto ? (
+                <span className="absolute bottom-3 left-3 flex items-center gap-2 rounded-full bg-black/55 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-white backdrop-blur">
+                  <span className="relative flex size-2" aria-hidden>
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-coral opacity-75" />
+                    <span className="relative inline-flex size-2 rounded-full bg-coral" />
+                  </span>
+                  Tap for sound
                 </span>
               ) : (
                 <span className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-surface-dark/35 transition-colors group-hover:bg-surface-dark/20">
