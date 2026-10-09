@@ -137,12 +137,13 @@ export function ReadinessPassport() {
             <p className="truncate font-display text-lg font-bold leading-tight">Puerto Rico Readiness Passport</p>
             <p className="truncate text-xs text-muted-foreground">{state.profile.name} · {state.profile.specialty}</p>
           </div>
-          <Button variant="outline" size="sm" className="shrink-0" onClick={() => setEditProfile(true)}><Pencil /> Edit profile</Button>
           <span className="rounded-full bg-surface-dark px-3 py-1 text-sm font-bold text-surface-dark-foreground">{progress}%</span>
         </div>
         <nav className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-4 pb-2 [scrollbar-width:none]">
           {TABS.map((t) => (
-            <button key={t.id} onClick={() => setTab(t.id)} className={cn("shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold transition", tab === t.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted")}>{t.label}</button>
+            <button key={t.id} onClick={() => setTab(t.id)} className={cn("flex shrink-0 items-center gap-1 rounded-full px-4 py-1.5 text-sm font-semibold transition", tab === t.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted")}>
+              {t.label}{stepDone[t.id] && <CheckCircle2 className="size-3.5" aria-label="Done" />}
+            </button>
           ))}
         </nav>
       </header>
