@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, Bot, CheckCircle2, Circle, Download, FileText, Languages, Loader2, Paperclip, Send, ShieldCheck, Stethoscope, Upload } from "lucide-react";
+import { ArrowLeft, Bot, CheckCircle2, Circle, Download, FileText, Languages, Loader2, Paperclip, Send, ShieldCheck, Upload } from "lucide-react";
+import nurseIconAsset from "@/assets/wepa-nurse.png.asset.json";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -360,7 +361,7 @@ export function CandidatePassport({ state, compact }: { state: ReadinessState; c
   return (
     <section className="overflow-hidden rounded-3xl border border-border bg-card">
       <div className="flex items-center gap-3 bg-surface-dark p-4 text-surface-dark-foreground">
-        <div className="grid size-11 place-items-center rounded-full bg-primary text-primary-foreground"><Stethoscope className="size-5" /></div>
+        <img src={nurseIconAsset.url} alt="" aria-hidden className="size-11 rounded-full object-contain" />
         <div className="min-w-0"><p className="font-display text-lg font-bold">{elena.name}</p><p className="text-xs opacity-75">Candidate Passport · {elena.city}</p></div>
         <ShieldCheck className="ml-auto size-6 text-primary" />
       </div>
