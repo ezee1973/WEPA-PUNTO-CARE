@@ -25,6 +25,7 @@ import {
 import { toast } from "sonner";
 
 import coastImage from "@/assets/puerto-rico-coast.jpg";
+import westCoastImage from "@/assets/wepa-west-coast.jpg";
 import jingleAsset from "@/assets/wepa-jingle.asset.json";
 import logoAsset from "@/assets/wepa-care-logo.asset.json";
 import nurseIconAsset from "@/assets/wepa-nurse.png.asset.json";
@@ -181,21 +182,19 @@ function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
       role="dialog"
       aria-label={tr("Welcome to WEPA.care — choose your journey")}
     >
-      <div className="absolute right-4 top-4 z-10">
-        <LanguageToggle dark />
-      </div>
-      {/* Restrained coast: a soft masked sea band low on the screen, never a backdrop */}
       <img
-        src={coastImage}
+        src={westCoastImage}
         alt={tr("")}
         aria-hidden
+        width={1920}
+        height={1280}
         className={cn(
-          "absolute inset-x-0 bottom-0 h-[48%] w-full object-cover object-center [mask-image:linear-gradient(to_top,black_4%,transparent_88%)] transition-opacity duration-700",
-          started ? "opacity-0" : "opacity-45",
+          "wepa-splash-image absolute inset-0 h-full w-full object-cover object-[66%_center] transition-opacity duration-700 md:object-center",
+          started ? "opacity-0" : "opacity-100",
         )}
       />
-      <div className="absolute inset-x-0 bottom-0 h-[48%] bg-gradient-to-t from-ocean/40 via-ocean/80 to-ocean" />
-      <div className="absolute -top-40 left-1/2 h-[26rem] w-[46rem] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
+      <div className="absolute inset-0 bg-ocean/65 md:bg-transparent md:bg-hero-wash" />
+      <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-ocean via-ocean/70 to-transparent md:h-1/2" />
       <video
         ref={videoRef}
         src={jingleUrl}
@@ -208,67 +207,75 @@ function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
         )}
       />
       {!started && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-7 overflow-y-auto px-5 py-8 sm:gap-9 sm:py-12">
-          <div className="flex w-full max-w-4xl flex-col items-center gap-3 text-center sm:gap-4">
-            <img
-              src={logoUrl}
-              alt={tr("WEPA.care")}
-              className="h-11 w-auto object-contain [filter:brightness(0)_invert(1)_drop-shadow(0_10px_24px_rgba(9,45,55,0.55))] sm:h-16"
-            />
-            <h1 className="max-w-3xl text-balance text-[1.85rem] font-black leading-[1.06] tracking-tight text-ocean-foreground sm:text-5xl">
-              {tr("Puerto Rico needs nurses.")}
-            </h1>
-            <p className="max-w-2xl text-sm font-semibold leading-relaxed text-ocean-foreground/95 sm:text-base">
-              {tr(
-                "Travel nurses are licensed professionals who take temporary hospital assignments. Puerto Rico competes with higher-paying mainland contracts, making critical vacancies harder to fill.",
-              )}
-            </p>
-            <p className="max-w-3xl text-xs leading-relaxed text-ocean-foreground/80 sm:text-sm">
-              {tr(
-                "WEPA closes the gap: hospitals offer local-pay gigs, tourism partners add stays and experiences, and U.S. nurses get ready and match.",
-              )}
-            </p>
-            <p className="text-sm font-black text-primary sm:text-base">
-              {tr("Come for the Island. Care for its People.")}
-            </p>
-          </div>
+        <div className="absolute inset-0 overflow-y-auto">
+          <div className="mx-auto flex min-h-full w-full max-w-7xl flex-col px-5 pb-6 pt-4 sm:px-8 sm:pb-8 sm:pt-6 lg:px-12 lg:pb-10">
+            <div className="wepa-splash-intro flex items-center justify-between gap-4">
+              <img
+                src={logoUrl}
+                alt={tr("WEPA.care")}
+                className="h-10 w-auto object-contain [filter:brightness(0)_invert(1)_drop-shadow(0_8px_20px_var(--color-ocean))] sm:h-14"
+              />
+              <LanguageToggle dark />
+            </div>
 
-          <div className="w-full max-w-4xl">
-            <p className="mb-3 text-center text-[0.66rem] font-extrabold uppercase tracking-[0.22em] text-ocean-foreground/75">
-              {tr(" Find your place ")}
-            </p>
-            <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
-              {JOURNEY_DOORS.map((door) => (
-                <button
-                  key={door.id}
-                  type="button"
-                  onClick={() => enter(door.id)}
-                  className="group relative flex items-center gap-4 rounded-2xl bg-ivory p-4 text-left shadow-[0_20px_45px_-24px_rgba(9,45,55,0.9)] ring-1 ring-ocean/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_60px_-24px_rgba(255,117,99,0.6)] hover:ring-coral/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral sm:flex-col sm:items-start sm:gap-4 sm:p-5"
-                >
-                  <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-secondary/55 ring-1 ring-primary/15 sm:h-[4.25rem] sm:w-[4.25rem]">
-                    <img
-                      src={ROLE_ICONS[door.id]}
-                      alt={tr("")}
-                      aria-hidden
-                      className="h-12 w-12 object-contain transition-transform duration-300 group-hover:scale-110 sm:h-[3.75rem] sm:w-[3.75rem]"
-                    />
-                  </span>
-                  <span className="min-w-0 sm:min-h-[8.5rem] sm:flex-1">
-                    <span className="block text-[0.62rem] font-extrabold uppercase tracking-[0.18em] text-accent-deep">
-                      {tr(door.audience)}
+            <div className="wepa-splash-intro mt-8 max-w-2xl sm:mt-12 lg:mt-[8vh]">
+              <h1 className="max-w-xl text-balance text-[2.25rem] font-black leading-[1.02] text-ocean-foreground sm:text-6xl lg:text-7xl">
+                {tr("Puerto Rico needs nurses.")}
+              </h1>
+              <p className="mt-4 max-w-xl text-sm font-semibold leading-relaxed text-ocean-foreground/95 sm:text-lg">
+                {tr(
+                  "Travel nurses are licensed professionals who take temporary hospital assignments. Puerto Rico competes with higher-paying mainland contracts, making critical vacancies harder to fill.",
+                )}
+              </p>
+              <p className="mt-3 max-w-2xl text-xs leading-relaxed text-ocean-foreground/80 sm:text-base">
+                {tr(
+                  "WEPA closes the gap: hospitals offer local-pay gigs, tourism partners add stays and experiences, and U.S. nurses get ready and match.",
+                )}
+              </p>
+              <p className="mt-3 text-sm font-black text-primary sm:text-lg">
+                {tr("Come for the Island. Care for its People.")}
+              </p>
+            </div>
+
+            <div className="relative mt-8 w-full lg:mt-auto lg:pt-10">
+              <div className="pointer-events-none absolute left-[8%] right-[8%] top-[4.75rem] hidden h-px bg-gradient-to-r from-coral/20 via-primary/70 to-coral/20 sm:block" />
+              <p className="mb-3 text-[0.66rem] font-extrabold uppercase text-ocean-foreground/75">
+                {tr(" Find your place ")}
+              </p>
+              <div className="grid gap-2.5 sm:grid-cols-3 sm:gap-4">
+                {JOURNEY_DOORS.map((door) => (
+                  <Button
+                    key={door.id}
+                    type="button"
+                    variant="ghost"
+                    onClick={() => enter(door.id)}
+                    className="wepa-journey-door group relative h-auto min-h-[6.5rem] w-full justify-start gap-3 overflow-hidden rounded-lg border border-ivory/45 bg-ivory p-3 text-left text-ivory-foreground shadow-xl transition-all duration-300 hover:-translate-y-1 hover:border-coral/70 hover:bg-ivory hover:shadow-2xl focus-visible:ring-coral sm:min-h-[13rem] sm:flex-col sm:items-start sm:gap-4 sm:p-5"
+                  >
+                    <span className="absolute inset-y-0 left-0 w-1 bg-primary transition-colors duration-300 group-hover:bg-coral" />
+                    <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-secondary/70 ring-1 ring-primary/25 sm:h-20 sm:w-20">
+                      <img
+                        src={ROLE_ICONS[door.id]}
+                        alt={tr(door.audience)}
+                        className="h-14 w-14 object-contain transition-transform duration-300 group-hover:scale-105 sm:h-[4.5rem] sm:w-[4.5rem]"
+                      />
                     </span>
-                    <span className="mt-1 block text-base font-black leading-tight text-ivory-foreground sm:text-lg">
-                      {tr(door.title)}
+                    <span className="min-w-0 flex-1 whitespace-normal sm:pr-8">
+                      <span className="block text-[0.62rem] font-extrabold uppercase text-accent-deep">
+                        {tr(door.audience)}
+                      </span>
+                      <span className="mt-1 block text-base font-black leading-tight sm:text-xl">
+                        {tr(door.title)}
+                      </span>
+                      <span className="mt-1 hidden text-xs font-normal leading-snug text-ivory-foreground/75 xs:block sm:block sm:text-sm">
+                        {tr(door.copy)}
+                      </span>
                     </span>
-                    <span className="mt-1 block text-xs leading-snug text-ivory-foreground/75 sm:text-sm">
-                      {tr(door.copy)}
+                    <span className="ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-coral/15 text-coral ring-1 ring-coral/35 transition-all duration-300 group-hover:translate-x-0.5 group-hover:bg-coral group-hover:text-ivory sm:absolute sm:bottom-4 sm:right-4 sm:ml-0">
+                      <ArrowRight className="h-4 w-4" />
                     </span>
-                  </span>
-                  <span className="ml-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-coral/15 text-coral ring-1 ring-coral/35 transition-all duration-300 group-hover:translate-x-0.5 group-hover:bg-coral group-hover:text-ivory sm:mt-1 sm:self-end sm:ml-0">
-                    <ArrowRight className="h-4 w-4" />
-                  </span>
-                </button>
-              ))}
+                  </Button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
