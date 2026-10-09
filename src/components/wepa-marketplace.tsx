@@ -52,11 +52,14 @@ const roleMeta: Record<DemoRole, { label: string; short: string; icon: typeof He
   tourism: { label: "Tourism partner", short: "Make an offer", icon: Palmtree },
 };
 
+const ANTHEM_SEEN_KEY = "wepa-anthem-experienced";
+
 export function WepaMarketplace() {
   const [role, setRole] = useState<DemoRole>("nurse");
   const [selectedGig, setSelectedGig] = useState<DemoGig | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
   const [soundOn, setSoundOn] = useState(false);
+  const [anthemAuto, setAnthemAuto] = useState(false);
   const [signedInEmail, setSignedInEmail] = useState<string | null>(null);
   const mediaRef = useRef<HTMLVideoElement>(null);
 
@@ -66,6 +69,19 @@ export function WepaMarketplace() {
     return () => data.subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    // First-time "WEPA!" moment only: the anthem plays itself, silently,
+    // on the very first land. Every later visit gets a quiet poster.
+    try {
+      if (!window.localStorage.getItem(ANTHEM_SEEN_KEY)) {
+        window.localStorage.setItem(ANTHEM_SEEN_KEY, "1");
+        setAnthemAuto(true);
+      }
+    } catch {
+      setAnthemAuto(true);
+    }
+  }, []);
+
   async function toggleSound() {
     const media = mediaRef.current;
     if (!media) return;
@@ -73,14 +89,33 @@ export function WepaMarketplace() {
       media.pause();
       media.currentTime = 0;
       setSoundOn(false);
+      if (anthemAuto) {
+        // Settle back into the silent ambient loop.
+        media.muted = true;
+        media.loop = true;
+        void media.play().catch(() => {});
+      }
       return;
     }
     try {
+      media.muted = false;
+      media.loop = false;
       media.currentTime = 0;
       await media.play();
       setSoundOn(true);
     } catch {
       toast.error("Sound is waiting for browser permission. Tap again to play.");
+    }
+  }
+
+  function handleAnthemEnded() {
+    setSoundOn(false);
+    const media = mediaRef.current;
+    if (media && anthemAuto) {
+      media.muted = true;
+      media.loop = true;
+      media.currentTime = 0;
+      void media.play().catch(() => {});
     }
   }
 
@@ -107,7 +142,9 @@ export function WepaMarketplace() {
           onSelectGig={setSelectedGig}
           soundOn={soundOn}
           onSound={() => void toggleSound()}
-          jingleMedia={<video ref={mediaRef} src={jingleUrl} onEnded={() => setSoundOn(false)} playsInline className="aspect-video w-full object-cover" />}
+          anthemAuto={anthemAuto}
+          onAnthemEnded={handleAnthemEnded}
+          mediaRef={mediaRef}
         />
       )}
       {role === "hospital" && <HospitalExperience />}
