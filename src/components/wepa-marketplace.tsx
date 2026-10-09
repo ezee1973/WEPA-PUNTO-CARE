@@ -55,7 +55,7 @@ import { Link } from "@tanstack/react-router";
 import { CandidatePassport } from "@/components/readiness-passport";
 import { HospitalExperience } from "@/components/hospital-experience";
 import { NurseStorySpotlight } from "@/components/nurse-community";
-import { STAGES, nextBestAction, preparationProgress, useReadiness } from "@/lib/readiness";
+import { STAGES, useReadiness } from "@/lib/readiness";
 
 const logoUrl = logoAsset.url;
 const jingleUrl = jingleAsset.url;
