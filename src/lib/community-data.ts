@@ -115,6 +115,14 @@ export function useCommunity() {
       const stored = localStorage.getItem(KEY);
       if (stored) setState({ ...INITIAL, ...JSON.parse(stored) });
     } catch { /* keep demo defaults */ }
+    const sync = (event: StorageEvent) => {
+      if (event.key !== KEY) return;
+      try {
+        setState(event.newValue ? { ...INITIAL, ...JSON.parse(event.newValue) } : INITIAL);
+      } catch { /* keep current state */ }
+    };
+    window.addEventListener("storage", sync);
+    return () => window.removeEventListener("storage", sync);
   }, []);
   function update(fn: (current: CommunityState) => CommunityState) {
     setState((current) => {

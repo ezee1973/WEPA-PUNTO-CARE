@@ -14,6 +14,7 @@ import {
   HeartPulse,
   MapPin,
   Menu,
+  MessageCircle,
   Search,
   Sparkles,
   Stethoscope,
@@ -53,6 +54,7 @@ import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { CandidatePassport } from "@/components/readiness-passport";
 import { HospitalExperience } from "@/components/hospital-experience";
+import { NurseStorySpotlight } from "@/components/nurse-community";
 import { STAGES, nextBestAction, preparationProgress, useReadiness } from "@/lib/readiness";
 
 const logoUrl = logoAsset.url;
@@ -497,6 +499,8 @@ function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void 
           </div>
         </div>
       </section>
+
+      <NurseStorySpotlight />
 
       <PartnerCarousel />
 
@@ -1201,7 +1205,7 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 function MobileNurseNav() {
   const { t: tr } = useLanguage();
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-border bg-card/95 px-2 pb-[max(.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-border bg-card/95 px-2 pb-[max(.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur md:hidden">
       <Button
         variant="ghost"
         className="h-auto flex-col gap-1 text-[10px] text-primary"
@@ -1217,6 +1221,12 @@ function MobileNurseNav() {
       >
         <Search />
         {tr(" Gigs")}
+      </Button>
+      <Button asChild variant="ghost" className="h-auto flex-col gap-1 text-[10px]">
+        <Link to="/community">
+          <MessageCircle />
+          {tr(" Community")}
+        </Link>
       </Button>
       <Button asChild variant="ghost" className="h-auto flex-col gap-1 text-[10px]">
         <Link to="/ready">
