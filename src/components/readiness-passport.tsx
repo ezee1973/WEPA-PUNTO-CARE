@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { INTEREST_OPTIONS, interestsComplete, nextBestAction, pathwayResult, preparationProgress, streamGuide, useReadiness, type ChecklistItem, type ItemStatus, type NurseProfile, type Pathway, type ReadinessState } from "@/lib/readiness";
+import { INTEREST_OPTIONS, interestsComplete, nextBestAction, pathwayComplete, pathwayResult, preparationProgress, streamGuide, useReadiness, type ChecklistItem, type ItemStatus, type NurseProfile, type Pathway, type ReadinessState } from "@/lib/readiness";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 
@@ -57,6 +57,19 @@ export function ReadinessPassport() {
     { label: "Clinical Spanish readiness", value: state.spanish ? 100 : 0, note: state.spanish ?? "Scenario not started" },
   ];
   const nextAction = nextBestAction(state);
+  const pathwayDone = pathwayComplete(state.pathway);
+  const stepDone: Partial<Record<Tab, boolean>> = {
+    pathway: pathwayDone,
+    checklist: state.packetConfirmed,
+    spanish: !!state.spanish,
+    interests: interestsComplete(state.interests),
+    hospital: state.credentialing.every((c) => c.done),
+    passport: !!state.applied,
+  };
+  const actionTab: Tab = !pathwayDone ? "pathway"
+    : !state.packetConfirmed || state.checklist.find((c) => c.id === "declaration")?.status !== "Submitted — self-reported" ? "checklist"
+    : !state.spanish ? "spanish"
+    : !interestsComplete(state.interests) ? "interests" : "passport";
 
   async function ask(task: string, detail = "", onDone?: (t: string) => void) {
     abortRef.current?.abort();
@@ -74,6 +87,11 @@ export function ReadinessPassport() {
   }
 
   function preparePacket() {
+    if (!pathwayComplete(state.pathway)) {
+      toast.info("First answer the pathway questions — your document list depends on your authorization route.");
+      setTab("pathway");
+      return;
+    }
     update((s) => ({
       ...s,
       packetPrepared: true,
