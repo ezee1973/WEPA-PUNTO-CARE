@@ -38,7 +38,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
+
 import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -55,7 +55,7 @@ import { Link } from "@tanstack/react-router";
 import { CandidatePassport } from "@/components/readiness-passport";
 import { HospitalExperience } from "@/components/hospital-experience";
 import { NurseStorySpotlight } from "@/components/nurse-community";
-import { STAGES, nextBestAction, preparationProgress, useReadiness } from "@/lib/readiness";
+import { STAGES, useReadiness } from "@/lib/readiness";
 
 const logoUrl = logoAsset.url;
 const jingleUrl = jingleAsset.url;
@@ -370,9 +370,6 @@ function Header({
 function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void }) {
   const { t: tr } = useLanguage();
   const [specialty, setSpecialty] = useState("All specialties");
-  const { state } = useReadiness();
-  const progress = preparationProgress(state);
-  const nextAction = nextBestAction(state);
   const [region, setRegion] = useState("Anywhere");
   const [showService, setShowService] = useState(false);
   const paid = islandGigs.filter((g) => !g.service);
@@ -504,36 +501,6 @@ function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void 
 
       <PartnerCarousel />
 
-      <section id="ready" className="border-b border-border bg-card">
-        <div className="mx-auto flex max-w-[1440px] flex-col gap-4 px-4 py-5 sm:px-6 lg:flex-row lg:items-center lg:px-8">
-          <div className="flex min-w-0 flex-1 items-center gap-4">
-            <img
-              src={nurseIconAsset.url}
-              alt={tr("")}
-              aria-hidden
-              className="size-12 shrink-0 object-contain"
-            />
-            <div className="min-w-0">
-              <p className="text-sm font-bold sm:text-base">
-                {tr("Puerto Rico Readiness Passport · ")}
-                {tr(progress)}
-                {tr("% ready")}
-              </p>
-              <Progress value={progress} className="mt-2 h-1.5 max-w-md" />
-              <p className="mt-2 truncate text-xs text-muted-foreground sm:text-sm">
-                {tr("Next: ")}
-                {tr(nextAction)}
-              </p>
-            </div>
-          </div>
-          <Button asChild size="lg" className="shrink-0">
-            <Link to="/ready">
-              {tr("Open your passport ")}
-              <ArrowRight />
-            </Link>
-          </Button>
-        </div>
-      </section>
 
       <section id="gigs" className="mx-auto max-w-[1440px] px-4 py-12 sm:px-6 lg:px-8">
         <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
