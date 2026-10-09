@@ -14,6 +14,7 @@ import {
   MapPin,
   Menu,
   Music2,
+  Palmtree,
   Play,
   Plane,
   Plus,
