@@ -78,7 +78,9 @@ export function WepaMarketplace() {
 function AnthemTakeover({ onDone }: { onDone: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [fading, setFading] = useState(false);
+  const [started, setStarted] = useState(false);
   const doneRef = useRef(false);
+  const timersRef = useRef<number[]>([]);
 
   function finish() {
     if (doneRef.current) return;
@@ -87,34 +89,20 @@ function AnthemTakeover({ onDone }: { onDone: () => void }) {
     window.setTimeout(onDone, 650);
   }
 
-  useEffect(() => {
+  useEffect(() => () => timersRef.current.forEach((t) => window.clearTimeout(t)), []);
+
+  function enter() {
     const video = videoRef.current;
-    if (!video) return;
-    // Try with sound first; if the browser blocks it, fall back to muted.
+    setStarted(true);
+    if (!video) return finish();
+    // The tap unlocks sound in every browser.
     video.muted = false;
-    void video.play().catch(() => {
-      video.muted = true;
-      void video.play().catch(() => {});
-    });
-
-    // Close the takeover 3 seconds before the clip would otherwise end.
-    let closeTimer = 0;
-    const schedule = () => {
-      const remaining = Math.max(1200, (video.duration || 6) * 1000 - 3000);
-      closeTimer = window.setTimeout(finish, remaining);
-    };
-    if (video.readyState >= 1) schedule();
-    else video.addEventListener("loadedmetadata", schedule, { once: true });
-
-    // Safety net: never trap the visitor if "ended" never fires.
-    const safety = window.setTimeout(finish, 6000);
-    return () => {
-      video.removeEventListener("loadedmetadata", schedule);
-      window.clearTimeout(closeTimer);
-      window.clearTimeout(safety);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    video.currentTime = 0;
+    void video.play().catch(() => finish());
+    // Close 3 seconds before the clip ends; safety net if anything stalls.
+    const remaining = Math.max(1200, (video.duration || 6) * 1000 - 3000);
+    timersRef.current.push(window.setTimeout(finish, remaining), window.setTimeout(finish, 6000));
+  }
 
   return (
     <div
@@ -123,16 +111,24 @@ function AnthemTakeover({ onDone }: { onDone: () => void }) {
         fading && "pointer-events-none opacity-0",
       )}
       role="dialog"
-      aria-label="WEPA.care anthem"
+      aria-label="Welcome to WEPA.care"
     >
       <video
         ref={videoRef}
         src={jingleUrl}
-        autoPlay
         playsInline
+        preload="auto"
         onEnded={finish}
-        className="h-full w-full object-contain"
+        className={cn("h-full w-full object-contain transition-opacity duration-300", started ? "opacity-100" : "opacity-0")}
       />
+      {!started && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-8 px-6">
+          <img src={logoUrl} alt="WEPA.care" className="h-12 w-auto rounded-md bg-background px-3 py-2 sm:h-14" />
+          <Button size="lg" className="min-w-40 rounded-full px-10 text-base font-black" onClick={enter} autoFocus>
+            Enter
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
