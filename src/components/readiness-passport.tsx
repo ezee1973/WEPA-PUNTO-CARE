@@ -243,6 +243,7 @@ export function ReadinessPassport() {
                   </li>
                 ))}
               </ul>
+              <ContinueButton label="Review your Candidate Passport" onClick={() => setTab("passport")} />
             </section>
           )}
 
@@ -256,7 +257,7 @@ export function ReadinessPassport() {
           )}
         </div>
 
-        <GuidePanel guide={guide} onAsk={ask} onPrepare={state.packetPrepared ? undefined : preparePacket} onStop={() => abortRef.current?.abort()} />
+        <GuidePanel guide={guide} onAsk={ask} onPrepare={state.packetPrepared || !pathwayDone ? undefined : preparePacket} onStop={() => abortRef.current?.abort()} />
       </main>
 
       <ProfileDialog open={editProfile} onOpenChange={setEditProfile} profile={state.profile} onSave={(p) => { update((s) => ({ ...s, profile: p })); setEditProfile(false); toast.success("Profile updated everywhere — passport, checklist and Wepa Guide."); }} />
