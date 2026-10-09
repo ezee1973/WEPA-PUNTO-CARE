@@ -36,30 +36,17 @@ import { cn } from "@/lib/utils";
 const logoUrl = logoAsset.url;
 const jingleUrl = jingleAsset.url;
 
-const ANTHEM_SEEN_KEY = "wepa-anthem-experienced";
-
 export function WepaMarketplace() {
   const [selectedGig, setSelectedGig] = useState<DemoGig | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
-  const [anthemPlaying, setAnthemPlaying] = useState(false);
+  // Every land opens with the anthem takeover; it plays, fades, and you're in.
+  const [anthemPlaying, setAnthemPlaying] = useState(true);
   const [signedInEmail, setSignedInEmail] = useState<string | null>(null);
 
   useEffect(() => {
     void supabase.auth.getUser().then(({ data }) => setSignedInEmail(data.user?.email ?? null));
     const { data } = supabase.auth.onAuthStateChange((_event, session) => setSignedInEmail(session?.user.email ?? null));
     return () => data.subscription.unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    // First land only: the anthem takes over the whole screen, then fades away.
-    try {
-      if (!window.localStorage.getItem(ANTHEM_SEEN_KEY)) {
-        window.localStorage.setItem(ANTHEM_SEEN_KEY, "1");
-        setAnthemPlaying(true);
-      }
-    } catch {
-      setAnthemPlaying(true);
-    }
   }, []);
 
   async function signOut() {
@@ -71,12 +58,11 @@ export function WepaMarketplace() {
     <main className="min-h-screen bg-background text-foreground">
       {anthemPlaying && <AnthemTakeover onDone={() => setAnthemPlaying(false)} />}
       <Header
-        onAnthem={() => setAnthemPlaying(true)}
         signedInEmail={signedInEmail}
         onAuth={() => setAuthOpen(true)}
         onSignOut={() => void signOut()}
       />
-      <NurseExperience onSelectGig={setSelectedGig} onAnthem={() => setAnthemPlaying(true)} />
+      <NurseExperience onSelectGig={setSelectedGig} />
       <GigDialog gig={selectedGig} onClose={() => setSelectedGig(null)} signedIn={Boolean(signedInEmail)} onAuth={() => setAuthOpen(true)} />
       <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
     </main>
