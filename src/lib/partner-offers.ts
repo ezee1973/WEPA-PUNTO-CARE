@@ -139,8 +139,8 @@ export const REGIONS = [...new Set(LOCATIONS.map((l) => l.region)), "Island-wide
 /* ---------- Partner store (local, single source for partner-created offers) ---------- */
 export type CustomOffer = {
   id: string; title: string; category: PerkCategory; image: string; pitch: string; perkPitch: string; included: string[];
-  offerType: OfferType; headline: string; endsAt?: string; retail: number; cost: number; capacity: number;
-  requirement?: string; locations: LocationId[] | "all"; status: OfferStatus;
+  offerType: OfferType; headline: string; endsAt?: string | undefined; retail: number; cost: number; capacity: number;
+  requirement?: string | undefined; locations: LocationId[] | "all"; status: OfferStatus;
 };
 export type PartnerState = { loggedIn: boolean; offers: CustomOffer[]; statusOverrides: Record<string, OfferStatus> };
 const KEY = "wepa-partner-v1";

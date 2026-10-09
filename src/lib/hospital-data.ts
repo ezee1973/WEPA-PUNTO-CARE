@@ -266,7 +266,7 @@ COMP_NAMES.forEach(([name, town, weeklyPay, perkValue]) => COMPETITORS.push({ na
 
 /* ---------- Partner perks are marketed offers ---------- */
 export type OfferType = "Standard" | "Limited time" | "Special";
-export type PerkOffer = { offerType: OfferType; headline?: string; endsAt?: string; requirement?: string };
+export type PerkOffer = { offerType: OfferType; headline?: string | undefined; endsAt?: string | undefined; requirement?: string | undefined };
 const OFFER_PATCH: Record<string, PerkOffer> = {
   "hilton-month": { offerType: "Limited time", headline: "65% off first month", endsAt: "2026-12-15" },
   "villa-dorado": { offerType: "Special", headline: "Rate cut in exchange for signage", requirement: "Partner banner in staff lounge + logo on your careers page" },
