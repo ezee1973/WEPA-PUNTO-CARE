@@ -137,22 +137,48 @@ function AnthemTakeover({ onDone }: { onDone: () => void }) {
   );
 }
 
+const ROLE_TABS: { id: MarketRole; label: string }[] = [
+  { id: "nurse", label: "Nurses" },
+  { id: "hospital", label: "Hospitals" },
+  { id: "tourism", label: "Travel & Tourism" },
+];
+
 function Header({
   signedInEmail,
   onAuth,
   onSignOut,
+  role,
+  onRole,
 }: {
   signedInEmail: string | null;
   onAuth: () => void;
   onSignOut: () => void;
+  role: MarketRole;
+  onRole: (role: MarketRole) => void;
 }) {
   return (
     <header className="sticky top-0 z-40 border-b border-border/80 bg-background/95 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-[1440px] items-center gap-3 px-4 sm:px-6 lg:px-8">
         <img src={logoUrl} alt="WEPA.care" className="h-11 w-auto object-contain" />
         <div className="hidden h-7 w-px bg-border sm:block" />
-        <p className="hidden text-xs font-semibold uppercase text-muted-foreground sm:block">Come for the Island.<br />Care for its People.</p>
-        <div className="ml-auto flex items-center gap-1">
+        <p className="hidden text-xs font-semibold uppercase text-muted-foreground lg:block">Come for the Island.<br />Care for its People.</p>
+        <nav aria-label="Marketplace sides" className="mx-auto flex items-center gap-1 rounded-full border border-border bg-muted/60 p-1">
+          {ROLE_TABS.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => onRole(tab.id)}
+              aria-pressed={role === tab.id}
+              className={cn(
+                "rounded-full px-3 py-1.5 text-xs font-bold transition-colors sm:px-4 sm:text-sm",
+                role === tab.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+        <div className="ml-auto flex items-center gap-1 sm:ml-0">
           <Button variant="ghost" size="icon" aria-label="Notifications"><Bell /></Button>
           {signedInEmail ? (
             <Button variant="outline" size="sm" onClick={onSignOut} className="hidden sm:inline-flex">Sign out</Button>
