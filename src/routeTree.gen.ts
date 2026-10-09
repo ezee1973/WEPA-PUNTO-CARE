@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PassportRouteImport } from './routes/passport'
 import { Route as ReadyRouteImport } from './routes/ready'
 import { Route as ApiWepaGuideRouteImport } from './routes/api/wepa-guide'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PassportRoute = PassportRouteImport.update({
+  id: '/passport',
+  path: '/passport',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReadyRoute = ReadyRouteImport.update({
@@ -31,30 +37,34 @@ const ApiWepaGuideRoute = ApiWepaGuideRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/passport': typeof PassportRoute
   '/ready': typeof ReadyRoute
   '/api/wepa-guide': typeof ApiWepaGuideRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/passport': typeof PassportRoute
   '/ready': typeof ReadyRoute
   '/api/wepa-guide': typeof ApiWepaGuideRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/passport': typeof PassportRoute
   '/ready': typeof ReadyRoute
   '/api/wepa-guide': typeof ApiWepaGuideRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/ready' | '/api/wepa-guide'
+  fullPaths: '/' | '/passport' | '/ready' | '/api/wepa-guide'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/ready' | '/api/wepa-guide'
-  id: '__root__' | '/' | '/ready' | '/api/wepa-guide'
+  to: '/' | '/passport' | '/ready' | '/api/wepa-guide'
+  id: '__root__' | '/' | '/passport' | '/ready' | '/api/wepa-guide'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PassportRoute: typeof PassportRoute
   ReadyRoute: typeof ReadyRoute
   ApiWepaGuideRoute: typeof ApiWepaGuideRoute
 }
@@ -66,6 +76,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/passport': {
+      id: '/passport'
+      path: '/passport'
+      fullPath: '/passport'
+      preLoaderRoute: typeof PassportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ready': {
@@ -87,6 +104,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PassportRoute: PassportRoute,
   ReadyRoute: ReadyRoute,
   ApiWepaGuideRoute: ApiWepaGuideRoute,
 }
