@@ -17,3 +17,4 @@
 - [x] Profile photo, Island Passport display with QR, wallet pass, social badge
 - [ ] Nurse gig search: 20+ real PR hospitals with photos from their sites; cards sell hospital + area
 - [ ] Service/mission gigs (unpaid, rural, underserved; faith or non-faith): nurse passport interest + hospital/org creation option, low-key
+- [x] Nurse home pitch line → marketplace one-liner
