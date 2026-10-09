@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Keep major marketplace experiences role-oriented while sharing one domain model, because the judge demo must traverse all three sides coherently.
+- Localize presentation through the shared language provider and English-keyed Spanish catalog; preserve canonical stored values and explicit option values so changing language never alters marketplace state.

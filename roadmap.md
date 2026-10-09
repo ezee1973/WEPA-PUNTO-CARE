@@ -18,3 +18,4 @@
 - [x] Nurse gig search: 20+ real PR hospitals with photos from their sites; cards sell hospital + area
 - [x] Service/mission gigs (unpaid, rural, underserved; faith or non-faith): nurse passport interest + hospital/org creation option, low-key
 - [x] Nurse home pitch line → marketplace one-liner
+- [ ] English / Español toggle on welcome and across nurse, hospital, tourism and passport journeys

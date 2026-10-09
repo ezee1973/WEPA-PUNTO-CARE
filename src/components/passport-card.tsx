@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/i18n";
 import { useRef, useState } from "react";
 import { QRCodeCanvas, QRCodeSVG } from "qrcode.react";
 import { Award, Copy, Download, ExternalLink, Share2, ShieldCheck, Wallet } from "lucide-react";
@@ -9,98 +10,230 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { shareUrl, type SharedPassport } from "@/lib/passport-share";
 import { cn } from "@/lib/utils";
 
-const NAVY = "#092D37", IVORY = "#F5F2E9", TEAL = "#16C9AD", CORAL = "#FF7563";
+const NAVY = "#092D37",
+  IVORY = "#F5F2E9",
+  TEAL = "#16C9AD",
+  CORAL = "#FF7563";
 
-function initials(n: string) { return n.split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase(); }
+function initials(n: string) {
+  return n
+    .split(/\s+/)
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
 
-export function Avatar({ photo, name, className }: { photo?: string | undefined; name: string; className?: string }) {
-  return photo
-    ? <img src={photo} alt={name} className={cn("rounded-full object-cover", className)} />
-    : <span className={cn("grid place-items-center rounded-full bg-primary font-display font-bold text-primary-foreground", className)}>{initials(name)}</span>;
+export function Avatar({
+  photo,
+  name,
+  className,
+}: {
+  photo?: string | undefined;
+  name: string;
+  className?: string;
+}) {
+  const { t: tr } = useLanguage();
+  return photo ? (
+    <img src={photo} alt={tr(name)} className={cn("rounded-full object-cover", className)} />
+  ) : (
+    <span
+      className={cn(
+        "grid place-items-center rounded-full bg-primary font-display font-bold text-primary-foreground",
+        className,
+      )}
+    >
+      {tr(initials(name))}
+    </span>
+  );
 }
 
 /** The passport "document": navy cover band, photo page, machine-readable zone, QR. */
-export function PassportDocument({ p, photo, showQr = true }: { p: SharedPassport; photo?: string | undefined; showQr?: boolean }) {
+export function PassportDocument({
+  p,
+  photo,
+  showQr = true,
+}: {
+  p: SharedPassport;
+  photo?: string | undefined;
+  showQr?: boolean;
+}) {
+  const { t: tr } = useLanguage();
   const url = shareUrl(p);
   const mrz1 = `P<PRI${p.name.toUpperCase().replace(/[^A-Z]/g, "<")}`.padEnd(44, "<").slice(0, 44);
-  const mrz2 = `${p.id.replace("-", "")}<${p.progress}RN${p.years}Y<<WEPA<CARE`.padEnd(44, "<").slice(0, 44);
+  const mrz2 = `${p.id.replace("-", "")}<${p.progress}RN${p.years}Y<<WEPA<CARE`
+    .padEnd(44, "<")
+    .slice(0, 44);
   return (
     <article className="relative overflow-hidden rounded-[1.75rem] bg-surface-dark text-surface-dark-foreground shadow-2xl">
-      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08]" style={{ backgroundImage: `repeating-radial-gradient(circle at 85% 15%, ${TEAL} 0 1px, transparent 1px 14px)` }} />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-[0.08]"
+        style={{
+          backgroundImage: `repeating-radial-gradient(circle at 85% 15%, ${TEAL} 0 1px, transparent 1px 14px)`,
+        }}
+      />
       <div className="relative flex items-center justify-between px-5 pt-5">
-        <img src={logoAsset.url} alt="WEPA.care" className="h-6 [filter:brightness(0)_invert(1)]" />
-        <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary">Island Passport</span>
+        <img
+          src={logoAsset.url}
+          alt={tr("WEPA.care")}
+          className="h-6 [filter:brightness(0)_invert(1)]"
+        />
+        <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary">
+          {tr("Island Passport")}
+        </span>
       </div>
       <div className="relative mx-3 mb-3 mt-4 rounded-2xl bg-ivory p-4 text-ivory-foreground">
         <div className="flex gap-4">
           <div className="shrink-0">
-            <Avatar photo={photo} name={p.name} className="size-24 rounded-xl text-3xl sm:size-28" />
-            <p className="mt-2 text-center font-mono text-[10px] font-bold tracking-wider">{p.id}</p>
+            <Avatar
+              photo={photo}
+              name={p.name}
+              className="size-24 rounded-xl text-3xl sm:size-28"
+            />
+            <p className="mt-2 text-center font-mono text-[10px] font-bold tracking-wider">
+              {tr(p.id)}
+            </p>
           </div>
           <div className="min-w-0 flex-1 space-y-2 text-[11px]">
-            <Field k="Name / Nombre" v={p.name} big />
-            <Field k="Specialty" v={`${p.specialty} · ${p.years} yrs`} />
-            <Field k="Home" v={p.city} />
-            <div className="flex gap-4"><Field k="Issued" v={p.issued} /><Field k="Prep" v={`${p.progress}%`} /></div>
+            <Field k={tr("Name / Nombre")} v={tr(p.name)} big />
+            <Field k={tr("Specialty")} v={tr(`${p.specialty} · ${p.years} yrs`)} />
+            <Field k={tr("Home")} v={tr(p.city)} />
+            <div className="flex gap-4">
+              <Field k={tr("Issued")} v={tr(p.issued)} />
+              <Field k={tr("Prep")} v={tr(`${p.progress}%`)} />
+            </div>
           </div>
           {showQr && (
             <div className="hidden shrink-0 flex-col items-center sm:flex">
-              <div className="rounded-lg bg-white p-1.5"><QRCodeSVG value={url} size={92} fgColor={NAVY} /></div>
-              <p className="mt-1 text-[9px] font-semibold uppercase tracking-wider">Scan to verify</p>
+              <div className="rounded-lg bg-white p-1.5">
+                <QRCodeSVG value={url} size={92} fgColor={NAVY} />
+              </div>
+              <p className="mt-1 text-[9px] font-semibold uppercase tracking-wider">
+                {tr("Scan to verify")}
+              </p>
             </div>
           )}
         </div>
         <div className="mt-3 flex flex-wrap gap-1.5">
-          <Stamp tone="teal">{p.pathway}</Stamp>
-          <Stamp tone="coral">{`Spanish: ${p.spanish}`}</Stamp>
-          {p.pool && <Stamp tone="navy">In the WEPA gig pool</Stamp>}
+          <Stamp tone="teal">{tr(p.pathway)}</Stamp>
+          <Stamp tone="coral">{tr(`Spanish: ${p.spanish}`)}</Stamp>
+          {p.pool && <Stamp tone="navy">{tr("In the WEPA gig pool")}</Stamp>}
         </div>
         {showQr && (
           <div className="mt-3 flex items-center gap-3 sm:hidden">
-            <div className="rounded-lg bg-white p-1.5"><QRCodeSVG value={url} size={84} fgColor={NAVY} /></div>
-            <p className="text-[11px] font-semibold">Scan to open this passport in any browser.</p>
+            <div className="rounded-lg bg-white p-1.5">
+              <QRCodeSVG value={url} size={84} fgColor={NAVY} />
+            </div>
+            <p className="text-[11px] font-semibold">
+              {tr("Scan to open this passport in any browser.")}
+            </p>
           </div>
         )}
         <div className="mt-3 overflow-hidden rounded-md bg-ivory-foreground/5 px-2 py-1.5 font-mono text-[9px] leading-tight tracking-[0.12em] text-ivory-foreground/70 sm:text-[10px]">
-          <p className="truncate">{mrz1}</p><p className="truncate">{mrz2}</p>
+          <p className="truncate">{mrz1}</p>
+          <p className="truncate">{mrz2}</p>
         </div>
       </div>
-      <p className="relative px-5 pb-4 text-[10px] opacity-70">Candidate-reported preparation record — not a license or authorization to practice.</p>
+      <p className="relative px-5 pb-4 text-[10px] opacity-70">
+        {tr("Candidate-reported preparation record — not a license or authorization to practice.")}
+      </p>
     </article>
   );
 }
 
 function Field({ k, v, big }: { k: string; v: string; big?: boolean }) {
-  return <div className="min-w-0"><p className="text-[9px] font-bold uppercase tracking-wider text-accent-deep">{k}</p><p className={cn("truncate font-semibold", big && "font-display text-base")}>{v}</p></div>;
+  const { t: tr } = useLanguage();
+  return (
+    <div className="min-w-0">
+      <p className="text-[9px] font-bold uppercase tracking-wider text-accent-deep">{tr(k)}</p>
+      <p className={cn("truncate font-semibold", big && "font-display text-base")}>{tr(v)}</p>
+    </div>
+  );
 }
 function Stamp({ tone, children }: { tone: "teal" | "coral" | "navy"; children: string }) {
-  return <span className={cn("rounded-full border-2 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide", tone === "teal" && "border-primary text-accent-deep", tone === "coral" && "border-coral text-coral", tone === "navy" && "border-ivory-foreground text-ivory-foreground")}>{children}</span>;
+  const { t: tr } = useLanguage();
+  return (
+    <span
+      className={cn(
+        "rounded-full border-2 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
+        tone === "teal" && "border-primary text-accent-deep",
+        tone === "coral" && "border-coral text-coral",
+        tone === "navy" && "border-ivory-foreground text-ivory-foreground",
+      )}
+    >
+      {tr(children)}
+    </span>
+  );
 }
 
 /** Share bar: copy link, open in browser, native share, wallet pass image, badge. */
 export function PassportShare({ p, photo }: { p: SharedPassport; photo?: string | undefined }) {
+  const { t: tr } = useLanguage();
   const url = shareUrl(p);
   const [walletOpen, setWalletOpen] = useState(false);
   const [badgeOpen, setBadgeOpen] = useState(false);
   async function share() {
-    if (navigator.share) { try { await navigator.share({ title: `${p.name} — WEPA Island Passport`, url }); } catch { /* cancelled */ } }
-    else { await navigator.clipboard.writeText(url); toast.success("Passport link copied."); }
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: `${p.name} — WEPA Island Passport`, url });
+      } catch {
+        /* cancelled */
+      }
+    } else {
+      await navigator.clipboard.writeText(url);
+      toast.success(tr("Passport link copied."));
+    }
   }
   return (
     <>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <Button variant="outline" onClick={share}><Share2 /> Share</Button>
-        <Button variant="outline" onClick={async () => { await navigator.clipboard.writeText(url); toast.success("Passport link copied."); }}><Copy /> Copy link</Button>
-        <Button variant="outline" asChild><a href={url} target="_blank" rel="noreferrer"><ExternalLink /> Open in browser</a></Button>
-        <Button className="bg-surface-dark text-surface-dark-foreground hover:bg-surface-dark/90" onClick={() => setWalletOpen(true)}><Wallet /> Add to Wallet</Button>
+        <Button variant="outline" onClick={share}>
+          <Share2 />
+          {tr(" Share")}
+        </Button>
+        <Button
+          variant="outline"
+          onClick={async () => {
+            await navigator.clipboard.writeText(url);
+            toast.success(tr("Passport link copied."));
+          }}
+        >
+          <Copy />
+          {tr(" Copy link")}
+        </Button>
+        <Button variant="outline" asChild>
+          <a href={url} target="_blank" rel="noreferrer">
+            <ExternalLink />
+            {tr(" Open in browser")}
+          </a>
+        </Button>
+        <Button
+          className="bg-surface-dark text-surface-dark-foreground hover:bg-surface-dark/90"
+          onClick={() => setWalletOpen(true)}
+        >
+          <Wallet />
+          {tr(" Add to Wallet")}
+        </Button>
       </div>
-      <Button size="lg" className="w-full bg-coral text-coral-foreground hover:bg-coral/90" onClick={() => setBadgeOpen(true)}><Award /> Get my WEPA badge</Button>
+      <Button
+        size="lg"
+        className="w-full bg-coral text-coral-foreground hover:bg-coral/90"
+        onClick={() => setBadgeOpen(true)}
+      >
+        <Award />
+        {tr(" Get my WEPA badge")}
+      </Button>
 
       <Dialog open={walletOpen} onOpenChange={setWalletOpen}>
         <DialogContent className="sm:max-w-sm">
-          <DialogTitle>Your wallet pass</DialogTitle>
+          <DialogTitle>{tr("Your wallet pass")}</DialogTitle>
           <WalletPass p={p} photo={photo} />
-          <p className="text-xs text-muted-foreground">Save this pass to your phone's photos or home screen and show the QR at interviews. One-tap Apple Wallet is coming soon.</p>
+          <p className="text-xs text-muted-foreground">
+            {tr(
+              "Save this pass to your phone's photos or home screen and show the QR at interviews. One-tap Apple Wallet is coming soon.",
+            )}
+          </p>
         </DialogContent>
       </Dialog>
       <BadgeDialog open={badgeOpen} onOpenChange={setBadgeOpen} p={p} photo={photo} />
@@ -109,68 +242,153 @@ export function PassportShare({ p, photo }: { p: SharedPassport; photo?: string 
 }
 
 function WalletPass({ p, photo }: { p: SharedPassport; photo?: string | undefined }) {
+  const { t: tr } = useLanguage();
   const ref = useRef<HTMLDivElement>(null);
   async function download() {
     const qr = ref.current?.querySelector("canvas");
-    const c = document.createElement("canvas"); c.width = 750; c.height = 1050;
+    const c = document.createElement("canvas");
+    c.width = 750;
+    c.height = 1050;
     const x = c.getContext("2d")!;
-    x.fillStyle = NAVY; roundRect(x, 0, 0, 750, 1050, 48); x.fill();
-    x.fillStyle = TEAL; x.font = "bold 28px sans-serif"; x.fillText("WEPA.CARE · ISLAND PASSPORT", 50, 80);
+    x.fillStyle = NAVY;
+    roundRect(x, 0, 0, 750, 1050, 48);
+    x.fill();
+    x.fillStyle = TEAL;
+    x.font = "bold 28px sans-serif";
+    x.fillText(tr("WEPA.CARE · ISLAND PASSPORT"), 50, 80);
     await drawAvatar(x, photo, p.name, 50, 130, 160);
-    x.fillStyle = IVORY; x.font = "bold 48px sans-serif"; x.fillText(p.name, 240, 200);
-    x.font = "28px sans-serif"; x.globalAlpha = .8; x.fillText(`${p.specialty} · ${p.years} yrs`, 240, 250); x.fillText(p.city, 240, 290); x.globalAlpha = 1;
-    x.fillStyle = CORAL; x.font = "bold 30px sans-serif"; x.fillText(`${p.progress}% Puerto Rico ready`, 50, 380);
-    x.fillStyle = IVORY; x.font = "26px sans-serif"; x.fillText(p.pathway, 50, 425);
-    x.fillStyle = "#fff"; roundRect(x, 175, 480, 400, 400, 24); x.fill();
+    x.fillStyle = IVORY;
+    x.font = "bold 48px sans-serif";
+    x.fillText(p.name, 240, 200);
+    x.font = "28px sans-serif";
+    x.globalAlpha = 0.8;
+    x.fillText(tr(`${p.specialty} · ${p.years} yrs`), 240, 250, 460);
+    x.fillText(p.city, 240, 290);
+    x.globalAlpha = 1;
+    x.fillStyle = CORAL;
+    x.font = "bold 30px sans-serif";
+    x.fillText(tr(`${p.progress}% Puerto Rico ready`), 50, 380, 650);
+    x.fillStyle = IVORY;
+    x.font = "26px sans-serif";
+    x.fillText(tr(p.pathway), 50, 425, 650);
+    x.fillStyle = "#fff";
+    roundRect(x, 175, 480, 400, 400, 24);
+    x.fill();
     if (qr) x.drawImage(qr, 200, 505, 350, 350);
-    x.fillStyle = IVORY; x.font = "bold 26px monospace"; x.textAlign = "center"; x.fillText(p.id, 375, 940);
-    x.font = "20px sans-serif"; x.globalAlpha = .6; x.fillText("Candidate-reported · not a license", 375, 990);
+    x.fillStyle = IVORY;
+    x.font = "bold 26px monospace";
+    x.textAlign = "center";
+    x.fillText(p.id, 375, 940);
+    x.font = "20px sans-serif";
+    x.globalAlpha = 0.6;
+    x.fillText(tr("Candidate-reported · not a license"), 375, 990, 650);
     downloadCanvas(c, `wepa-pass-${p.id}.png`);
   }
   return (
     <div ref={ref} className="space-y-3">
       <div className="rounded-3xl bg-surface-dark p-5 text-surface-dark-foreground">
-        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">WEPA.care · Island Passport</p>
-        <div className="mt-3 flex items-center gap-3"><Avatar photo={photo} name={p.name} className="size-14 text-lg" /><div className="min-w-0"><p className="truncate font-display text-lg font-bold">{p.name}</p><p className="truncate text-xs opacity-75">{p.specialty}</p></div></div>
-        <p className="mt-3 text-sm font-bold text-coral">{p.progress}% Puerto Rico ready</p>
-        <div className="mx-auto mt-4 w-fit rounded-xl bg-white p-3"><QRCodeCanvas value={shareUrl(p)} size={180} fgColor={NAVY} marginSize={0} /></div>
-        <p className="mt-2 text-center font-mono text-xs tracking-wider">{p.id}</p>
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+          {tr("WEPA.care · Island Passport")}
+        </p>
+        <div className="mt-3 flex items-center gap-3">
+          <Avatar photo={photo} name={p.name} className="size-14 text-lg" />
+          <div className="min-w-0">
+            <p className="truncate font-display text-lg font-bold">{tr(p.name)}</p>
+            <p className="truncate text-xs opacity-75">{tr(p.specialty)}</p>
+          </div>
+        </div>
+        <p className="mt-3 text-sm font-bold text-coral">
+          {tr(p.progress)}
+          {tr("% Puerto Rico ready")}
+        </p>
+        <div className="mx-auto mt-4 w-fit rounded-xl bg-white p-3">
+          <QRCodeCanvas value={shareUrl(p)} size={180} fgColor={NAVY} marginSize={0} />
+        </div>
+        <p className="mt-2 text-center font-mono text-xs tracking-wider">{tr(p.id)}</p>
       </div>
-      <Button className="w-full" onClick={download}><Download /> Save pass to phone</Button>
+      <Button className="w-full" onClick={download}>
+        <Download />
+        {tr(" Save pass to phone")}
+      </Button>
     </div>
   );
 }
 
 type BadgeStyle = "seal" | "banner";
-function BadgeDialog({ open, onOpenChange, p, photo }: { open: boolean; onOpenChange: (o: boolean) => void; p: SharedPassport; photo?: string | undefined }) {
+function BadgeDialog({
+  open,
+  onOpenChange,
+  p,
+  photo,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  p: SharedPassport;
+  photo?: string | undefined;
+}) {
+  const { t: tr } = useLanguage();
   const [style, setStyle] = useState<BadgeStyle>("seal");
   const url = shareUrl(p);
   async function download() {
-    const c = style === "seal" ? await drawSeal(p) : await drawBanner(p, photo);
+    const c = style === "seal" ? await drawSeal(p, tr) : await drawBanner(p, photo, tr);
     downloadCanvas(c, `wepa-badge-${style}-${p.id}.png`);
   }
-  const caption = `I'm getting Puerto Rico ready with WEPA.care 🌴 ${p.specialty}, ${p.progress}% prepared for island nursing gigs. Verify my Island Passport: ${url}`;
+  const caption = tr(`I'm getting Puerto Rico ready with WEPA.care 🌴 ${p.specialty}, ${p.progress}% prepared for island nursing gigs. Verify my Island Passport: ${url}`);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-md">
-        <DialogTitle>Your WEPA Island Nurse badge</DialogTitle>
+        <DialogTitle>{tr("Your WEPA Island Nurse badge")}</DialogTitle>
         <div className="grid grid-cols-2 gap-2">
           {(["seal", "banner"] as const).map((s) => (
-            <button key={s} onClick={() => setStyle(s)} className={cn("rounded-xl border-2 px-3 py-2 text-sm font-semibold", style === s ? "border-primary bg-primary/10" : "border-border")}>
-              {s === "seal" ? "Seal · profiles & résumés" : "Banner · LinkedIn & socials"}
+            <button
+              key={s}
+              onClick={() => setStyle(s)}
+              className={cn(
+                "rounded-xl border-2 px-3 py-2 text-sm font-semibold",
+                style === s ? "border-primary bg-primary/10" : "border-border",
+              )}
+            >
+              {tr(s === "seal" ? "Seal · profiles & résumés" : "Banner · LinkedIn & socials")}
             </button>
           ))}
         </div>
-        {style === "seal" ? <SealPreview p={p} /> : <BannerPreview p={p} photo={photo} />}
-        <Button onClick={download}><Download /> Download badge</Button>
+        {tr(style === "seal" ? <SealPreview p={p} /> : <BannerPreview p={p} photo={photo} />)}
+        <Button onClick={download}>
+          <Download />
+          {tr(" Download badge")}
+        </Button>
         <div className="rounded-xl bg-muted p-3 text-xs">
-          <p className="font-semibold">Suggested post</p>
-          <p className="mt-1 text-muted-foreground">{caption}</p>
+          <p className="font-semibold">{tr("Suggested post")}</p>
+          <p className="mt-1 text-muted-foreground">{tr(caption)}</p>
           <div className="mt-2 flex flex-wrap gap-2">
-            <Button size="sm" variant="outline" onClick={async () => { await navigator.clipboard.writeText(caption); toast.success("Caption copied."); }}><Copy /> Copy caption</Button>
-            <Button size="sm" variant="outline" asChild><a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`} target="_blank" rel="noreferrer"><ExternalLink /> Share on LinkedIn</a></Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={async () => {
+                await navigator.clipboard.writeText(caption);
+                toast.success(tr("Caption copied."));
+              }}
+            >
+              <Copy />
+              {tr(" Copy caption")}
+            </Button>
+            <Button size="sm" variant="outline" asChild>
+              <a
+                href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <ExternalLink />
+                {tr(" Share on LinkedIn")}
+              </a>
+            </Button>
           </div>
-          <p className="mt-2 text-muted-foreground">Résumé tip: add the seal next to your certifications and list “WEPA Island Passport {p.id}”.</p>
+          <p className="mt-2 text-muted-foreground">
+            {tr(
+              "Résumé tip: add the seal next to your certifications and list “WEPA Island Passport ",
+            )}
+            {tr(p.id)}”.
+          </p>
         </div>
       </DialogContent>
     </Dialog>
@@ -178,70 +396,190 @@ function BadgeDialog({ open, onOpenChange, p, photo }: { open: boolean; onOpenCh
 }
 
 function SealPreview({ p }: { p: SharedPassport }) {
+  const { t: tr } = useLanguage();
   return (
     <div className="mx-auto grid size-56 place-items-center rounded-full border-[6px] border-coral bg-surface-dark p-3 text-center text-surface-dark-foreground shadow-xl">
       <div className="grid size-full place-items-center rounded-full border-2 border-dashed border-primary">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary">WEPA.care</p>
-          <p className="font-display text-2xl font-bold leading-tight">Island<br />Nurse</p>
-          <p className="mt-1 text-[10px] font-semibold uppercase tracking-widest text-coral">Puerto Rico Ready</p>
-          <p className="mt-1 font-mono text-[10px] opacity-70">{p.id}</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary">
+            {tr("WEPA.care")}
+          </p>
+          <p className="font-display text-2xl font-bold leading-tight">
+            {tr("Island")}
+            <br />
+            {tr("Nurse")}
+          </p>
+          <p className="mt-1 text-[10px] font-semibold uppercase tracking-widest text-coral">
+            {tr("Puerto Rico Ready")}
+          </p>
+          <p className="mt-1 font-mono text-[10px] opacity-70">{tr(p.id)}</p>
         </div>
       </div>
     </div>
   );
 }
 function BannerPreview({ p, photo }: { p: SharedPassport; photo?: string | undefined }) {
+  const { t: tr } = useLanguage();
   return (
-    <div className="flex aspect-[1200/627] items-center gap-3 overflow-hidden rounded-xl bg-surface-dark p-4 text-surface-dark-foreground" style={{ backgroundImage: `linear-gradient(120deg, ${NAVY} 55%, ${TEAL}55)` }}>
-      <Avatar photo={photo} name={p.name} className="size-16 shrink-0 border-4 border-coral text-xl" />
+    <div
+      className="flex aspect-[1200/627] items-center gap-3 overflow-hidden rounded-xl bg-surface-dark p-4 text-surface-dark-foreground"
+      style={{ backgroundImage: `linear-gradient(120deg, ${NAVY} 55%, ${TEAL}55)` }}
+    >
+      <Avatar
+        photo={photo}
+        name={p.name}
+        className="size-16 shrink-0 border-4 border-coral text-xl"
+      />
       <div className="min-w-0">
-        <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-primary">WEPA Island Nurse · Puerto Rico Ready</p>
-        <p className="truncate font-display text-lg font-bold">{p.name}</p>
-        <p className="truncate text-xs opacity-80">{p.specialty} · {p.years} yrs</p>
-        <p className="mt-1 text-[10px] font-semibold text-coral">Come for the Island. Care for its People.</p>
+        <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-primary">
+          {tr("WEPA Island Nurse · Puerto Rico Ready")}
+        </p>
+        <p className="truncate font-display text-lg font-bold">{tr(p.name)}</p>
+        <p className="truncate text-xs opacity-80">
+          {tr(p.specialty)} · {tr(p.years)}
+          {tr(" yrs")}
+        </p>
+        <p className="mt-1 text-[10px] font-semibold text-coral">
+          {tr("Come for the Island. Care for its People.")}
+        </p>
       </div>
     </div>
   );
 }
 
 // ---------- canvas helpers ----------
-function roundRect(x: CanvasRenderingContext2D, l: number, t: number, w: number, h: number, r: number) {
-  x.beginPath(); x.moveTo(l + r, t); x.arcTo(l + w, t, l + w, t + h, r); x.arcTo(l + w, t + h, l, t + h, r); x.arcTo(l, t + h, l, t, r); x.arcTo(l, t, l + w, t, r); x.closePath();
+function roundRect(
+  x: CanvasRenderingContext2D,
+  l: number,
+  t: number,
+  w: number,
+  h: number,
+  r: number,
+) {
+  x.beginPath();
+  x.moveTo(l + r, t);
+  x.arcTo(l + w, t, l + w, t + h, r);
+  x.arcTo(l + w, t + h, l, t + h, r);
+  x.arcTo(l, t + h, l, t, r);
+  x.arcTo(l, t, l + w, t, r);
+  x.closePath();
 }
-function loadImg(src: string) { return new Promise<HTMLImageElement>((res, rej) => { const i = new Image(); i.crossOrigin = "anonymous"; i.onload = () => res(i); i.onerror = rej; i.src = src; }); }
-async function drawAvatar(x: CanvasRenderingContext2D, photo: string | undefined, name: string, l: number, t: number, s: number) {
-  x.save(); x.beginPath(); x.arc(l + s / 2, t + s / 2, s / 2, 0, Math.PI * 2); x.clip();
-  if (photo) { try { x.drawImage(await loadImg(photo), l, t, s, s); } catch { photo = undefined; } }
-  if (!photo) { x.fillStyle = TEAL; x.fillRect(l, t, s, s); x.fillStyle = NAVY; x.font = `bold ${s * 0.38}px sans-serif`; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(initials(name), l + s / 2, t + s / 2); }
-  x.restore(); x.textAlign = "left"; x.textBaseline = "alphabetic";
+function loadImg(src: string) {
+  return new Promise<HTMLImageElement>((res, rej) => {
+    const i = new Image();
+    i.crossOrigin = "anonymous";
+    i.onload = () => res(i);
+    i.onerror = rej;
+    i.src = src;
+  });
 }
-async function drawSeal(p: SharedPassport) {
-  const c = document.createElement("canvas"); c.width = c.height = 800; const x = c.getContext("2d")!;
-  x.fillStyle = CORAL; x.beginPath(); x.arc(400, 400, 400, 0, Math.PI * 2); x.fill();
-  x.fillStyle = NAVY; x.beginPath(); x.arc(400, 400, 370, 0, Math.PI * 2); x.fill();
-  x.strokeStyle = TEAL; x.lineWidth = 6; x.setLineDash([18, 12]); x.beginPath(); x.arc(400, 400, 330, 0, Math.PI * 2); x.stroke(); x.setLineDash([]);
+async function drawAvatar(
+  x: CanvasRenderingContext2D,
+  photo: string | undefined,
+  name: string,
+  l: number,
+  t: number,
+  s: number,
+) {
+  x.save();
+  x.beginPath();
+  x.arc(l + s / 2, t + s / 2, s / 2, 0, Math.PI * 2);
+  x.clip();
+  if (photo) {
+    try {
+      x.drawImage(await loadImg(photo), l, t, s, s);
+    } catch {
+      photo = undefined;
+    }
+  }
+  if (!photo) {
+    x.fillStyle = TEAL;
+    x.fillRect(l, t, s, s);
+    x.fillStyle = NAVY;
+    x.font = `bold ${s * 0.38}px sans-serif`;
+    x.textAlign = "center";
+    x.textBaseline = "middle";
+    x.fillText(initials(name), l + s / 2, t + s / 2);
+  }
+  x.restore();
+  x.textAlign = "left";
+  x.textBaseline = "alphabetic";
+}
+async function drawSeal(p: SharedPassport, tr: (text: string) => string) {
+  const c = document.createElement("canvas");
+  c.width = c.height = 800;
+  const x = c.getContext("2d")!;
+  x.fillStyle = CORAL;
+  x.beginPath();
+  x.arc(400, 400, 400, 0, Math.PI * 2);
+  x.fill();
+  x.fillStyle = NAVY;
+  x.beginPath();
+  x.arc(400, 400, 370, 0, Math.PI * 2);
+  x.fill();
+  x.strokeStyle = TEAL;
+  x.lineWidth = 6;
+  x.setLineDash([18, 12]);
+  x.beginPath();
+  x.arc(400, 400, 330, 0, Math.PI * 2);
+  x.stroke();
+  x.setLineDash([]);
   x.textAlign = "center";
-  x.fillStyle = TEAL; x.font = "bold 40px sans-serif"; x.fillText("W E P A . C A R E", 400, 250);
-  x.fillStyle = IVORY; x.font = "bold 110px Georgia, serif"; x.fillText("Island", 400, 380); x.fillText("Nurse", 400, 490);
-  x.fillStyle = CORAL; x.font = "bold 38px sans-serif"; x.fillText("PUERTO RICO READY", 400, 570);
-  x.fillStyle = IVORY; x.globalAlpha = .7; x.font = "30px monospace"; x.fillText(p.id, 400, 625);
+  x.fillStyle = TEAL;
+  x.font = "bold 40px sans-serif";
+  x.fillText("W E P A . C A R E", 400, 250);
+  x.fillStyle = IVORY;
+  x.font = "bold 110px Georgia, serif";
+  x.fillText(tr("Island"), 400, 380, 580);
+  x.fillText(tr("Nurse"), 400, 490, 580);
+  x.fillStyle = CORAL;
+  x.font = "bold 38px sans-serif";
+  x.fillText(tr("Puerto Rico Ready").toUpperCase(), 400, 570, 580);
+  x.fillStyle = IVORY;
+  x.globalAlpha = 0.7;
+  x.font = "30px monospace";
+  x.fillText(p.id, 400, 625);
   return c;
 }
-async function drawBanner(p: SharedPassport, photo?: string) {
-  const c = document.createElement("canvas"); c.width = 1200; c.height = 627; const x = c.getContext("2d")!;
-  const g = x.createLinearGradient(0, 0, 1200, 627); g.addColorStop(0.55, NAVY); g.addColorStop(1, "#0f6f68"); x.fillStyle = g; x.fillRect(0, 0, 1200, 627);
-  x.fillStyle = CORAL; x.beginPath(); x.arc(240, 313, 160, 0, Math.PI * 2); x.fill();
+async function drawBanner(p: SharedPassport, photo: string | undefined, tr: (text: string) => string) {
+  const c = document.createElement("canvas");
+  c.width = 1200;
+  c.height = 627;
+  const x = c.getContext("2d")!;
+  const g = x.createLinearGradient(0, 0, 1200, 627);
+  g.addColorStop(0.55, NAVY);
+  g.addColorStop(1, "#0f6f68");
+  x.fillStyle = g;
+  x.fillRect(0, 0, 1200, 627);
+  x.fillStyle = CORAL;
+  x.beginPath();
+  x.arc(240, 313, 160, 0, Math.PI * 2);
+  x.fill();
   await drawAvatar(x, photo, p.name, 92, 165, 296);
-  x.fillStyle = TEAL; x.font = "bold 30px sans-serif"; x.fillText("WEPA ISLAND NURSE · PUERTO RICO READY", 470, 210);
-  x.fillStyle = IVORY; x.font = "bold 76px sans-serif"; x.fillText(p.name, 470, 300);
-  x.globalAlpha = .85; x.font = "36px sans-serif"; x.fillText(`${p.specialty} · ${p.years} yrs`, 470, 360); x.globalAlpha = 1;
-  x.fillStyle = CORAL; x.font = "bold 32px sans-serif"; x.fillText("Come for the Island. Care for its People.", 470, 440);
-  x.fillStyle = IVORY; x.globalAlpha = .6; x.font = "24px monospace"; x.fillText(`wepa.care · ${p.id}`, 470, 500);
+  x.fillStyle = TEAL;
+  x.font = "bold 30px sans-serif";
+  x.fillText(tr("WEPA Island Nurse · Puerto Rico Ready"), 470, 210, 680);
+  x.fillStyle = IVORY;
+  x.font = "bold 76px sans-serif";
+  x.fillText(p.name, 470, 300);
+  x.globalAlpha = 0.85;
+  x.font = "36px sans-serif";
+  x.fillText(tr(`${p.specialty} · ${p.years} yrs`), 470, 360, 680);
+  x.globalAlpha = 1;
+  x.fillStyle = CORAL;
+  x.font = "bold 32px sans-serif";
+  x.fillText(tr("Come for the Island. Care for its People."), 470, 440, 680);
+  x.fillStyle = IVORY;
+  x.globalAlpha = 0.6;
+  x.font = "24px monospace";
+  x.fillText(`wepa.care · ${p.id}`, 470, 500);
   return c;
 }
 function downloadCanvas(c: HTMLCanvasElement, name: string) {
-  const a = document.createElement("a"); a.href = c.toDataURL("image/png"); a.download = name; a.click();
+  const a = document.createElement("a");
+  a.href = c.toDataURL("image/png");
+  a.download = name;
+  a.click();
   toast.success("Saved — check your downloads.");
 }
 
