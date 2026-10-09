@@ -3,6 +3,7 @@ import {
   ArrowRight,
   BarChart3,
   Bookmark,
+  CreditCard,
   Copy,
   Eye,
   Flame,
@@ -38,34 +39,40 @@ import { useLanguage } from "@/lib/i18n";
 import { LOCATIONS, type LocationId, type OfferType, type PerkCategory } from "@/lib/hospital-data";
 import {
   CATEGORIES,
-  DEMO_PARTNER,
   OFFER_TYPES,
+  PARTNER_ACCOUNTS,
   REGIONS,
   SAMPLE_IMAGES,
+  accountOffers,
+  boostSpend,
   customToDirectory,
   fullDirectory,
+  hash,
   trending,
   usePartner,
+  type AccountSlice,
   type CustomOffer,
   type DirectoryOffer,
   type OfferStatus,
+  type PartnerAccount,
 } from "@/lib/partner-offers";
 import { BOOST_TIERS, boostTier, type BoostId } from "@/lib/business";
+import { FeeSchedule } from "@/components/fee-schedule";
 import heroImg from "@/assets/partners/el-conquistador.jpg";
 
 const money = (n: number) => `$${n.toLocaleString()}`;
-type Tab = "directory" | "trending" | "mine";
+type Tab = "directory" | "trending" | "mine" | "billing";
 
 export function TourismExperience() {
   const { t: tr } = useLanguage();
-  const { state, update, reset } = usePartner();
+  const { state, account, slice, update, loginAs, logout, reset } = usePartner();
   const [tab, setTab] = useState<Tab>("directory");
   const [editing, setEditing] = useState<CustomOffer | null>(null);
   const [wizard, setWizard] = useState(false);
   const [boosting, setBoosting] = useState<CustomOffer | null>(null);
   const directory = useMemo(() => fullDirectory(state), [state]);
 
-  if (!state.loggedIn) return <PartnerLanding count={directory.length} onLogin={() => update((s) => ({ ...s, loggedIn: true }))} />;
+  if (!state.loggedIn) return <PartnerLanding count={directory.length} onLogin={loginAs} />;
 
   function save(o: CustomOffer) {
     update((s) => ({ ...s, offers: s.offers.some((x) => x.id === o.id) ? s.offers.map((x) => (x.id === o.id ? o : x)) : [o, ...s.offers] }));
@@ -80,16 +87,16 @@ export function TourismExperience() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="eyebrow">{tr("Partner workspace")}</p>
-          <h2 className="text-2xl font-black sm:text-3xl">{DEMO_PARTNER}</h2>
-          <p className="text-xs text-muted-foreground">{tr("Fajardo · Adventure & sailing · Demo partner")}</p>
+          <h2 className="text-2xl font-black sm:text-3xl">{account.name}</h2>
+          <p className="text-xs text-muted-foreground">{tr(`${account.town} · ${account.category}`)}</p>
         </div>
         <div className="flex gap-2">
           <Button onClick={() => { setEditing(null); setWizard(true); }}><Plus />{tr("Create an offer")}</Button>
-          <Button variant="outline" size="icon" aria-label={tr("Sign out")} onClick={() => update((s) => ({ ...s, loggedIn: false }))}><LogOut /></Button>
+          <Button variant="outline" size="icon" aria-label={tr("Sign out")} onClick={logout}><LogOut /></Button>
         </div>
       </div>
       <nav className="sticky top-0 z-10 -mx-4 mt-5 flex gap-1 overflow-x-auto border-b border-border bg-background px-4 sm:mx-0 sm:px-0">
-        {([["directory", "Offer directory", Store], ["trending", "Trending", Flame], ["mine", "My offers", BarChart3]] as const).map(([id, label, Icon]) => (
+        {([["directory", "Offer directory", Store], ["trending", "Trending", Flame], ["mine", "My offers", BarChart3], ["billing", "Billing", CreditCard]] as const).map(([id, label, Icon]) => (
           <button key={id} onClick={() => setTab(id)} className={cn("flex shrink-0 items-center gap-2 border-b-2 px-4 py-3 text-sm font-bold", tab === id ? "border-primary text-foreground" : "border-transparent text-muted-foreground")}>
             <Icon className="size-4" />{tr(label)}
           </button>
