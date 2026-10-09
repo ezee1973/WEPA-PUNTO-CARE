@@ -29,11 +29,13 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
-import { demoGigs, demoPartners, qualificationSteps, type DemoGig, type DemoPartner } from "@/lib/wepa-data";
+import { demoGigs, demoOffers, demoPartners, qualificationSteps, type DemoGig, type DemoOffer, type DemoPartner } from "@/lib/wepa-data";
 import { cn } from "@/lib/utils";
 
 const logoUrl = logoAsset.url;
 const jingleUrl = jingleAsset.url;
+
+type MarketRole = "nurse" | "hospital" | "tourism";
 
 export function WepaMarketplace() {
   const [selectedGig, setSelectedGig] = useState<DemoGig | null>(null);
@@ -41,6 +43,7 @@ export function WepaMarketplace() {
   // Every land opens with the anthem takeover; it plays, fades, and you're in.
   const [anthemPlaying, setAnthemPlaying] = useState(true);
   const [signedInEmail, setSignedInEmail] = useState<string | null>(null);
+  const [role, setRole] = useState<MarketRole>("nurse");
 
   useEffect(() => {
     void supabase.auth.getUser().then(({ data }) => setSignedInEmail(data.user?.email ?? null));
@@ -60,8 +63,12 @@ export function WepaMarketplace() {
         signedInEmail={signedInEmail}
         onAuth={() => setAuthOpen(true)}
         onSignOut={() => void signOut()}
+        role={role}
+        onRole={setRole}
       />
-      <NurseExperience onSelectGig={setSelectedGig} />
+      {role === "nurse" && <NurseExperience onSelectGig={setSelectedGig} />}
+      {role === "hospital" && <HospitalExperience />}
+      {role === "tourism" && <TourismExperience />}
       <GigDialog gig={selectedGig} onClose={() => setSelectedGig(null)} signedIn={Boolean(signedInEmail)} onAuth={() => setAuthOpen(true)} />
       <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
     </main>
