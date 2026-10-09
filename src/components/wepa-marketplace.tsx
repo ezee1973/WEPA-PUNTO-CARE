@@ -225,92 +225,94 @@ function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
               <LanguageToggle dark />
             </div>
 
-            <div className="wepa-splash-intro mt-8 max-w-2xl sm:mt-12 lg:mt-[8vh]">
-              <h1 className="max-w-xl text-balance text-[2.25rem] font-black leading-[1.02] text-ocean-foreground sm:text-6xl lg:text-7xl">
-                {tr("Puerto Rico needs nurses.")}
-              </h1>
-              <p className="mt-4 max-w-xl text-sm font-semibold leading-relaxed text-ocean-foreground/95 sm:text-lg">
-                {tr(
-                  "Travel nurses are licensed professionals who take temporary hospital assignments. Puerto Rico competes with higher-paying mainland contracts, making critical vacancies harder to fill.",
-                )}
-              </p>
-              <p className="mt-3 text-sm font-black text-primary sm:text-lg">
-                {tr("Come for the Island. Care for its People.")}
-              </p>
-            </div>
+            <div className="grid flex-1 items-center gap-6 pb-1 pt-6 sm:gap-8 sm:pt-8 lg:grid-cols-[minmax(0,1.2fr)_minmax(21rem,0.8fr)] lg:gap-10 lg:pt-6 xl:gap-16">
+              <div className="wepa-splash-intro min-w-0 max-w-3xl">
+                <h1 className="max-w-xl text-balance text-[2.25rem] font-black leading-[1.02] text-ocean-foreground sm:text-6xl lg:text-[3.65rem] xl:text-7xl">
+                  {tr("Puerto Rico needs nurses.")}
+                </h1>
+                <p className="mt-3 max-w-xl text-sm font-semibold leading-relaxed text-ocean-foreground/95 sm:mt-4 sm:text-base xl:text-lg">
+                  {tr(
+                    "Travel nurses are licensed professionals who take temporary hospital assignments. Puerto Rico competes with higher-paying mainland contracts, making critical vacancies harder to fill.",
+                  )}
+                </p>
+                <p className="mt-2.5 text-sm font-black text-primary sm:mt-3 sm:text-base xl:text-lg">
+                  {tr("Come for the Island. Care for its People.")}
+                </p>
 
-            <div className="wepa-splash-intro mt-6 w-full border-t border-ocean-foreground/15 pt-4 sm:mt-8 sm:pt-5">
-              <dl className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4 sm:gap-x-8">
-                {SPLASH_STATS.map((stat) => (
-                  <div key={stat.label} className="flex flex-col">
-                    <dt className="order-2 mt-1.5 text-[0.7rem] font-semibold leading-snug text-ocean-foreground/85 sm:text-xs">
-                      {tr(stat.label)}
-                    </dt>
-                    <dd
-                      className={cn(
-                        "order-1 text-3xl font-black leading-none sm:text-4xl lg:text-5xl",
-                        stat.tone === "teal" ? "text-primary" : "text-coral",
-                      )}
+                <div className="mt-5 w-full border-t border-ocean-foreground/15 pt-4 sm:mt-6 sm:pt-5">
+                  <dl className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4 sm:gap-x-5">
+                    {SPLASH_STATS.map((stat) => (
+                      <div key={stat.label} className="flex min-w-0 flex-col">
+                        <dt className="order-2 mt-1.5 text-[0.7rem] font-semibold leading-snug text-ocean-foreground/85 sm:text-[0.7rem] xl:text-xs">
+                          {tr(stat.label)}
+                        </dt>
+                        <dd
+                          className={cn(
+                            "order-1 text-3xl font-black leading-none sm:text-4xl xl:text-5xl",
+                            stat.tone === "teal" ? "text-primary" : "text-coral",
+                          )}
+                        >
+                          {stat.value}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                  <p className="mt-3 max-w-3xl text-xs leading-relaxed text-ocean-foreground/90 sm:text-sm">
+                    <span className="font-black text-coral">{tr("The result:")}</span>{" "}
+                    {tr("unsafe nurse-to-patient ratios and eroding patient care.")}
+                  </p>
+                  <p className="mt-3 max-w-2xl text-balance text-xl font-black leading-tight text-ocean-foreground sm:mt-4 sm:text-2xl xl:text-3xl">
+                    {tr("The fastest fix: travel nurses from the mainland.")}
+                    <br />
+                    <img
+                      src={logoUrl}
+                      alt="WEPA! care"
+                      className="mr-2 inline-block h-5 w-auto -translate-y-0.5 object-contain align-middle [filter:brightness(0)_invert(1)] sm:h-6 xl:h-7"
+                    />
+                    {tr("gets them ready and matched.")}
+                  </p>
+                </div>
+              </div>
+
+              <div className="relative min-w-0 self-center lg:pt-1">
+                <div className="pointer-events-none absolute bottom-[10%] left-[2.25rem] top-[3.75rem] hidden w-px bg-gradient-to-b from-coral/20 via-primary/70 to-coral/20 lg:block" />
+                <p className="mb-3 text-[0.66rem] font-extrabold uppercase text-ocean-foreground/75">
+                  {tr(" Find your place ")}
+                </p>
+                <div className="grid gap-2.5 sm:gap-3">
+                  {JOURNEY_DOORS.map((door) => (
+                    <Button
+                      key={door.id}
+                      type="button"
+                      variant="ghost"
+                      onClick={() => enter(door.id)}
+                      className="wepa-journey-door group relative h-auto min-h-[6.25rem] w-full justify-start gap-3 overflow-hidden rounded-lg border border-ivory/45 bg-ivory p-3 text-left text-ivory-foreground shadow-xl transition-all duration-300 hover:-translate-y-1 hover:border-coral/70 hover:bg-ivory hover:shadow-2xl focus-visible:ring-coral sm:min-h-[7rem] sm:gap-4 sm:p-4 lg:min-h-[8.25rem]"
                     >
-                      {stat.value}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-              <p className="mt-3 max-w-3xl text-xs leading-relaxed text-ocean-foreground/90 sm:text-sm">
-                <span className="font-black text-coral">{tr("The result:")}</span>{" "}
-                {tr("unsafe nurse-to-patient ratios and eroding patient care.")}
-              </p>
-              <p className="mt-4 max-w-2xl text-balance text-xl font-black leading-tight text-ocean-foreground sm:mt-5 sm:text-3xl">
-                {tr("The fastest fix: travel nurses from the mainland.")}
-                <br />
-                <img
-                  src={logoUrl}
-                  alt="WEPA! care"
-                  className="mr-2 inline-block h-5 w-auto -translate-y-0.5 object-contain align-middle [filter:brightness(0)_invert(1)] sm:h-7"
-                />
-                {tr("gets them ready and matched.")}
-              </p>
-            </div>
-
-            <div className="relative mt-8 w-full lg:mt-auto lg:pt-10">
-              <div className="pointer-events-none absolute left-[8%] right-[8%] top-[4.75rem] hidden h-px bg-gradient-to-r from-coral/20 via-primary/70 to-coral/20 sm:block" />
-              <p className="mb-3 text-[0.66rem] font-extrabold uppercase text-ocean-foreground/75">
-                {tr(" Find your place ")}
-              </p>
-              <div className="grid gap-2.5 sm:grid-cols-3 sm:gap-4">
-                {JOURNEY_DOORS.map((door) => (
-                  <Button
-                    key={door.id}
-                    type="button"
-                    variant="ghost"
-                    onClick={() => enter(door.id)}
-                    className="wepa-journey-door group relative h-auto min-h-[6.5rem] w-full justify-start gap-3 overflow-hidden rounded-lg border border-ivory/45 bg-ivory p-3 text-left text-ivory-foreground shadow-xl transition-all duration-300 hover:-translate-y-1 hover:border-coral/70 hover:bg-ivory hover:shadow-2xl focus-visible:ring-coral sm:min-h-[13rem] sm:flex-col sm:items-start sm:gap-4 sm:p-5"
-                  >
-                    <span className="absolute inset-y-0 left-0 w-1 bg-primary transition-colors duration-300 group-hover:bg-coral" />
-                    <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-secondary/70 ring-1 ring-primary/25 sm:h-20 sm:w-20">
-                      <img
-                        src={ROLE_ICONS[door.id]}
-                        alt={tr(door.audience)}
-                        className="h-14 w-14 object-contain transition-transform duration-300 group-hover:scale-105 sm:h-[4.5rem] sm:w-[4.5rem]"
-                      />
-                    </span>
-                    <span className="min-w-0 flex-1 whitespace-normal sm:pr-8">
-                      <span className="block text-[0.62rem] font-extrabold uppercase text-accent-deep">
-                        {tr(door.audience)}
+                      <span className="absolute inset-y-0 left-0 w-1 bg-primary transition-colors duration-300 group-hover:bg-coral" />
+                      <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-secondary/70 ring-1 ring-primary/25 sm:h-[4.5rem] sm:w-[4.5rem]">
+                        <img
+                          src={ROLE_ICONS[door.id]}
+                          alt={tr(door.audience)}
+                          className="h-14 w-14 object-contain transition-transform duration-300 group-hover:scale-105 sm:h-16 sm:w-16"
+                        />
                       </span>
-                      <span className="mt-1 block text-base font-black leading-tight sm:text-xl">
-                        {tr(door.title)}
+                      <span className="min-w-0 flex-1 whitespace-normal pr-1 sm:pr-10">
+                        <span className="block text-[0.62rem] font-extrabold uppercase text-accent-deep">
+                          {tr(door.audience)}
+                        </span>
+                        <span className="mt-1 block text-base font-black leading-tight sm:text-lg">
+                          {tr(door.title)}
+                        </span>
+                        <span className="mt-1 hidden text-xs font-normal leading-snug text-ivory-foreground/75 xs:block sm:block sm:text-sm">
+                          {tr(door.copy)}
+                        </span>
                       </span>
-                      <span className="mt-1 hidden text-xs font-normal leading-snug text-ivory-foreground/75 xs:block sm:block sm:text-sm">
-                        {tr(door.copy)}
+                      <span className="ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-coral/15 text-coral ring-1 ring-coral/35 transition-all duration-300 group-hover:translate-x-0.5 group-hover:bg-coral group-hover:text-ivory sm:absolute sm:right-4 sm:ml-0">
+                        <ArrowRight className="h-4 w-4" />
                       </span>
-                    </span>
-                    <span className="ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-coral/15 text-coral ring-1 ring-coral/35 transition-all duration-300 group-hover:translate-x-0.5 group-hover:bg-coral group-hover:text-ivory sm:absolute sm:bottom-4 sm:right-4 sm:ml-0">
-                      <ArrowRight className="h-4 w-4" />
-                    </span>
-                  </Button>
-                ))}
+                    </Button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
