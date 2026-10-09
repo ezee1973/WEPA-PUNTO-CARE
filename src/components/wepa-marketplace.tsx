@@ -95,10 +95,25 @@ const ROLE_ICONS: Record<MarketRole, string> = {
   tourism: tourismIconAsset.url,
 };
 
-const JOURNEY_DOORS: { id: MarketRole; label: string; hook: string }[] = [
-  { id: "nurse", label: "I'm a Nurse", hook: "Island gigs, covered living, real adventure." },
-  { id: "hospital", label: "I'm a Hospital", hook: "Build gig packages nurses actually want." },
-  { id: "tourism", label: "I'm a Tourism Partner", hook: "Put your experiences in front of clinicians." },
+const JOURNEY_DOORS: { id: MarketRole; audience: string; title: string; copy: string }[] = [
+  {
+    id: "nurse",
+    audience: "Nurses",
+    title: "Find your island opportunity",
+    copy: "Explore nursing gigs, prepare to apply, and discover life in Puerto Rico.",
+  },
+  {
+    id: "hospital",
+    audience: "Hospitals",
+    title: "Build a stronger nursing team",
+    copy: "Create opportunities that attract travel nurses to your hospital.",
+  },
+  {
+    id: "tourism",
+    audience: "Tourism partners",
+    title: "Welcome nurses to your business",
+    copy: "Offer stays, experiences, and perks that make island assignments more rewarding.",
+  },
 ];
 
 function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
@@ -135,23 +150,24 @@ function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
   return (
     <div
       className={cn(
-        "fixed inset-0 z-[80] overflow-hidden bg-surface-dark transition-opacity duration-700 ease-in-out",
+        "fixed inset-0 z-[80] overflow-hidden bg-ocean transition-opacity duration-700 ease-in-out",
         fading && "pointer-events-none opacity-0",
       )}
       role="dialog"
       aria-label="Welcome to WEPA.care — choose your journey"
     >
-      {/* Full-bleed island backdrop blends the welcome into the anthem */}
+      {/* Restrained coast: a soft masked sea band low on the screen, never a backdrop */}
       <img
         src={coastImage}
         alt=""
         aria-hidden
         className={cn(
-          "absolute inset-0 h-full w-full object-cover transition-all duration-700",
-          started ? "opacity-0" : "opacity-90",
+          "absolute inset-x-0 bottom-0 h-[48%] w-full object-cover object-center [mask-image:linear-gradient(to_top,black_4%,transparent_88%)] transition-opacity duration-700",
+          started ? "opacity-0" : "opacity-45",
         )}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-surface-dark/55 via-surface-dark/35 to-surface-dark/80" />
+      <div className="absolute inset-x-0 bottom-0 h-[48%] bg-gradient-to-t from-ocean via-ocean/60 to-transparent" />
+      <div className="absolute -top-40 left-1/2 h-[26rem] w-[46rem] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
       <video
         ref={videoRef}
         src={jingleUrl}
@@ -161,28 +177,54 @@ function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
         className={cn("absolute inset-0 h-full w-full object-cover transition-opacity duration-500", started ? "opacity-100" : "opacity-0")}
       />
       {!started && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-8 overflow-y-auto px-5 py-10 sm:gap-10">
-          <img
-            src={logoUrl}
-            alt="WEPA.care"
-            className="h-28 w-auto [filter:drop-shadow(0_0_18px_rgba(245,242,233,0.95))_drop-shadow(0_0_55px_rgba(245,242,233,0.75))] sm:h-40"
-          />
-          <p className="text-center text-sm font-bold uppercase tracking-[0.25em] text-surface-dark-foreground/90 sm:text-base">
-            Come for the Island. Care for its People.
-          </p>
-          <div className="grid w-full max-w-4xl gap-4 sm:grid-cols-3">
-            {JOURNEY_DOORS.map((door) => (
-              <button
-                key={door.id}
-                type="button"
-                onClick={() => enter(door.id)}
-                className="group flex flex-col items-start gap-3 rounded-3xl border border-surface-dark-foreground/15 bg-surface-dark-foreground/5 p-6 text-left backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-coral/60 hover:bg-surface-dark-foreground/10 hover:shadow-2xl hover:shadow-coral/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral"
-              >
-                <img src={ROLE_ICONS[door.id]} alt="" aria-hidden className="h-16 w-16 object-contain drop-shadow-lg transition-transform duration-300 group-hover:scale-110 sm:h-20 sm:w-20" />
-                <span className="text-lg font-black text-surface-dark-foreground">{door.label}</span>
-                <span className="text-sm leading-snug text-surface-dark-foreground/70">{door.hook}</span>
-              </button>
-            ))}
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-7 overflow-y-auto px-5 py-8 sm:gap-9 sm:py-12">
+          <div className="flex w-full max-w-3xl flex-col items-center gap-3 text-center sm:gap-4">
+            <img
+              src={logoUrl}
+              alt="WEPA.care"
+              className="h-11 w-auto object-contain [filter:brightness(0)_invert(1)_drop-shadow(0_10px_24px_rgba(9,45,55,0.55))] sm:h-16"
+            />
+            <h1 className="max-w-2xl text-balance text-[1.85rem] font-black leading-[1.06] tracking-tight text-ocean-foreground sm:text-5xl">
+              Come for the Island.
+              <span className="block text-primary">Care for its People.</span>
+            </h1>
+            <p className="max-w-xl text-sm leading-relaxed text-ocean-foreground/70 sm:text-base">
+              Puerto Rico hospitals staff nursing gigs at honest local wages — and island partners cover the travel, lodging, and fun.
+            </p>
+          </div>
+
+          <div className="w-full max-w-4xl">
+            <p className="mb-3 text-center text-[0.66rem] font-extrabold uppercase tracking-[0.22em] text-ocean-foreground/55">
+              Choose your side
+            </p>
+            <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
+              {JOURNEY_DOORS.map((door) => (
+                <button
+                  key={door.id}
+                  type="button"
+                  onClick={() => enter(door.id)}
+                  className="group relative flex items-center gap-4 rounded-2xl bg-ivory p-4 text-left shadow-[0_20px_45px_-24px_rgba(9,45,55,0.9)] ring-1 ring-ocean/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_60px_-24px_rgba(255,117,99,0.6)] hover:ring-coral/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral sm:flex-col sm:items-start sm:gap-4 sm:p-5"
+                >
+                  <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-secondary ring-1 ring-primary/25 sm:h-16 sm:w-16">
+                    <img
+                      src={ROLE_ICONS[door.id]}
+                      alt=""
+                      aria-hidden
+                      className="h-9 w-9 object-contain transition-transform duration-300 group-hover:scale-110 sm:h-11 sm:w-11"
+                    />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-[0.62rem] font-extrabold uppercase tracking-[0.18em] text-accent-strong">{door.audience}</span>
+                    <span className="mt-1 block text-base font-black leading-tight text-ivory-foreground sm:text-lg">{door.title}</span>
+                    <span className="mt-1 block text-xs leading-snug text-ivory-foreground/65 sm:text-sm">{door.copy}</span>
+                  </span>
+                  <ArrowRight className="ml-auto h-4 w-4 shrink-0 self-center text-coral transition-transform duration-300 group-hover:translate-x-1 sm:absolute sm:bottom-5 sm:right-5 sm:ml-0 sm:self-auto" />
+                </button>
+              ))}
+            </div>
+            <p className="mt-4 text-center text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-ocean-foreground/45">
+              No account needed to look around
+            </p>
           </div>
         </div>
       )}
