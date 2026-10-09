@@ -1,3 +1,4 @@
+import { netPay } from "@/lib/business";
 import { LanguageToggle } from "@/components/language-toggle";
 import { TourismExperience } from "@/components/tourism-partner";
 import { useLanguage } from "@/lib/i18n";
@@ -763,10 +764,10 @@ function GigCard({
         <div className="my-4 grid grid-cols-3 border-y border-border py-3 text-center">
           <div>
             <strong className="block text-base">
-              {tr(gig.service ? "Unpaid" : `$${gig.pay.toLocaleString()}`)}
+              {tr(gig.service ? "Unpaid" : `$${netPay(gig.pay).toLocaleString()}`)}
             </strong>
             <span className="text-[10px] uppercase text-muted-foreground">
-              {tr(gig.service ? "service" : "weekly")}
+              {tr(gig.service ? "service" : "take-home / wk")}
             </span>
           </div>
           <div className="border-x border-border">
@@ -855,10 +856,10 @@ function GigDialog({
         <div className="grid grid-cols-3 border-y border-border py-4 text-center">
           <div>
             <strong className="text-xl">
-              {tr(gig.service ? "Unpaid" : `$${gig.pay.toLocaleString()}`)}
+              {tr(gig.service ? "Unpaid" : `$${netPay(gig.pay).toLocaleString()}`)}
             </strong>
             <span className="block text-xs text-muted-foreground">
-              {tr(gig.service ? "service" : "per week")}
+              {tr(gig.service ? "service" : "take-home per week")}
             </span>
           </div>
           <div className="border-x border-border">

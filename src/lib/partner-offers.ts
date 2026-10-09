@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { boostRank, type BoostId } from "@/lib/business";
 import {
   LOCATIONS,
   PERKS,
@@ -92,6 +93,7 @@ export type DirectoryOffer = Perk & PerkOffer & {
   region: string; towns: string; image: string; pitch: string; perkPitch: string; included: string[];
   capacity: number; free: boolean; stats: { views: number; saves: number; hospitalAdds: number; nurseInterest: number; trend: number };
   status: OfferStatus;
+  boost?: BoostId | undefined;
 };
 export type OfferStatus = "Draft" | "Live" | "Paused" | "Ended";
 
@@ -142,7 +144,7 @@ export type CustomOffer = {
   offerType: OfferType; headline: string; endsAt?: string | undefined; retail: number; cost: number; capacity: number;
   requirement?: string | undefined; locations: LocationId[] | "all"; status: OfferStatus;
 };
-export type PartnerState = { loggedIn: boolean; offers: CustomOffer[]; statusOverrides: Record<string, OfferStatus> };
+export type PartnerState = { loggedIn: boolean; offers: CustomOffer[]; statusOverrides: Record<string, OfferStatus>; boosts?: Record<string, BoostId> };
 const KEY = "wepa-partner-v1";
 const EVT = "wepa-partner-change";
 export const partnerSeed: PartnerState = {
@@ -211,10 +213,19 @@ export function usePartner() {
 
 /** Full directory: real-partner catalog + the demo partner's live offers. */
 export function fullDirectory(s: PartnerState) {
-  return [
+  const boosts = s.boosts ?? {};
+  const list = [
     ...s.offers.filter((o) => o.status === "Live").map(customToDirectory),
     ...baseDirectory().map((d) => (s.statusOverrides[d.id] ? { ...d, status: s.statusOverrides[d.id]! } : d)),
-  ];
+  ].map((d) => (boosts[d.id] ? { ...d, boost: boosts[d.id] } : d));
+  // Boosted offers rank first; stable order otherwise.
+  return list.map((d, i) => ({ d, i })).sort((a, b) => boostRank(b.d.boost) - boostRank(a.d.boost) || a.i - b.i).map((x) => x.d);
+}
+
+/** Current boost per offer id, read straight from storage (for non-hook callers like the hospital perk menu). */
+export function currentBoosts(): Record<string, BoostId> {
+  if (typeof window === "undefined") return {};
+  try { return (JSON.parse(localStorage.getItem(KEY) ?? "{}") as PartnerState).boosts ?? {}; } catch { return {}; }
 }
 
 /* ---------- Trending (deterministic synthetic signals) ---------- */

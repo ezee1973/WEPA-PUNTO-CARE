@@ -46,6 +46,8 @@ import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import { Avatar, PassportDocument, PassportShare } from "@/components/passport-card";
 import { NurseCommunity } from "@/components/nurse-community";
+import { NursePay } from "@/components/nurse-pay";
+import { NurseConcierge } from "@/components/nurse-concierge";
 import { toShared } from "@/lib/passport-share";
 
 const DISCLAIMER =
@@ -59,6 +61,8 @@ const TABS = [
   { id: "hospital", label: "Credentials" },
   { id: "passport", label: "Passport" },
   { id: "community", label: "Community" },
+  { id: "pay", label: "Pay" },
+  { id: "travel", label: "Travel" },
 ] as const;
 type Tab = (typeof TABS)[number]["id"];
 
@@ -566,6 +570,9 @@ export function ReadinessPassport({ initialTab }: { initialTab?: "community" } =
               )}
             </section>
           )}
+
+          {tab === "pay" && <NursePay />}
+          {tab === "travel" && <NurseConcierge />}
 
           {tab === "community" && (
             <NurseCommunity

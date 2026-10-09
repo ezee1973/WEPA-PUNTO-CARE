@@ -3,6 +3,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import {
   ArrowRight,
   BarChart3,
+  CreditCard,
   Check,
   CheckCircle2,
   Handshake,
@@ -33,6 +34,9 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { perkImage, usePartner } from "@/lib/partner-offers";
+import { HospitalBilling } from "@/components/hospital-billing";
+import { boostRank, boostTier, hospitalWeekly } from "@/lib/business";
+import { currentBoosts } from "@/lib/partner-offers";
 import { PassportThumb, PassportViewer, Pipeline } from "@/components/hospital-ats";
 import {
   ATS_STAGES,
@@ -56,7 +60,7 @@ import {
   type PoolNurse,
 } from "@/lib/hospital-data";
 
-type Tab = "dashboard" | "pool" | "pipeline" | "build";
+type Tab = "dashboard" | "pool" | "pipeline" | "build" | "billing";
 const money = (n: number) => `$${n.toLocaleString()}`;
 const locName = (id: LocationId) => LOCATIONS.find((l) => l.id === id)?.name ?? id;
 
@@ -88,6 +92,7 @@ export function HospitalExperience() {
     { id: "pool", label: "Nurse pool", icon: Users },
     { id: "pipeline", label: "Pipeline", icon: Handshake },
     { id: "build", label: "Build a gig", icon: Plus },
+    { id: "billing", label: "Billing", icon: CreditCard },
   ];
 
   return (
@@ -153,6 +158,7 @@ export function HospitalExperience() {
         {tab === "dashboard" && <Dashboard facilityLocation={facility.location} onGo={setTab} />}
         {tab === "pool" && <NursePool facilityLocation={facility.location} />}
         {tab === "pipeline" && <Pipeline facilityLocation={facility.location} />}
+        {tab === "billing" && <HospitalBilling />}
         {tab === "build" && (
           <GigBuilder
             facilityName={facility.name}
@@ -729,9 +735,14 @@ function GigBuilder({
   const [freeOnly, setFreeOnly] = useState(false);
 
   const loc = LOCATIONS.find((l) => l.id === location)!;
-  const available = perksFor(location).filter(
-    (p) => (cat === "All" || p.category === cat) && (!freeOnly || p.cost === 0),
-  );
+  const boosts = currentBoosts();
+  const rankOf = (id: string) => boostRank(boosts[id]);
+  const available = perksFor(location)
+    .filter((p) => (cat === "All" || p.category === cat) && (!freeOnly || p.cost === 0))
+    .map((p, i) => ({ p, i }))
+    .sort((a, b) => rankOf(b.p.id) - rankOf(a.p.id) || a.i - b.i)
+    .map((x) => x.p);
+  const weeklyCost = hospitalWeekly(service ? 0 : weeklyPay);
   const totals = packageTotals(perks);
   const mine = weeklyValue(weeklyPay, totals.retail, weeks);
   const board = useMemo(
@@ -982,6 +993,11 @@ function GigBuilder({
                     >
                       {tr(o.offerType)}
                     </span>
+                    {boosts[p.id] && (
+                      <span className="absolute bottom-2 left-2 bg-coral px-2 py-0.5 text-[10px] font-black uppercase text-primary-foreground">
+                        {tr(boostTier(boosts[p.id])!.name)}
+                      </span>
+                    )}
                     <span
                       className={cn(
                         "absolute right-2 top-2 flex size-6 items-center justify-center rounded-full border-2",
@@ -1094,6 +1110,13 @@ function GigBuilder({
               {tr("/wk total value (pay + perks)")}
             </span>
           </div>
+          {!service && (
+            <dl className="grid grid-cols-3 border-t border-primary/20 text-center text-xs">
+              <div className="p-2"><dt className="text-muted-foreground">{tr("Nurse take-home")}</dt><dd className="text-base font-black">{tr(money(weeklyCost.nurseNet))}</dd></div>
+              <div className="border-x border-primary/20 p-2"><dt className="text-muted-foreground">{tr("WEPA fee (8%)")}</dt><dd className="text-base font-black">{tr(money(weeklyCost.fee))}</dd></div>
+              <div className="p-2"><dt className="text-muted-foreground">{tr("Your weekly cost")}</dt><dd className="text-base font-black">{tr(money(weeklyCost.total + Math.round(totals.cost / Math.max(weeks, 1))))}</dd></div>
+            </dl>
+          )}
         </div>
 
         <div className="border border-border bg-card p-5">
