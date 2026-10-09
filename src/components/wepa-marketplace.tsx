@@ -46,22 +46,13 @@ import { cn } from "@/lib/utils";
 const logoUrl = logoAsset.url;
 const jingleUrl = jingleAsset.url;
 
-const roleMeta: Record<DemoRole, { label: string; short: string; icon: typeof HeartPulse }> = {
-  nurse: { label: "Nurse", short: "Find my gig", icon: HeartPulse },
-  hospital: { label: "Hospital", short: "Build a package", icon: Building2 },
-  tourism: { label: "Tourism partner", short: "Make an offer", icon: Palmtree },
-};
-
 const ANTHEM_SEEN_KEY = "wepa-anthem-experienced";
 
 export function WepaMarketplace() {
-  const [role, setRole] = useState<DemoRole>("nurse");
   const [selectedGig, setSelectedGig] = useState<DemoGig | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
-  const [soundOn, setSoundOn] = useState(false);
-  const [anthemAuto, setAnthemAuto] = useState(false);
+  const [anthemPlaying, setAnthemPlaying] = useState(false);
   const [signedInEmail, setSignedInEmail] = useState<string | null>(null);
-  const mediaRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     void supabase.auth.getUser().then(({ data }) => setSignedInEmail(data.user?.email ?? null));
@@ -70,54 +61,16 @@ export function WepaMarketplace() {
   }, []);
 
   useEffect(() => {
-    // First-time "WEPA!" moment only: the anthem plays itself, silently,
-    // on the very first land. Every later visit gets a quiet poster.
+    // First land only: the anthem takes over the whole screen, then fades away.
     try {
       if (!window.localStorage.getItem(ANTHEM_SEEN_KEY)) {
         window.localStorage.setItem(ANTHEM_SEEN_KEY, "1");
-        setAnthemAuto(true);
+        setAnthemPlaying(true);
       }
     } catch {
-      setAnthemAuto(true);
+      setAnthemPlaying(true);
     }
   }, []);
-
-  async function toggleSound() {
-    const media = mediaRef.current;
-    if (!media) return;
-    if (soundOn) {
-      media.pause();
-      media.currentTime = 0;
-      setSoundOn(false);
-      if (anthemAuto) {
-        // Settle back into the silent ambient loop.
-        media.muted = true;
-        media.loop = true;
-        void media.play().catch(() => {});
-      }
-      return;
-    }
-    try {
-      media.muted = false;
-      media.loop = false;
-      media.currentTime = 0;
-      await media.play();
-      setSoundOn(true);
-    } catch {
-      toast.error("Sound is waiting for browser permission. Tap again to play.");
-    }
-  }
-
-  function handleAnthemEnded() {
-    setSoundOn(false);
-    const media = mediaRef.current;
-    if (media && anthemAuto) {
-      media.muted = true;
-      media.loop = true;
-      media.currentTime = 0;
-      void media.play().catch(() => {});
-    }
-  }
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -126,48 +79,85 @@ export function WepaMarketplace() {
 
   return (
     <main className="min-h-screen bg-background text-foreground">
-      {role !== "nurse" && <video ref={mediaRef} src={jingleUrl} className="hidden" onEnded={() => setSoundOn(false)} playsInline />}
+      {anthemPlaying && <AnthemTakeover onDone={() => setAnthemPlaying(false)} />}
       <Header
-        role={role}
-        setRole={setRole}
-        soundOn={soundOn}
-        onSound={() => void toggleSound()}
+        onAnthem={() => setAnthemPlaying(true)}
         signedInEmail={signedInEmail}
         onAuth={() => setAuthOpen(true)}
         onSignOut={() => void signOut()}
       />
-      <RoleRail role={role} setRole={setRole} />
-      {role === "nurse" && (
-        <NurseExperience
-          onSelectGig={setSelectedGig}
-          soundOn={soundOn}
-          onSound={() => void toggleSound()}
-          anthemAuto={anthemAuto}
-          onAnthemEnded={handleAnthemEnded}
-          mediaRef={mediaRef}
-        />
-      )}
-      {role === "hospital" && <HospitalExperience />}
-      {role === "tourism" && <TourismExperience />}
+      <NurseExperience onSelectGig={setSelectedGig} onAnthem={() => setAnthemPlaying(true)} />
       <GigDialog gig={selectedGig} onClose={() => setSelectedGig(null)} signedIn={Boolean(signedInEmail)} onAuth={() => setAuthOpen(true)} />
       <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
     </main>
   );
 }
 
+function AnthemTakeover({ onDone }: { onDone: () => void }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [fading, setFading] = useState(false);
+  const doneRef = useRef(false);
+
+  function finish() {
+    if (doneRef.current) return;
+    doneRef.current = true;
+    setFading(true);
+    window.setTimeout(onDone, 650);
+  }
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    // Try with sound first; if the browser blocks it, fall back to muted.
+    video.muted = false;
+    void video.play().catch(() => {
+      video.muted = true;
+      void video.play().catch(() => {});
+    });
+    // Safety net: never trap the visitor if "ended" never fires.
+    const timer = window.setTimeout(finish, 9000);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <div
+      className={cn(
+        "fixed inset-0 z-[80] flex items-center justify-center bg-surface-dark transition-opacity duration-500",
+        fading && "pointer-events-none opacity-0",
+      )}
+      role="dialog"
+      aria-label="WEPA.care anthem"
+    >
+      <video
+        ref={videoRef}
+        src={jingleUrl}
+        autoPlay
+        playsInline
+        onEnded={finish}
+        className="h-full w-full object-cover"
+      />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between bg-gradient-to-t from-surface-dark/80 to-transparent p-5 sm:p-8">
+        <img src={logoUrl} alt="" className="h-9 w-auto object-contain" />
+        <button
+          type="button"
+          onClick={finish}
+          className="pointer-events-auto rounded-full border border-surface-dark-foreground/30 bg-surface-dark/60 px-4 py-2 text-xs font-bold uppercase tracking-wide text-surface-dark-foreground backdrop-blur transition-colors hover:bg-surface-dark-foreground/15"
+        >
+          Skip
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function Header({
-  role,
-  setRole,
-  soundOn,
-  onSound,
+  onAnthem,
   signedInEmail,
   onAuth,
   onSignOut,
 }: {
-  role: DemoRole;
-  setRole: (role: DemoRole) => void;
-  soundOn: boolean;
-  onSound: () => void;
+  onAnthem: () => void;
   signedInEmail: string | null;
   onAuth: () => void;
   onSignOut: () => void;
@@ -178,51 +168,20 @@ function Header({
         <img src={logoUrl} alt="WEPA.care" className="h-11 w-auto object-contain" />
         <div className="hidden h-7 w-px bg-border sm:block" />
         <p className="hidden text-xs font-semibold uppercase text-muted-foreground sm:block">Come for the Island.<br />Care for its People.</p>
-        <div className="ml-auto hidden rounded-md bg-muted p-1 md:flex" aria-label="Demo role switcher">
-          {(Object.keys(roleMeta) as DemoRole[]).map((key) => {
-            const Icon = roleMeta[key].icon;
-            return (
-              <Button key={key} variant={role === key ? "default" : "ghost"} size="sm" onClick={() => setRole(key)} className="h-8">
-                <Icon /> {roleMeta[key].label}
-              </Button>
-            );
-          })}
+        <div className="ml-auto flex items-center gap-1">
+          <Button variant="ghost" size="icon" onClick={onAnthem} aria-label="Play the WEPA anthem" title="Play the WEPA anthem">
+            <Music2 />
+          </Button>
+          <Button variant="ghost" size="icon" aria-label="Notifications"><Bell /></Button>
+          {signedInEmail ? (
+            <Button variant="outline" size="sm" onClick={onSignOut} className="hidden sm:inline-flex">Sign out</Button>
+          ) : (
+            <Button size="sm" onClick={onAuth}>Sign in</Button>
+          )}
+          <Button variant="ghost" size="icon" className="md:hidden" aria-label="Open menu"><Menu /></Button>
         </div>
-        <Button variant="ghost" size="icon" onClick={onSound} aria-label={soundOn ? "Stop WEPA jingle" : "Play WEPA jingle"} title="Play the WEPA jingle">
-          <Music2 className={soundOn ? "text-coral" : ""} />
-        </Button>
-        <Button variant="ghost" size="icon" aria-label="Notifications"><Bell /></Button>
-        {signedInEmail ? (
-          <Button variant="outline" size="sm" onClick={onSignOut} className="hidden sm:inline-flex">Sign out</Button>
-        ) : (
-          <Button size="sm" onClick={onAuth}>Sign in</Button>
-        )}
-        <Button variant="ghost" size="icon" className="md:hidden" aria-label="Open menu"><Menu /></Button>
       </div>
     </header>
-  );
-}
-
-function RoleRail({ role, setRole }: { role: DemoRole; setRole: (role: DemoRole) => void }) {
-  return (
-    <div className="border-b border-border bg-surface-dark text-surface-dark-foreground">
-      <div className="mx-auto flex max-w-[1440px] items-center gap-2 overflow-x-auto px-4 py-2 sm:px-6 lg:px-8">
-        <span className="shrink-0 text-[11px] font-bold uppercase text-surface-dark-foreground/55">Judge view</span>
-        <ChevronRight className="size-3 shrink-0 text-surface-dark-foreground/40" />
-        {(Object.keys(roleMeta) as DemoRole[]).map((key) => (
-          <Button
-            key={key}
-            variant="ghost"
-            size="sm"
-            onClick={() => setRole(key)}
-            className={cn("h-7 shrink-0 text-surface-dark-foreground/65 hover:bg-surface-dark-foreground/10 hover:text-surface-dark-foreground md:hidden", role === key && "bg-surface-dark-foreground/15 text-surface-dark-foreground")}
-          >
-            {roleMeta[key].label}
-          </Button>
-        ))}
-        <span className="ml-auto hidden text-xs text-surface-dark-foreground/55 md:block">Switch roles to follow one offer from partner → hospital → nurse</span>
-      </div>
-    </div>
   );
 }
 
