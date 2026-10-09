@@ -1,6 +1,6 @@
 import { useRef, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, Bot, CheckCircle2, Circle, Download, FileText, Languages, Loader2, Paperclip, Send, ShieldCheck, Upload } from "lucide-react";
+import { ArrowLeft, Bot, CheckCircle2, Circle, Download, FileText, Languages, Loader2, Paperclip, Pencil, RefreshCw, Send, ShieldCheck, Upload } from "lucide-react";
 import nurseIconAsset from "@/assets/wepa-nurse.png.asset.json";
 import logoAsset from "@/assets/wepa-care-logo.asset.json";
 import { toast } from "sonner";
@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { INTEREST_OPTIONS, interestsComplete, elena, nextBestAction, pathwayResult, preparationProgress, streamGuide, useReadiness, type ChecklistItem, type ItemStatus, type Pathway, type ReadinessState } from "@/lib/readiness";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
@@ -261,11 +263,32 @@ function PathwayCheck({ pathway, onChange }: { pathway: Pathway; onChange: (p: P
   );
 }
 
+async function readUpload(f: File): Promise<{ fileData?: string; fileType: string }> {
+  const asDataUrl = (b: Blob) => new Promise<string>((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result)); r.onerror = rej; r.readAsDataURL(b); });
+  if (f.type.startsWith("image/") && f.type !== "image/svg+xml") {
+    const url = URL.createObjectURL(f);
+    const img = new Image();
+    await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
+    const scale = Math.min(1, 1200 / Math.max(img.width, img.height));
+    const c = document.createElement("canvas");
+    c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
+    c.getContext("2d")?.drawImage(img, 0, 0, c.width, c.height);
+    URL.revokeObjectURL(url);
+    return { fileData: c.toDataURL("image/jpeg", 0.8), fileType: "image/jpeg" };
+  }
+  if (f.size > 2_000_000) return { fileType: f.type };
+  return { fileData: await asDataUrl(f), fileType: f.type };
+}
+
 function ChecklistCard({ item, state, onExplain, onDraft, onDraftChange, onSet }: {
   item: ChecklistItem; state: ReadinessState; onExplain: () => void; onDraft: () => void; onDraftChange: (t: string) => void; onSet: (p: Partial<ChecklistItem>) => void;
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
+  const [preview, setPreview] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState({ source: item.source, expires: item.expires ?? "", next: item.next });
   const isDecl = item.id === "declaration";
+  const isImage = item.fileType?.startsWith("image/");
   function download() {
     const blob = new Blob([state.declarationDraft], { type: "text/plain" });
     const a = document.createElement("a");
@@ -273,34 +296,60 @@ function ChecklistCard({ item, state, onExplain, onDraft, onDraftChange, onSet }
     a.download = "declaracion-jurada-borrador.txt";
     a.click();
   }
+  function saveEdit() {
+    onSet({ source: draft.source.trim() || item.source, expires: draft.expires, next: draft.next.trim() || "None" });
+    setEditing(false);
+    toast.success("Saved.");
+  }
   return (
     <article className="rounded-2xl border border-border bg-card p-4">
       <div className="flex items-start gap-3">
-        <FileText className="mt-0.5 size-5 shrink-0 text-accent-strong" />
+        {item.file ? (
+          <button type="button" onClick={() => setPreview(true)} aria-label={`View ${item.file}`} className="group relative size-16 shrink-0 overflow-hidden rounded-xl border border-border bg-secondary">
+            {isImage && item.fileData ? <img src={item.fileData} alt="" className="size-full object-cover transition-transform group-hover:scale-110" /> : <FileText className="m-auto size-7 text-accent-strong" />}
+          </button>
+        ) : <FileText className="mt-0.5 size-5 shrink-0 text-accent-strong" />}
         <div className="min-w-0 flex-1">
           <p className="font-semibold">{item.title}</p>
           <p className="text-xs text-muted-foreground">Source: {item.source}{item.expires ? ` · Expires ${item.expires}` : ""}</p>
           {item.next !== "None" && <p className="mt-1 text-xs"><strong>Next:</strong> {item.next}</p>}
-          {item.file && <p className="mt-1 flex items-center gap-1 text-xs"><Paperclip className="size-3" /> {item.file} (stored on this device only)</p>}
+          {item.file && <p className="mt-1 flex items-center gap-1 truncate text-xs"><Paperclip className="size-3 shrink-0" /> {item.file}</p>}
         </div>
         <span className={cn("shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold", statusTone[item.status])}>{item.status}</span>
       </div>
+      {editing && (
+        <div className="mt-3 grid gap-2 rounded-xl bg-secondary/50 p-3 sm:grid-cols-3">
+          <label className="text-xs font-semibold">Source<Input value={draft.source} onChange={(e) => setDraft({ ...draft, source: e.target.value })} className="mt-1" /></label>
+          <label className="text-xs font-semibold">Expires<Input type="date" value={draft.expires} onChange={(e) => setDraft({ ...draft, expires: e.target.value })} className="mt-1" /></label>
+          <label className="text-xs font-semibold">Next step<Input value={draft.next} onChange={(e) => setDraft({ ...draft, next: e.target.value })} className="mt-1" /></label>
+          <div className="flex gap-2 sm:col-span-3">
+            <Button size="sm" onClick={saveEdit}>Save</Button>
+            <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>Cancel</Button>
+          </div>
+        </div>
+      )}
       <details className="mt-2 text-sm text-muted-foreground"><summary className="cursor-pointer text-xs font-semibold">What is this?</summary><p className="mt-1">{item.help}</p></details>
       <div className="mt-3 flex flex-wrap gap-2">
         <Button size="sm" variant="outline" onClick={onExplain}><Bot /> Explain</Button>
+        {!editing && <Button size="sm" variant="outline" onClick={() => { setDraft({ source: item.source, expires: item.expires ?? "", next: item.next }); setEditing(true); }}><Pencil /> Edit</Button>}
         {isDecl && <Button size="sm" onClick={onDraft}><FileText /> {state.declarationDraft ? "Redraft" : "Draft with Wepa Guide"}</Button>}
-        {!["Nurse confirmed", "Submitted — self-reported"].includes(item.status) && !isDecl && (
-          <Button size="sm" variant="outline" onClick={() => fileRef.current?.click()}><Upload /> Attach</Button>
+        {(!isDecl || state.declarationDraft || item.file) && (
+          <Button size="sm" variant="outline" onClick={() => fileRef.current?.click()}>
+            {item.file ? <><RefreshCw /> Replace</> : <><Upload /> {isDecl ? "Attach notarized copy" : "Upload"}</>}
+          </Button>
         )}
-        {isDecl && state.declarationDraft && item.status !== "Submitted — self-reported" && (
-          <Button size="sm" variant="outline" onClick={() => fileRef.current?.click()}><Upload /> Attach notarized copy</Button>
-        )}
-        <input ref={fileRef} type="file" className="hidden" accept=".pdf,image/*" onChange={(e) => {
+        <input ref={fileRef} type="file" className="hidden" accept=".pdf,image/*" onChange={async (e) => {
           const f = e.target.files?.[0];
+          e.target.value = "";
           if (!f) return;
-          onSet(isDecl ? { file: f.name, status: "Submitted — self-reported", source: "Notarized copy — candidate-reported", next: "None" } : { file: f.name, status: "Ready for review", next: "Confirm" });
-          toast.success(`${f.name} attached (demo — kept on this device).`);
+          try {
+            const data = await readUpload(f);
+            const base = { file: f.name, ...data };
+            onSet(isDecl ? { ...base, status: "Submitted — self-reported", source: "Notarized copy — candidate-reported", next: "None" } : { ...base, status: "Ready for review", next: "Confirm the new document" });
+            toast.success(`${f.name} ${item.file ? "replaced" : "uploaded"} — kept on this device.`);
+          } catch { toast.error("Couldn't read that file. Try a JPG, PNG or PDF."); }
         }} />
+        {item.status === "Ready for review" && item.file && <Button size="sm" onClick={() => onSet({ status: "Nurse confirmed", next: "None" })}><CheckCircle2 /> Confirm</Button>}
       </div>
       {isDecl && state.declarationDraft && (
         <div className="mt-3 space-y-2">
@@ -308,6 +357,19 @@ function ChecklistCard({ item, state, onExplain, onDraft, onDraftChange, onSet }
           <Button size="sm" variant="ghost" onClick={download}><Download /> Download draft to print for the notary</Button>
         </div>
       )}
+      <Dialog open={preview} onOpenChange={setPreview}>
+        <DialogContent className="max-w-3xl">
+          <DialogTitle>{item.title}</DialogTitle>
+          {item.fileData ? (isImage
+            ? <img src={item.fileData} alt={item.title} className="max-h-[70vh] w-full rounded-xl object-contain" />
+            : <iframe src={item.fileData} title={item.title} className="h-[70vh] w-full rounded-xl border border-border" />)
+            : <p className="text-sm text-muted-foreground">{item.file} is too large to preview here, but it is attached.</p>}
+          <div className="flex gap-2">
+            <Button onClick={() => { setPreview(false); fileRef.current?.click(); }}><RefreshCw /> Replace</Button>
+            <Button variant="ghost" onClick={() => setPreview(false)}>Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </article>
   );
 }
