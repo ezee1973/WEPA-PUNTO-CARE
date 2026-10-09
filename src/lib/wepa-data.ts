@@ -222,11 +222,3 @@ export const demoPartners: DemoPartner[] = [
     perk: "West-coast surf & stay weekends",
   },
 ];
-
-export const qualificationSteps = [
-  { id: "profile", title: "Clinical profile", detail: "Specialty, experience, and availability", done: true },
-  { id: "license", title: "License readiness", detail: "Current license and Puerto Rico pathway", done: true },
-  { id: "credentials", title: "Credentials", detail: "BLS/ACLS and key certifications", done: true },
-  { id: "documents", title: "Document packet", detail: "Identity, resume, and references", done: false },
-  { id: "language", title: "Language snapshot", detail: "Patient-care communication comfort", done: false },
-];

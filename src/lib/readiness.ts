@@ -49,6 +49,17 @@ export function interestsComplete(i: Interests) {
   return i.regions.length > 0 && i.experiences.length > 0 && !!i.length && !!i.housing;
 }
 
+// Single source of truth for "what should the nurse do next" — the passport
+// workspace and the nurse home both read this so the two can never drift.
+export function nextBestAction(s: ReadinessState) {
+  if (!s.packetConfirmed) return s.packetPrepared ? "Review and confirm your prepared packet" : "Prepare your document packet with Wepa Guide";
+  if (s.checklist.find((c) => c.id === "declaration")?.status !== "Submitted — self-reported") return "Sign your sworn declaration before a notary";
+  if (!s.spanish) return "Complete the 3-question clinical Spanish scenario";
+  if (!interestsComplete(s.interests)) return "Pick your island interests so we can match you";
+  if (!s.applied) return "Join the WEPA gig pool and start matching";
+  return "You’re in the gig pool — hospitals with matching gigs can now see your Passport";
+}
+
 
 const seedChecklist: ChecklistItem[] = [
   { id: "id", title: "Government-issued photo ID", status: "Nurse confirmed", source: "Florida driver license", expires: "2029-04-02", next: "None", help: "A valid passport, REAL ID or driver license. The Board also asks for a recent 2×2 photo." },

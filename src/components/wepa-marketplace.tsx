@@ -32,11 +32,11 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
-import { demoGigs, demoOffers, demoPartners, qualificationSteps, type DemoGig, type DemoOffer, type DemoPartner } from "@/lib/wepa-data";
+import { demoGigs, demoOffers, demoPartners, type DemoGig, type DemoOffer, type DemoPartner } from "@/lib/wepa-data";
 import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { CandidatePassport } from "@/components/readiness-passport";
-import { STAGES, useReadiness } from "@/lib/readiness";
+import { STAGES, nextBestAction, preparationProgress, useReadiness } from "@/lib/readiness";
 
 const logoUrl = logoAsset.url;
 const jingleUrl = jingleAsset.url;
@@ -247,15 +247,10 @@ function Header({
 
 function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void }) {
   const [specialty, setSpecialty] = useState("All specialties");
-  const [stepState, setStepState] = useState(qualificationSteps);
-  const complete = stepState.filter((step) => step.done).length;
-  const progress = Math.round((complete / stepState.length) * 100);
+  const { state } = useReadiness();
+  const progress = preparationProgress(state);
+  const nextAction = nextBestAction(state);
   const filtered = specialty === "All specialties" ? demoGigs : demoGigs.filter((gig) => gig.specialty.includes(specialty));
-
-  function finishStep(id: string) {
-    setStepState((steps) => steps.map((step) => step.id === id ? { ...step, done: true } : step));
-    toast.success("Qualification progress saved.");
-  }
 
   return (
     <>
@@ -316,30 +311,16 @@ function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void 
       <PartnerCarousel />
 
       <section id="ready" className="border-b border-border bg-card">
-        <div className="mx-auto grid max-w-[1440px] gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[1.05fr_1.95fr] lg:px-8">
-          <div>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="eyebrow">Puerto Rico ready</p>
-                <h2 className="mt-1 text-2xl font-extrabold">You’re {progress}% there, Maya.</h2>
-              </div>
-              <div className="flex size-14 items-center justify-center rounded-full border-4 border-primary bg-primary/10 text-sm font-black text-primary">{progress}%</div>
-            </div>
-            <Progress value={progress} className="mt-5 h-2.5" />
-            <div className="mt-5 border-l-2 border-accent bg-accent/8 p-4">
-              <div className="flex gap-3"><Sparkles className="mt-0.5 size-4 shrink-0 text-accent-strong" /><div><p className="text-sm font-bold">WEPA Guide</p><p className="mt-1 text-sm leading-relaxed text-muted-foreground">Your clinical profile is strong. Finish the document packet next; it unlocks fast-track review for 3 matching gigs.</p></div></div>
+        <div className="mx-auto flex max-w-[1440px] flex-col gap-4 px-4 py-5 sm:px-6 lg:flex-row lg:items-center lg:px-8">
+          <div className="flex min-w-0 flex-1 items-center gap-4">
+            <img src={nurseIconAsset.url} alt="" aria-hidden className="size-12 shrink-0 object-contain" />
+            <div className="min-w-0">
+              <p className="text-sm font-bold sm:text-base">Puerto Rico Readiness Passport · {progress}% ready</p>
+              <Progress value={progress} className="mt-2 h-1.5 max-w-md" />
+              <p className="mt-2 truncate text-xs text-muted-foreground sm:text-sm">Next: {nextAction}</p>
             </div>
           </div>
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {stepState.map((step) => (
-              <button key={step.id} type="button" onClick={() => !step.done && finishStep(step.id)} className="group flex min-h-24 items-start gap-3 border border-border bg-background p-4 text-left transition-colors hover:border-primary">
-                <span className={cn("mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full border", step.done ? "border-primary bg-primary text-primary-foreground" : "border-border bg-muted text-muted-foreground")}>
-                  {step.done ? <Check className="size-3.5" /> : <span className="size-1.5 rounded-full bg-current" />}
-                </span>
-                <span><span className="block text-sm font-bold">{step.title}</span><span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{step.detail}</span></span>
-              </button>
-            ))}
-          </div>
+          <Button asChild size="lg" className="shrink-0"><Link to="/ready">Open your passport <ArrowRight /></Link></Button>
         </div>
       </section>
 
