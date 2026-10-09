@@ -107,12 +107,16 @@ export const seed: ReadinessState = {
   officialAuthorization: "Pending",
 };
 
+// Weighted from the same steps shown in the Passport tracks — no fixed numbers.
 export function preparationProgress(s: ReadinessState) {
-  let p = 72;
-  if (s.packetConfirmed) p = 92;
-  if (s.spanish) p += 4;
-  if (s.checklist.find((c) => c.id === "declaration")?.status === "Submitted — self-reported") p += 2;
-  return Math.min(p, 98); // the last step is official authorization, which WEPA never controls
+  const doneDocs = s.checklist.filter((c) => ["Nurse confirmed", "Submitted — self-reported", "Accepted"].includes(c.status)).length;
+  const p =
+    (pathwayComplete(s.pathway) ? 15 : 0) +
+    (doneDocs / s.checklist.length) * 45 +
+    (s.credentialing.filter((c) => c.done).length / s.credentialing.length) * 20 +
+    (interestsComplete(s.interests) ? 10 : 0) +
+    (s.spanish ? 10 : 0);
+  return Math.min(Math.round(p), 98); // the last step is official authorization, which WEPA never controls
 }
 
 export function pathwayComplete(p: Pathway) {
