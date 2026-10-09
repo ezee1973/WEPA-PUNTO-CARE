@@ -119,6 +119,88 @@ export const demoGigs: DemoGig[] = [
   },
 ];
 
+export type DemoPartner = {
+  name: string;
+  category: "Hotel" | "Adventure" | "Spa & Wellness" | "Beach & Sailing" | "Food & Culture";
+  location: string;
+  blurb: string;
+  perk: string;
+};
+
+// Real Puerto Rico travel & tourism partners featured in the marketplace.
+export const demoPartners: DemoPartner[] = [
+  {
+    name: "Caribe Hilton",
+    category: "Hotel",
+    location: "San Juan",
+    blurb: "The iconic beachfront resort where the piña colada was born — private beach, pools, and ten minutes from the metro hospitals.",
+    perk: "Monthly nurse rate on ocean-view rooms",
+  },
+  {
+    name: "La Concha Renaissance",
+    category: "Hotel",
+    location: "Condado, San Juan",
+    blurb: "Condado's landmark resort with a casino, oceanfront pools, and the liveliest beach strip on the island.",
+    perk: "Weekend suite upgrades for gig packages",
+  },
+  {
+    name: "Dorado Beach, a Ritz-Carlton Reserve",
+    category: "Hotel",
+    location: "Dorado",
+    blurb: "Ultra-luxury beachfront reserve on a former Rockefeller estate — the island's most storied coastline.",
+    perk: "Spa & beach day passes for completed contracts",
+  },
+  {
+    name: "El Conquistador Resort",
+    category: "Hotel",
+    location: "Fajardo",
+    blurb: "Cliff-top resort with its own private island, Palomino, reached by catamaran from the marina below.",
+    perk: "Palomino Island day escapes",
+  },
+  {
+    name: "East Island Excursions",
+    category: "Beach & Sailing",
+    location: "Fajardo",
+    blurb: "Catamaran day sails to Cayo Icacos and Culebra — snorkeling, lunch, and open bar on the water.",
+    perk: "Monthly catamaran seats in every package",
+  },
+  {
+    name: "Kayaking Puerto Rico",
+    category: "Adventure",
+    location: "Fajardo & Vieques",
+    blurb: "Guided night paddles through the brightest bioluminescent bays in the world.",
+    perk: "Bio-bay nights for two, every rotation",
+  },
+  {
+    name: "Toro Verde Adventure Park",
+    category: "Adventure",
+    location: "Orocovis",
+    blurb: "Home of The Monster — one of the longest ziplines on Earth — deep in the central mountains.",
+    perk: "Zipline day trips between shifts",
+  },
+  {
+    name: "Casa Bacardí",
+    category: "Food & Culture",
+    location: "Cataño",
+    blurb: "The Cathedral of Rum — distillery tours, mixology classes, and sunset views across the bay to Old San Juan.",
+    perk: "Welcome-week mixology class",
+  },
+  {
+    name: "Copamarina Beach Resort & Spa",
+    category: "Spa & Wellness",
+    location: "Guánica",
+    blurb: "South-coast hideaway on the edge of the Guánica Dry Forest with a full spa and calm Caribbean coves.",
+    perk: "Shift-reset spa weekends",
+  },
+  {
+    name: "Villa Montaña Beach Resort",
+    category: "Beach & Sailing",
+    location: "Isabela",
+    blurb: "Barefoot-luxury villas on three miles of west-coast beach — surf, horses, and legendary sunsets.",
+    perk: "West-coast surf & stay weekends",
+  },
+];
+
 export const qualificationSteps = [
   { id: "profile", title: "Clinical profile", detail: "Specialty, experience, and availability", done: true },
   { id: "license", title: "License readiness", detail: "Current license and Puerto Rico pathway", done: true },
