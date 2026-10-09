@@ -107,8 +107,6 @@ export function WepaMarketplace({ home }: { home?: MarketRole | undefined } = {}
       <GigDialog
         gig={selectedGig}
         onClose={() => setSelectedGig(null)}
-        signedIn={Boolean(signedInEmail)}
-        onAuth={() => setAuthOpen(true)}
       />
       <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
     </main>
@@ -821,13 +819,9 @@ function HeroStat({ value, label }: { value: string; label: string }) {
 function GigDialog({
   gig,
   onClose,
-  signedIn,
-  onAuth,
 }: {
   gig: DemoGig | null;
   onClose: () => void;
-  signedIn: boolean;
-  onAuth: () => void;
 }) {
   const { t: tr } = useLanguage();
   const [applied, setApplied] = useState(false);
@@ -916,11 +910,7 @@ function GigDialog({
               size="lg"
               className="w-full"
               onClick={() => {
-                if (!signedIn) {
-                  onClose();
-                  onAuth();
-                  return;
-                }
+                // Demo nurse profile applies without a real account.
                 setApplied(true);
                 toast.success(tr("Application sent to the hospital."));
               }}
