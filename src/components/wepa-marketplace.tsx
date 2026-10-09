@@ -188,7 +188,7 @@ function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
               Come for the Island.
               <span className="block text-primary">Care for its People.</span>
             </h1>
-            <p className="max-w-xl text-sm leading-relaxed text-ocean-foreground/85 sm:text-base">
+            <p className="max-w-xl text-sm leading-relaxed text-ocean-foreground/90 sm:text-base">
               Puerto Rico hospitals staff nursing gigs at honest local wages — and island partners cover the travel, lodging, and fun.
             </p>
           </div>
