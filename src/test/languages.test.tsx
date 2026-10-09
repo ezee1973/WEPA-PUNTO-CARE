@@ -11,6 +11,9 @@ describe("Marketplace language choice", () => {
     expect(translate(" 12 weeks ", "es")).toBe(" 12 semanas ");
     expect(translate("Find your place", "en")).toBe("Find your place");
     expect(translate("Hospital Auxilio Mutuo", "es")).toBe("Hospital Auxilio Mutuo");
+    expect(translate("Round-trip flight", "es")).toBe("Vuelo de ida y vuelta");
+    expect(translate("BLS", "es")).toBe("BLS");
+    expect(translate("ACLS", "es")).toBe("ACLS");
     const state = { stage: "Shortlisted", pay: 1800 };
     expect(translate(state, "es")).toBe(state);
   });
