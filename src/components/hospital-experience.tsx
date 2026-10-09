@@ -304,6 +304,7 @@ function GigBuilder({ facilityName, facilityLocation, onDone }: { facilityName: 
   const location: LocationId = hubFor(town);
   const [weeks, setWeeks] = useState(13);
   const [weeklyPay, setWeeklyPay] = useState(1750);
+  const [service, setService] = useState(false);
   const [shift, setShift] = useState("3 × 12 nights");
   const [start, setStart] = useState("2027-01-11");
   const [perks, setPerks] = useState<string[]>(["flight", "pickup", "meal-card"]);
@@ -321,7 +322,7 @@ function GigBuilder({ facilityName, facilityLocation, onDone }: { facilityName: 
 
   function toggle(id: string) { setPerks((p) => p.includes(id) ? p.filter((x) => x !== id) : [...p, id]); }
   function save(status: HospitalGig["status"]) {
-    const gig: HospitalGig = { id: `g${Date.now()}`, title: title.trim() || `${specialty} in ${town}`, specialty, location, town, weeks, weeklyPay, shift, start, perks, status, views: 0 };
+    const gig: HospitalGig = { id: `g${Date.now()}`, title: title.trim() || `${specialty} in ${town}`, specialty, location, town, weeks, weeklyPay: service ? 0 : weeklyPay, shift, start, perks, status, views: 0, service };
     update((s) => ({ ...s, gigs: [gig, ...s.gigs] }));
     toast.success(status === "Published" ? "Gig published to the nurse pool." : "Draft saved.");
     onDone();
@@ -336,7 +337,8 @@ function GigBuilder({ facilityName, facilityLocation, onDone }: { facilityName: 
             <label className="text-sm sm:col-span-2">Title<Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={`${specialty} in ${town}`} /></label>
             <label className="text-sm">Specialty<select className={field} value={specialty} onChange={(e) => setSpecialty(e.target.value)}>{Array.from(new Set(POOL.map((n) => n.specialty))).map((s) => <option key={s}>{s}</option>)}</select></label>
             <label className="text-sm">Shift<select className={field} value={shift} onChange={(e) => setShift(e.target.value)}>{["3 × 12 nights", "3 × 12 days", "3 × 12 rotating", "4 × 10 days"].map((s) => <option key={s}>{s}</option>)}</select></label>
-            <label className="text-sm">Weekly pay (local)<Input type="number" value={weeklyPay} onChange={(e) => setWeeklyPay(Number(e.target.value))} /></label>
+            {service ? <div className="text-sm">Weekly pay<p className="mt-2 text-muted-foreground">Unpaid community service</p></div> : <label className="text-sm">Weekly pay (local)<Input type="number" value={weeklyPay} onChange={(e) => setWeeklyPay(Number(e.target.value))} /></label>}
+            <label className="flex items-start gap-2 text-xs text-muted-foreground sm:col-span-2"><input type="checkbox" className="mt-0.5" checked={service} onChange={(e) => setService(e.target.checked)} /> <span>Make this an unpaid community service gig (rural or underserved outreach, faith-based or secular). It's shown only to nurses who opt in, with lodging and meals covered by you or partners.</span></label>
             <label className="text-sm">Length<select className={field} value={weeks} onChange={(e) => setWeeks(Number(e.target.value))}>{[4, 8, 13, 26].map((w) => <option key={w} value={w}>{w} weeks</option>)}</select></label>
             <label className="text-sm">Start date<Input type="date" value={start} onChange={(e) => setStart(e.target.value)} /></label>
           </div>
