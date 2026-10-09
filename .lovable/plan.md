@@ -1,47 +1,30 @@
-# Make the Splash a Problem-First Marketplace Gateway
+# Elevate the Splash Design Without Changing Content
 
-## Recommendation
-Keep the splash focused on two jobs only:
+## Goal
+Keep every current word and the direct three-journey flow, but make the splash feel more distinctive, energetic, and premium for a hackathon judging moment.
 
-1. Make the Puerto Rico nursing challenge understandable in seconds.
-2. Let each judge immediately enter the journey they want to experience.
+## Design recommendation
+- Promote the existing Puerto Rico coastline from a faint lower strip to a full-viewport image, with a deep-ocean directional wash that preserves text contrast.
+- Recompose the desktop splash asymmetrically: keep the problem statement visually dominant on the left/top while the journey choices form a strong entry zone beneath or slightly offset—not three small cards floating in empty space.
+- Keep the mobile sequence exactly logical: logo and language → message → tagline → journey choices, with tighter vertical rhythm so the first choice remains immediately visible.
+- Replace the rigid, equal card-grid feeling with three visually distinct “journey doors”: larger role artwork, subtle image depth, a clear action area, and stronger coral response on interaction.
+- Introduce one restrained connecting motif behind the role choices to suggest one ecosystem without adding labels or explanatory copy.
+- Increase contrast in scale, spacing, and surface treatment so the headline, supporting text, tagline, and choices no longer carry similar visual weight.
+- Add a short staggered entrance for the message and journey doors, plus light parallax or image drift on capable devices; preserve reduced-motion behavior.
+- Retain the current logo, exact English and Spanish copy, role order, supplied icons, brand palette, coastline asset, language toggle, and jingle transition.
 
-Strong marketplace homepages lead with one clear promise and an immediate audience choice. Upwork pairs a short proposition with “hire” versus “work” intent, while TrustedHousesitters explains the exchange through distinct participant benefits. Healthcare marketplaces such as Vivian and Incredible Health add specificity and proof, but WEPA should not introduce unsupported live metrics or distract judges with inventory on this gateway.
+## Marketplace references applied
+- Use Airbnb’s product-forward visual confidence: let the subject imagery carry more of the first impression instead of treating it as decoration.
+- Use Upwork’s strong audience-routing hierarchy: participant choices should feel like primary actions, not informational cards.
+- Use TrustedHousesitters’ participant exchange clarity: make each journey visually recognizable at a glance while preserving the shared system.
 
-## Proposed first-viewport story
-```text
-PUERTO RICO NEEDS NURSES.
-
-Mainland travel contracts win on pay.
-Puerto Rico wins by turning local-pay hospital work
-into a supported island experience.
-
-Hospitals + Nurses + Tourism
-one connected marketplace
-
-COME FOR THE ISLAND. CARE FOR ITS PEOPLE.
-
-[ Nurse journey ] [ Hospital journey ] [ Tourism journey ]
-```
-
-The final wording will stay plain-English and avoid implying that tourism replaces clinical compensation or that WEPA is a staffing agency.
-
-## Visual treatment
-- Make the problem statement the unmistakable focal point, with fewer lines and stronger scale contrast.
-- Use the existing Puerto Rico coast more assertively as a full-viewport environmental signal, under a deep-ocean readability wash rather than confined to a faint lower strip.
-- Turn the solution into a compact visual bridge: three participant labels connected around a single “WEPA marketplace” point. This explains the model without another paragraph.
-- Keep the three role choices as the dominant interactive area, but make them feel like distinct entry doors rather than three identical information cards.
-- Give each entry a short action label and one outcome-focused sentence; retain the supplied role artwork and dedicated arrow space.
-- Use restrained staggered reveal and card response so the page feels alive, while respecting reduced-motion settings.
-- Preserve the English/Spanish toggle, jingle transition, brand palette, tagline, and mobile-first single-column flow.
-
-## Role-door copy direction
-- **Nurses:** Build your Passport and find an island assignment.
-- **Hospitals:** Bring qualified U.S. nurses to critical openings.
-- **Tourism partners:** Help make Puerto Rico assignments worth the journey.
+## Technical details
+- Limit changes to the splash composition and any reusable semantic styling needed in the global design tokens.
+- Do not change marketplace logic, role destinations, page content, or the jingle behavior.
+- Use existing assets and semantic color tokens; no new generated imagery is required.
 
 ## Validation
-- A first-time judge can state the problem, WEPA’s solution, and all three participants after one glance.
-- Every role remains reachable with one click and the jingle transition still works.
-- The message and role choices fit cleanly at the current phone and desktop sizes in both English and Spanish.
-- No invented traction, vacancy, salary, or outcome claims are introduced.
+- Compare the result at the current desktop viewport and a narrow phone viewport.
+- Confirm no clipping, overlap, or hidden role choices in English or Spanish.
+- Confirm all three journey doors and the jingle transition still work.
+- Confirm reduced-motion users receive a stable, non-animated composition.
