@@ -32,7 +32,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
-import { demoGigs, demoOffers, demoPartners, type DemoGig, type DemoOffer, type DemoPartner } from "@/lib/wepa-data";
+import { islandGigs, demoGigs, demoOffers, demoPartners, type DemoGig, type DemoOffer, type DemoPartner } from "@/lib/wepa-data";
 import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { CandidatePassport } from "@/components/readiness-passport";
@@ -295,7 +295,13 @@ function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void 
   const { state } = useReadiness();
   const progress = preparationProgress(state);
   const nextAction = nextBestAction(state);
-  const filtered = specialty === "All specialties" ? demoGigs : demoGigs.filter((gig) => gig.specialty.includes(specialty));
+  const [region, setRegion] = useState("Anywhere");
+  const [showService, setShowService] = useState(false);
+  const paid = islandGigs.filter((g) => !g.service);
+  const service = islandGigs.filter((g) => g.service);
+  const regions = ["Anywhere", ...Array.from(new Set(paid.map((g) => g.region!)))];
+  const specialties = ["All specialties", ...Array.from(new Set(paid.map((g) => g.specialty)))];
+  const filtered = paid.filter((g) => (specialty === "All specialties" || g.specialty === specialty) && (region === "Anywhere" || g.region === region)).sort((a, b) => b.match - a.match);
 
   return (
     <>
@@ -372,10 +378,25 @@ function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void 
       <section id="gigs" className="mx-auto max-w-[1440px] px-4 py-12 sm:px-6 lg:px-8">
         <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
           <div><p className="eyebrow">Live opportunities</p><h2 className="mt-1 text-3xl font-black sm:text-4xl">Gigs with more life in them.</h2></div>
-          <div className="relative w-full sm:w-64"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><select value={specialty} onChange={(event) => setSpecialty(event.target.value)} className="h-11 w-full appearance-none rounded-md border border-input bg-card pl-10 pr-4 text-sm font-medium outline-none focus:ring-2 focus:ring-ring"><option>All specialties</option><option>ICU</option><option>Emergency</option><option>NICU</option></select></div>
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+            <div className="relative sm:w-56"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><select value={specialty} onChange={(event) => setSpecialty(event.target.value)} className="h-11 w-full appearance-none rounded-md border border-input bg-card pl-10 pr-4 text-sm font-medium outline-none focus:ring-2 focus:ring-ring">{specialties.map((s) => <option key={s}>{s}</option>)}</select></div>
+            <div className="relative sm:w-52"><MapPin className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><select value={region} onChange={(event) => setRegion(event.target.value)} className="h-11 w-full appearance-none rounded-md border border-input bg-card pl-10 pr-4 text-sm font-medium outline-none focus:ring-2 focus:ring-ring">{regions.map((r) => <option key={r}>{r}</option>)}</select></div>
+          </div>
         </div>
-        <div className="mt-7 grid gap-5 lg:grid-cols-3">
+        <p className="mt-3 text-sm text-muted-foreground">{filtered.length} gigs at {new Set(filtered.map((g) => g.hospital)).size} Puerto Rico hospitals</p>
+        <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((gig, index) => <GigCard key={gig.id} gig={gig} featured={index === 0} onOpen={() => onSelectGig(gig)} />)}
+        </div>
+        <div className="mt-10 border-t border-border pt-6">
+          <button type="button" onClick={() => setShowService((v) => !v)} className="text-sm font-semibold text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
+            {showService ? "Hide" : "Also open:"} {service.length} unpaid community service gigs in rural and underserved areas {showService ? "" : "→"}
+          </button>
+          {showService && (
+            <>
+              <p className="mt-2 max-w-2xl text-sm text-muted-foreground">Short, unpaid stays where the reward is the work itself: bringing care and know-how to communities that need it. Faith-based and secular hosts. Lodging, meals and transport are covered.</p>
+              <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{service.map((gig) => <GigCard key={gig.id} gig={gig} featured={false} onOpen={() => onSelectGig(gig)} />)}</div>
+            </>
+          )}
         </div>
       </section>
 
@@ -492,22 +513,33 @@ function PartnerCard({ partner }: { partner: DemoPartner }) {
 function GigCard({ gig, featured, onOpen }: { gig: DemoGig; featured: boolean; onOpen: () => void }) {
   return (
     <article className={cn("group flex flex-col overflow-hidden border bg-card transition-all hover:-translate-y-1 hover:shadow-xl", featured ? "border-primary" : "border-border")}>
-      <div className={cn("flex items-center justify-between px-4 py-2 text-xs font-bold uppercase", featured ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
-        <span>{featured ? "Top match" : "Great match"}</span><span>{gig.match}% fit</span>
+      <div className="relative aspect-[16/10] overflow-hidden bg-muted">
+        {gig.image && <img src={gig.image} alt={gig.hospital} loading="lazy" className="size-full object-cover transition-transform duration-500 group-hover:scale-105" />}
+        <div className="absolute inset-0 bg-gradient-to-t from-surface-dark via-surface-dark/30 to-transparent" />
+        <span className={cn("absolute left-3 top-3 px-2 py-1 text-[11px] font-bold uppercase", gig.service ? "bg-card text-foreground" : featured ? "bg-primary text-primary-foreground" : "bg-card/90 text-foreground")}>{gig.service ? "Community service · unpaid" : featured ? `Top match · ${gig.match}%` : `${gig.match}% fit`}</span>
+        <div className="absolute inset-x-0 bottom-0 p-4 text-surface-dark-foreground">
+          <p className="flex items-center gap-1 text-xs font-semibold opacity-90"><MapPin className="size-3.5" /> {gig.city} · {gig.region}</p>
+          <p className="mt-0.5 text-lg font-black leading-tight">{gig.hospital}</p>
+        </div>
       </div>
       <div className="flex flex-1 flex-col p-5">
-        <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground"><Building2 className="size-4" /> {gig.hospital}</div>
-        <h3 className="mt-4 text-2xl font-extrabold leading-tight">{gig.title}</h3>
-        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground"><span className="flex items-center gap-1"><MapPin className="size-4" /> {gig.city}</span><span className="flex items-center gap-1"><Stethoscope className="size-4" /> {gig.specialty}</span></div>
-        <div className="my-5 grid grid-cols-3 border-y border-border py-4 text-center"><div><strong className="block text-lg">${gig.pay.toLocaleString()}</strong><span className="text-[11px] uppercase text-muted-foreground">weekly</span></div><div className="border-x border-border"><strong className="block text-lg">{gig.duration}</strong><span className="text-[11px] uppercase text-muted-foreground">weeks</span></div><div><strong className="block text-lg">{gig.start}</strong><span className="text-[11px] uppercase text-muted-foreground">starts</span></div></div>
-        <p className="text-xs font-bold uppercase text-muted-foreground">Your island package</p>
-        <ul className="mt-3 space-y-2">{gig.benefits.map((benefit) => <li key={benefit} className="flex items-center gap-2 text-sm"><CheckCircle2 className="size-4 text-primary" /> {benefit}</li>)}</ul>
-        <Button className="mt-6 w-full" variant={featured ? "default" : "outline"} onClick={onOpen}>See the full gig <ArrowRight /></Button>
+        <h3 className="text-xl font-extrabold leading-tight">{gig.title}</h3>
+        {gig.hospitalPitch && <p className="mt-2 text-sm text-muted-foreground">{gig.hospitalPitch}</p>}
+        {gig.area && <p className="mt-3 border-l-2 border-coral pl-3 text-sm font-medium">{gig.area}</p>}
+        {gig.areaHighlights && <div className="mt-3 flex flex-wrap gap-1.5">{gig.areaHighlights.map((h) => <span key={h} className="bg-muted px-2 py-0.5 text-[11px] font-semibold">{h}</span>)}</div>}
+        <div className="my-4 grid grid-cols-3 border-y border-border py-3 text-center">
+          <div><strong className="block text-base">{gig.service ? "Unpaid" : `$${gig.pay.toLocaleString()}`}</strong><span className="text-[10px] uppercase text-muted-foreground">{gig.service ? "service" : "weekly"}</span></div>
+          <div className="border-x border-border"><strong className="block text-base">{gig.duration}</strong><span className="text-[10px] uppercase text-muted-foreground">weeks</span></div>
+          <div><strong className="block text-base">{gig.start}</strong><span className="text-[10px] uppercase text-muted-foreground">starts</span></div>
+        </div>
+        <p className="text-[11px] font-bold uppercase text-muted-foreground">{gig.service ? "Covered for you" : "Your island package"}</p>
+        <ul className="mt-2 space-y-1.5">{gig.benefits.map((benefit) => <li key={benefit} className="flex items-center gap-2 text-sm"><CheckCircle2 className="size-4 text-primary" /> {benefit}</li>)}</ul>
+        <div className="mt-auto pt-5"><Button className="w-full" variant={featured ? "default" : "outline"} onClick={onOpen}>See the full gig <ArrowRight /></Button></div>
+        {gig.photoCredit && <p className="mt-2 text-[10px] text-muted-foreground">Photo: {gig.photoCredit}</p>}
       </div>
     </article>
   );
 }
-
 
 function HeroStat({ value, label }: { value: string; label: string }) {
   return <div className="border border-surface-dark-foreground/20 bg-surface-dark/50 px-3 py-3 backdrop-blur"><strong className="block text-lg font-black text-primary sm:text-xl">{value}</strong><span className="mt-0.5 block text-[11px] leading-tight text-surface-dark-foreground/70">{label}</span></div>;
@@ -517,7 +549,7 @@ function GigDialog({ gig, onClose, signedIn, onAuth }: { gig: DemoGig | null; on
   const [applied, setApplied] = useState(false);
   useEffect(() => setApplied(false), [gig?.id]);
   if (!gig) return null;
-  return <Dialog open={Boolean(gig)} onOpenChange={(open) => !open && onClose()}><DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-2xl"><DialogHeader><p className="eyebrow">{gig.match}% match · {gig.city}</p><DialogTitle className="text-3xl font-black">{gig.title}</DialogTitle><DialogDescription>{gig.hospital} · {gig.specialty}</DialogDescription></DialogHeader><div className="grid grid-cols-3 border-y border-border py-4 text-center"><div><strong className="text-xl">${gig.pay}</strong><span className="block text-xs text-muted-foreground">per week</span></div><div className="border-x border-border"><strong className="text-xl">{gig.duration}</strong><span className="block text-xs text-muted-foreground">weeks</span></div><div><strong className="text-xl">{gig.start}</strong><span className="block text-xs text-muted-foreground">start</span></div></div><p className="text-sm leading-relaxed text-muted-foreground">{gig.description}</p><div className="bg-primary/8 p-5"><p className="text-xs font-bold uppercase text-primary">Built into this gig</p><ul className="mt-3 grid gap-2 sm:grid-cols-2">{gig.benefits.map((item) => <li key={item} className="flex items-center gap-2 text-sm font-medium"><CheckCircle2 className="size-4 text-primary" /> {item}</li>)}</ul></div>{applied ? <div className="flex items-center gap-3 bg-primary p-4 text-primary-foreground"><CheckCircle2 /><div><strong className="block">Application sent</strong><span className="text-sm text-primary-foreground/75">The hospital can now review your Puerto Rico readiness.</span></div></div> : <Button size="lg" className="w-full" onClick={() => { if (!signedIn) { onClose(); onAuth(); return; } setApplied(true); toast.success("Application sent to the hospital."); }}>Apply to this gig <ArrowRight /></Button>}</DialogContent></Dialog>;
+  return <Dialog open={Boolean(gig)} onOpenChange={(open) => !open && onClose()}><DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-2xl">{gig.image && <img src={gig.image} alt={gig.hospital} className="-mx-6 -mt-6 aspect-[16/7] w-[calc(100%+3rem)] max-w-none object-cover" />}<DialogHeader><p className="eyebrow">{gig.service ? "Community service · unpaid" : `${gig.match}% match`} · {gig.city}</p><DialogTitle className="text-3xl font-black">{gig.title}</DialogTitle><DialogDescription>{gig.hospital} · {gig.specialty}</DialogDescription></DialogHeader><div className="grid grid-cols-3 border-y border-border py-4 text-center"><div><strong className="text-xl">{gig.service ? "Unpaid" : `$${gig.pay.toLocaleString()}`}</strong><span className="block text-xs text-muted-foreground">{gig.service ? "service" : "per week"}</span></div><div className="border-x border-border"><strong className="text-xl">{gig.duration}</strong><span className="block text-xs text-muted-foreground">weeks</span></div><div><strong className="text-xl">{gig.start}</strong><span className="block text-xs text-muted-foreground">start</span></div></div><p className="text-sm leading-relaxed text-muted-foreground">{gig.description}</p>{gig.hospitalPitch && <div className="grid gap-3 sm:grid-cols-2"><div className="border border-border p-4"><p className="text-xs font-bold uppercase text-muted-foreground">The hospital</p><p className="mt-1 text-sm">{gig.hospitalPitch}</p></div><div className="border border-border p-4"><p className="text-xs font-bold uppercase text-muted-foreground">Life in {gig.city}</p><p className="mt-1 text-sm">{gig.area}</p></div></div>}{gig.serviceFocus && <p className="text-sm font-semibold">{gig.serviceFocus}</p>}<div className="bg-primary/8 p-5"><p className="text-xs font-bold uppercase text-primary">Built into this gig</p><ul className="mt-3 grid gap-2 sm:grid-cols-2">{gig.benefits.map((item) => <li key={item} className="flex items-center gap-2 text-sm font-medium"><CheckCircle2 className="size-4 text-primary" /> {item}</li>)}</ul></div>{applied ? <div className="flex items-center gap-3 bg-primary p-4 text-primary-foreground"><CheckCircle2 /><div><strong className="block">Application sent</strong><span className="text-sm text-primary-foreground/75">The hospital can now review your Puerto Rico readiness.</span></div></div> : <Button size="lg" className="w-full" onClick={() => { if (!signedIn) { onClose(); onAuth(); return; } setApplied(true); toast.success("Application sent to the hospital."); }}>Apply to this gig <ArrowRight /></Button>}</DialogContent></Dialog>;
 }
 
 function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {

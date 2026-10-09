@@ -25,6 +25,8 @@ export type DemoGig = {
   match: number;
   description: string;
   benefits: string[];
+  image?: string; hospitalPitch?: string; area?: string; areaHighlights?: string[]; region?: string; photoCredit?: string;
+  service?: boolean; serviceFocus?: string;
 };
 
 export const demoOffers: DemoOffer[] = [
@@ -222,3 +224,10 @@ export const demoPartners: DemoPartner[] = [
     perk: "West-coast surf & stay weekends",
   },
 ];
+
+import { PR_GIGS, PR_HOSPITALS } from "@/lib/pr-hospitals";
+/** Nurse-facing gig search: real PR hospitals, fictional gigs. */
+export const islandGigs: DemoGig[] = PR_GIGS.map((g) => {
+  const h = PR_HOSPITALS.find((x) => x.id === g.hospitalId)!;
+  return { ...g, hospital: h.name, city: h.town, image: h.image, hospitalPitch: h.pitch, area: h.area, areaHighlights: h.areaHighlights, region: h.region, photoCredit: h.photoCredit };
+});
