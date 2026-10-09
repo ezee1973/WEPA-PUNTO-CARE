@@ -36,6 +36,7 @@ import { demoGigs, demoOffers, demoPartners, type DemoGig, type DemoOffer, type 
 import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { CandidatePassport } from "@/components/readiness-passport";
+import { HospitalExperience } from "@/components/hospital-experience";
 import { STAGES, nextBestAction, preparationProgress, useReadiness } from "@/lib/readiness";
 
 const logoUrl = logoAsset.url;
@@ -336,59 +337,6 @@ function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void 
 
       <MobileNurseNav />
     </>
-  );
-}
-
-function HospitalExperience() {
-  const [offers, setOffers] = useState(demoOffers);
-  const selected = offers.filter((offer) => offer.selected);
-  const packageCost = selected.reduce((sum, offer) => sum + offer.price, 0);
-  const packageRetail = selected.reduce((sum, offer) => sum + offer.retail, 0);
-
-  function toggle(id: string) {
-    setOffers((current) => current.map((offer) => offer.id === id ? { ...offer, selected: !offer.selected } : offer));
-  }
-
-  return (
-    <section className="mx-auto max-w-[1440px] px-4 py-12 sm:px-6 lg:px-8">
-      <div className="max-w-2xl">
-        <p className="eyebrow">Hospital workspace</p>
-        <h2 className="mt-1 text-3xl font-black sm:text-4xl">Build a gig nurses actually want.</h2>
-        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">Centro Médico del Caribe · San Juan. Pick from private partner offers to assemble the island package that ships with your gig. Nurses see the package — never the pricing.</p>
-      </div>
-      <HospitalCandidate />
-      <div className="mt-8 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-        <div className="grid gap-4 sm:grid-cols-2">
-          {offers.map((offer) => (
-            <button key={offer.id} type="button" onClick={() => toggle(offer.id)} aria-pressed={offer.selected} className={cn("flex flex-col border p-5 text-left transition-colors", offer.selected ? "border-primary bg-primary/5" : "border-border bg-card hover:border-primary/50")}>
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black uppercase text-muted-foreground">{offer.category}</span>
-                <span className={cn("flex size-6 items-center justify-center rounded-full border", offer.selected ? "border-primary bg-primary text-primary-foreground" : "border-border text-transparent")}><Check className="size-3.5" /></span>
-              </div>
-              <h3 className="mt-3 text-lg font-extrabold leading-tight">{offer.title}</h3>
-              <p className="mt-1 text-xs font-bold text-primary">{offer.partner} · {offer.location}</p>
-              <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">{offer.description}</p>
-              <p className="mt-4 border-t border-border pt-3 text-sm"><strong className="text-lg">${offer.price.toLocaleString()}</strong> <span className="text-xs text-muted-foreground">partner price · retail ${offer.retail.toLocaleString()}</span></p>
-            </button>
-          ))}
-        </div>
-        <aside className="h-fit border-2 border-primary bg-primary/5 lg:sticky lg:top-24">
-          <div className="border-b border-primary/20 bg-primary px-5 py-4 text-primary-foreground">
-            <h3 className="text-lg font-black">Your gig package</h3>
-            <p className="text-xs text-primary-foreground/75">Cardiac ICU · 13 weeks · San Juan</p>
-          </div>
-          <ul className="space-y-2 p-5">
-            {selected.length === 0 && <li className="text-sm text-muted-foreground">Select offers to build the package.</li>}
-            {selected.map((offer) => <li key={offer.id} className="flex items-center gap-2 text-sm font-medium"><CheckCircle2 className="size-4 text-primary" /> {offer.title}</li>)}
-          </ul>
-          <div className="grid grid-cols-2 border-t border-primary/20 text-center">
-            <div className="border-r border-primary/20 p-4"><strong className="block text-xl">${packageCost.toLocaleString()}</strong><span className="text-[11px] uppercase text-muted-foreground">your cost</span></div>
-            <div className="p-4"><strong className="block text-xl text-primary">${packageRetail.toLocaleString()}</strong><span className="text-[11px] uppercase text-muted-foreground">nurse sees value</span></div>
-          </div>
-          <div className="p-5 pt-0"><Button className="w-full" onClick={() => toast.success("Gig published with its island package.")}>Publish this gig <ArrowRight /></Button></div>
-        </aside>
-      </div>
-    </section>
   );
 }
 

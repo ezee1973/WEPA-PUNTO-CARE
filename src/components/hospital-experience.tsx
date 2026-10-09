@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import {
   ArrowRight, BarChart3, Check, CheckCircle2, Handshake, LogIn, LogOut, MapPin, MessageSquare, Plus, RotateCcw, Search, Send, Trophy, Users,
 } from "lucide-react";
@@ -200,7 +200,7 @@ function Kpi({ label, value }: { label: string; value: string }) {
   return <div className="border border-border bg-card p-4"><strong className="block text-2xl font-black">{value}</strong><span className="text-[11px] uppercase text-muted-foreground">{label}</span></div>;
 }
 
-function Panel({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
+function Panel({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
   return <div className="border border-border bg-card p-5"><div className="mb-4 flex items-center justify-between gap-2"><h3 className="text-lg font-black">{title}</h3>{action}</div>{children}</div>;
 }
 
