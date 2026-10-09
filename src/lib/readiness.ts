@@ -34,7 +34,7 @@ export const INTEREST_OPTIONS = {
 export type Interests = { regions: string[]; experiences: string[]; length: string; housing: string; settings: string[] };
 
 export type Pathway = {
-  active: boolean; oneYear: boolean; continuous: boolean; inactive: boolean; goodStanding: boolean; pending: boolean; revoked: boolean; category: string;
+  active: boolean | null; oneYear: boolean | null; continuous: boolean | null; inactive: boolean | null; goodStanding: boolean | null; pending: boolean | null; revoked: boolean | null; category: string;
 };
 
 export type NurseProfile = typeof elena;
@@ -61,6 +61,7 @@ export function interestsComplete(i: Interests) {
 // Single source of truth for "what should the nurse do next" — the passport
 // workspace and the nurse home both read this so the two can never drift.
 export function nextBestAction(s: ReadinessState) {
+  if (!pathwayComplete(s.pathway)) return "Answer the pathway questions to find your authorization route";
   if (!s.packetConfirmed) return s.packetPrepared ? "Review and confirm your prepared packet" : "Prepare your document packet with Wepa Guide";
   if (s.checklist.find((c) => c.id === "declaration")?.status !== "Submitted — self-reported") return "Sign your sworn declaration before a notary";
   if (!s.spanish) return "Complete the 3-question clinical Spanish scenario";
@@ -85,7 +86,7 @@ const seedChecklist: ChecklistItem[] = [
 
 export const seed: ReadinessState = {
   profile: elena,
-  pathway: { active: true, oneYear: true, continuous: true, inactive: false, goodStanding: true, pending: false, revoked: false, category: "RN — Emergency" },
+  pathway: { active: null, oneYear: null, continuous: null, inactive: null, goodStanding: null, pending: null, revoked: null, category: "" },
   checklist: seedChecklist,
   packetPrepared: false,
   packetConfirmed: false,
@@ -113,9 +114,14 @@ export function preparationProgress(s: ReadinessState) {
   return Math.min(p, 98); // the last step is official authorization, which WEPA never controls
 }
 
+export function pathwayComplete(p: Pathway) {
+  return [p.active, p.oneYear, p.continuous, p.inactive, p.goodStanding, p.pending, p.revoked].every((v) => v !== null) && !!p.category.trim();
+}
+
 export function pathwayResult(p: Pathway) {
+  if (!pathwayComplete(p)) return "Additional information required" as const;
   if (p.revoked || p.pending || !p.goodStanding) return "Manual board review recommended" as const;
-  if (!p.active || !p.category.trim()) return "Additional information required" as const;
+  if (!p.active) return "Additional information required" as const;
   if (!p.oneYear || !p.continuous || p.inactive) return "Manual board review recommended" as const;
   return "Potential Regulation 9746 pathway" as const;
 }
