@@ -39,7 +39,7 @@ const statusTone: Record<ItemStatus, string> = {
 };
 
 function guideContext(s: ReadinessState) {
-  return { profile: elena, goal: "Get ready for all WEPA Puerto Rico gigs, then match by interests", interests: s.interests, pathway: s.pathway, checklist: s.checklist.map(({ title, status, source, expires }) => ({ title, status, source, expires })) };
+  return { profile: s.profile, goal: "Get ready for all WEPA Puerto Rico gigs, then match by interests", interests: s.interests, pathway: s.pathway, checklist: s.checklist.map(({ title, status, source, expires }) => ({ title, status, source, expires })) };
 }
 
 export function ReadinessPassport() {
@@ -116,8 +116,9 @@ export function ReadinessPassport() {
           <Button asChild variant="ghost" size="icon" aria-label="Back to WEPA.care"><Link to="/"><ArrowLeft /></Link></Button>
           <div className="min-w-0 flex-1">
             <p className="truncate font-display text-lg font-bold leading-tight">Puerto Rico Readiness Passport</p>
-            <p className="truncate text-xs text-muted-foreground">{elena.name} · {elena.specialty}</p>
+            <p className="truncate text-xs text-muted-foreground">{state.profile.name} · {state.profile.specialty}</p>
           </div>
+          <Button variant="outline" size="sm" className="shrink-0" onClick={() => setEditProfile(true)}><Pencil /> Edit profile</Button>
           <span className="rounded-full bg-surface-dark px-3 py-1 text-sm font-bold text-surface-dark-foreground">{progress}%</span>
         </div>
         <nav className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-4 pb-2 [scrollbar-width:none]">
