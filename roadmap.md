@@ -7,3 +7,4 @@
 - [x] Add authentication, persistent marketplace data, and role-aware access
 - [x] Integrate supplied branding, jingle, and mobile-first nurse experience
 - [x] Verify the full demo loop on desktop and mobile
+- [x] Puerto Rico Readiness Passport with Wepa Guide AI (nurse) + Candidate Passport (hospital)
