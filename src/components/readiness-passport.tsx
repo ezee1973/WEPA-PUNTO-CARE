@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, Bot, CheckCircle2, Circle, Download, FileText, Languages, Loader2, Paperclip, Pencil, RefreshCw, Send, ShieldCheck, Upload } from "lucide-react";
 import nurseIconAsset from "@/assets/wepa-nurse.png.asset.json";
@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { INTEREST_OPTIONS, interestsComplete, elena, nextBestAction, pathwayResult, preparationProgress, streamGuide, useReadiness, type ChecklistItem, type ItemStatus, type Pathway, type ReadinessState } from "@/lib/readiness";
+import { INTEREST_OPTIONS, interestsComplete, nextBestAction, pathwayResult, preparationProgress, streamGuide, useReadiness, type ChecklistItem, type ItemStatus, type NurseProfile, type Pathway, type ReadinessState } from "@/lib/readiness";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 
