@@ -153,7 +153,7 @@ function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
           <img
             src={logoUrl}
             alt="WEPA.care"
-            className="h-20 w-auto [filter:drop-shadow(0_0_18px_rgba(245,242,233,0.95))_drop-shadow(0_0_55px_rgba(245,242,233,0.75))] sm:h-28"
+            className="h-28 w-auto [filter:drop-shadow(0_0_18px_rgba(245,242,233,0.95))_drop-shadow(0_0_55px_rgba(245,242,233,0.75))] sm:h-40"
           />
           <p className="text-center text-sm font-bold uppercase tracking-[0.25em] text-surface-dark-foreground/90 sm:text-base">
             Come for the Island. Care for its People.
