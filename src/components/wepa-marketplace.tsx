@@ -3,7 +3,6 @@ import {
   ArrowRight,
   Bell,
   Building2,
-  Palmtree,
   Check,
   CheckCircle2,
   ChevronLeft,
@@ -23,6 +22,9 @@ import { toast } from "sonner";
 import coastImage from "@/assets/puerto-rico-coast.jpg";
 import jingleAsset from "@/assets/wepa-jingle.asset.json";
 import logoAsset from "@/assets/wepa-care-logo.asset.json";
+import nurseIconAsset from "@/assets/wepa-nurse.png.asset.json";
+import hospitalIconAsset from "@/assets/wepa-hospital.png.asset.json";
+import tourismIconAsset from "@/assets/wepa-tourism-partner.png.asset.json";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
