@@ -137,7 +137,7 @@ export type Candidate = { nurseId: string; gigId: string; stage: AtsStage; weekl
 
 export type HospitalGig = {
   id: string; title: string; specialty: string; location: LocationId; weeks: number; weeklyPay: number; shift: string;
-  start: string; perks: string[]; status: "Draft" | "Published"; views: number;
+  start: string; perks: string[]; status: "Draft" | "Published"; views: number; town?: string;
 };
 
 export type HospitalState = { loggedIn: boolean; facilityId: string; gigs: HospitalGig[]; candidates: Candidate[] };
