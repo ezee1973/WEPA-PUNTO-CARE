@@ -3,6 +3,7 @@ import {
   ArrowRight,
   Bell,
   Building2,
+  Palmtree,
   Check,
   CheckCircle2,
   ChevronLeft,
