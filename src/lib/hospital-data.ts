@@ -18,7 +18,7 @@ export const LOCATIONS: PRLocation[] = [
 
 export type PerkCategory = "Housing" | "Mobility" | "Adventure" | "Wellness" | "Food & Culture" | "Family" | "Professional" | "Travel";
 
-export type Perk = { id: string; title: string; partner: string; category: PerkCategory; retail: number; cost: number; locations: LocationId[] | "all"; note?: string };
+export type Perk = { id: string; title: string; partner: string; category: PerkCategory; retail: number; cost: number; locations: LocationId[] | "all"; note?: string; image?: string; custom?: boolean };
 
 const ALL = "all" as const;
 
@@ -285,6 +285,12 @@ const OFFER_PATCH: Record<string, PerkOffer> = {
   gym: { offerType: "Special", headline: "Corporate wellness rate", requirement: "Flyer at employee entrance" },
 };
 export function offerOf(id: string): PerkOffer { return OFFER_PATCH[id] ?? { offerType: "Standard" }; }
+
+/** Partner-published offers join the same perk menu hospitals build packages from. */
+export function registerPartnerOffers(list: { perk: Perk; offer: PerkOffer }[]) {
+  for (let i = PERKS.length - 1; i >= 0; i--) if (PERKS[i]!.custom) PERKS.splice(i, 1);
+  for (const { perk, offer } of list) { PERKS.push({ ...perk, custom: true }); OFFER_PATCH[perk.id] = offer; }
+}
 
 // More partner perks so every corner of the island has a real menu.
 PERKS.push(
