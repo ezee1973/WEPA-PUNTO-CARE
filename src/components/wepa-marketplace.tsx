@@ -88,10 +88,16 @@ export function WepaMarketplace() {
   );
 }
 
-const JOURNEY_DOORS: { id: MarketRole; label: string; hook: string; icon: typeof Stethoscope }[] = [
-  { id: "nurse", label: "I'm a Nurse", hook: "Island gigs, covered living, real adventure.", icon: Stethoscope },
-  { id: "hospital", label: "I'm a Hospital", hook: "Build gig packages nurses actually want.", icon: Building2 },
-  { id: "tourism", label: "I'm a Tourism Partner", hook: "Put your experiences in front of clinicians.", icon: Palmtree },
+const ROLE_ICONS: Record<MarketRole, string> = {
+  nurse: nurseIconAsset.url,
+  hospital: hospitalIconAsset.url,
+  tourism: tourismIconAsset.url,
+};
+
+const JOURNEY_DOORS: { id: MarketRole; label: string; hook: string }[] = [
+  { id: "nurse", label: "I'm a Nurse", hook: "Island gigs, covered living, real adventure." },
+  { id: "hospital", label: "I'm a Hospital", hook: "Build gig packages nurses actually want." },
+  { id: "tourism", label: "I'm a Tourism Partner", hook: "Put your experiences in front of clinicians." },
 ];
 
 function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
@@ -171,7 +177,7 @@ function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
                 onClick={() => enter(door.id)}
                 className="group flex flex-col items-start gap-3 rounded-3xl border border-surface-dark-foreground/15 bg-surface-dark-foreground/5 p-6 text-left backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-coral/60 hover:bg-surface-dark-foreground/10 hover:shadow-2xl hover:shadow-coral/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral"
               >
-                <door.icon className="h-8 w-8 text-teal transition-colors group-hover:text-coral" aria-hidden />
+                <img src={ROLE_ICONS[door.id]} alt="" aria-hidden className="h-16 w-16 object-contain drop-shadow-lg transition-transform duration-300 group-hover:scale-110 sm:h-20 sm:w-20" />
                 <span className="text-lg font-black text-surface-dark-foreground">{door.label}</span>
                 <span className="text-sm leading-snug text-surface-dark-foreground/70">{door.hook}</span>
               </button>
