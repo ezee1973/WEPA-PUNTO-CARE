@@ -111,29 +111,17 @@ function AnthemTakeover({ onDone }: { onDone: () => void }) {
         autoPlay
         playsInline
         onEnded={finish}
-        className="h-full w-full object-cover"
+        className="h-full w-full object-contain"
       />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between bg-gradient-to-t from-surface-dark/80 to-transparent p-5 sm:p-8">
-        <img src={logoUrl} alt="" className="h-9 w-auto object-contain" />
-        <button
-          type="button"
-          onClick={finish}
-          className="pointer-events-auto rounded-full border border-surface-dark-foreground/30 bg-surface-dark/60 px-4 py-2 text-xs font-bold uppercase tracking-wide text-surface-dark-foreground backdrop-blur transition-colors hover:bg-surface-dark-foreground/15"
-        >
-          Skip
-        </button>
-      </div>
     </div>
   );
 }
 
 function Header({
-  onAnthem,
   signedInEmail,
   onAuth,
   onSignOut,
 }: {
-  onAnthem: () => void;
   signedInEmail: string | null;
   onAuth: () => void;
   onSignOut: () => void;
@@ -145,9 +133,6 @@ function Header({
         <div className="hidden h-7 w-px bg-border sm:block" />
         <p className="hidden text-xs font-semibold uppercase text-muted-foreground sm:block">Come for the Island.<br />Care for its People.</p>
         <div className="ml-auto flex items-center gap-1">
-          <Button variant="ghost" size="icon" onClick={onAnthem} aria-label="Play the WEPA anthem" title="Play the WEPA anthem">
-            <Music2 />
-          </Button>
           <Button variant="ghost" size="icon" aria-label="Notifications"><Bell /></Button>
           {signedInEmail ? (
             <Button variant="outline" size="sm" onClick={onSignOut} className="hidden sm:inline-flex">Sign out</Button>
@@ -161,7 +146,7 @@ function Header({
   );
 }
 
-function NurseExperience({ onSelectGig, onAnthem }: { onSelectGig: (gig: DemoGig) => void; onAnthem: () => void }) {
+function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void }) {
   const [specialty, setSpecialty] = useState("All specialties");
   const [stepState, setStepState] = useState(qualificationSteps);
   const complete = stepState.filter((step) => step.done).length;
