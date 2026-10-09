@@ -6,4 +6,4 @@
 - [x] Implement tourism partner offer creation and activity flow
 - [x] Add authentication, persistent marketplace data, and role-aware access
 - [x] Integrate supplied branding, jingle, and mobile-first nurse experience
-- [ ] Verify the full demo loop on desktop and mobile
+- [x] Verify the full demo loop on desktop and mobile
