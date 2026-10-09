@@ -297,7 +297,7 @@ function ChecklistCard({ item, state, onExplain, onDraft, onDraftChange, onSet }
     a.click();
   }
   function saveEdit() {
-    onSet({ source: draft.source.trim() || item.source, expires: draft.expires || undefined, next: draft.next.trim() || "None" });
+    onSet({ source: draft.source.trim() || item.source, expires: draft.expires, next: draft.next.trim() || "None" });
     setEditing(false);
     toast.success("Saved.");
   }
