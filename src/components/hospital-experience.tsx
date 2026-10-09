@@ -21,6 +21,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import { PassportThumb, PassportViewer, Pipeline } from "@/components/hospital-ats";
 import {
   ATS_STAGES, COMPETITORS, FACILITIES, LOCATIONS, MUNICIPALITIES, POOL, hubFor, offerOf, matchScore, packageTotals, perksFor, useHospital, weeklyValue,
   type AtsStage, type HospitalGig, type LocationId, type Perk, type PerkCategory, type PoolNurse,
@@ -71,7 +72,7 @@ export function HospitalExperience() {
       <div className="mt-6">
         {tab === "dashboard" && <Dashboard facilityLocation={facility.location} onGo={setTab} />}
         {tab === "pool" && <NursePool facilityLocation={facility.location} />}
-        {tab === "pipeline" && <Pipeline />}
+        {tab === "pipeline" && <Pipeline facilityLocation={facility.location} />}
         {tab === "build" && <GigBuilder facilityName={facility.name} facilityLocation={facility.location} onDone={() => setTab("dashboard")} />}
       </div>
     </section>
@@ -233,6 +234,8 @@ function NursePool({ facilityLocation }: { facilityLocation: LocationId }) {
     .filter((n) => (region === "any" || n.regions.includes(region)) && (specialty === "Any" || n.specialty === specialty) && (!readyOnly || n.status === "Passport ready") && `${n.name} ${n.home}`.toLowerCase().includes(q.toLowerCase()))
     .sort((a, b) => matchScore(b, facilityLocation) - matchScore(a, facilityLocation));
   const gig = state.gigs[0];
+  const [passport, setPassport] = useState<PoolNurse | null>(null);
+  const [limit, setLimit] = useState(24);
 
   function shortlist(n: PoolNurse) {
     if (!gig) { toast.error("Build a gig first."); return; }
@@ -252,7 +255,7 @@ function NursePool({ facilityLocation }: { facilityLocation: LocationId }) {
       </div>
       <p className="mt-3 text-xs text-muted-foreground">{list.length} nurses · readiness is preparation progress, not license approval. Only Puerto Rico’s licensing authority authorizes practice.</p>
       <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {list.map((n) => {
+        {list.slice(0, limit).map((n) => {
           const m = matchScore(n, facilityLocation);
           const inPipe = state.candidates.some((c) => c.nurseId === n.id);
           return (
@@ -271,95 +274,14 @@ function NursePool({ facilityLocation }: { facilityLocation: LocationId }) {
                 {n.regions.map((r) => <span key={r} className={cn("px-2 py-0.5 text-[11px] font-bold", r === facilityLocation ? "bg-coral text-primary-foreground" : "bg-muted")}>{locName(r)}</span>)}
                 {n.experiences.map((x) => <span key={x} className="border border-border px-2 py-0.5 text-[11px]">{x}</span>)}
               </div>
+              <div className="mt-3"><PassportThumb nurse={n} onOpen={() => setPassport(n)} /></div>
               <Button className="mt-4" variant={inPipe ? "outline" : "default"} disabled={inPipe} onClick={() => shortlist(n)}>{inPipe ? <><Check /> In pipeline</> : <><Plus /> Shortlist & contact</>}</Button>
             </div>
           );
         })}
       </div>
-    </div>
-  );
-}
-
-/* ---------------- Pipeline (ATS) ---------------- */
-
-function Pipeline() {
-  const { state, update } = useHospital();
-  const [openId, setOpenId] = useState<string | null>(null);
-  const open = state.candidates.find((c) => c.nurseId === openId) ?? null;
-  const nurse = open ? POOL.find((n) => n.id === open.nurseId) : null;
-  const gig = open ? state.gigs.find((g) => g.id === open.gigId) : null;
-  const [msg, setMsg] = useState("");
-  const [pay, setPay] = useState(0);
-
-  function patch(stage?: AtsStage, text?: string, from: "hospital" | "nurse" = "hospital", weeklyPay?: number) {
-    if (!open) return;
-    update((s) => ({ ...s, candidates: s.candidates.map((c) => c.nurseId === open.nurseId ? { ...c, stage: stage ?? c.stage, weeklyPay: weeklyPay ?? c.weeklyPay, messages: text ? [...c.messages, { from, text, at: new Date().toISOString() }] : c.messages } : c) }));
-  }
-
-  function send() {
-    if (!msg.trim() || !open) return;
-    patch(open.stage === "Shortlisted" ? "Contacted" : undefined, msg.trim());
-    setMsg("");
-    // Simulated nurse reply for the demo
-    setTimeout(() => update((s) => ({ ...s, candidates: s.candidates.map((c) => c.nurseId === open.nurseId ? { ...c, messages: [...c.messages, { from: "nurse", text: "Thanks! That sounds great — can you tell me more about the housing?", at: new Date().toISOString() }] } : c) })), 1200);
-  }
-
-  return (
-    <div>
-      <div className="grid gap-3 overflow-x-auto md:grid-cols-5">
-        {ATS_STAGES.map((stage) => (
-          <div key={stage} className="min-w-56 bg-muted/60 p-3">
-            <p className="mb-2 flex justify-between text-xs font-black uppercase">{stage}<span>{state.candidates.filter((c) => c.stage === stage).length}</span></p>
-            <div className="space-y-2">
-              {state.candidates.filter((c) => c.stage === stage).map((c) => {
-                const n = POOL.find((x) => x.id === c.nurseId);
-                const g = state.gigs.find((x) => x.id === c.gigId);
-                if (!n) return null;
-                return (
-                  <button key={c.nurseId} type="button" onClick={() => { setOpenId(c.nurseId); setPay(c.weeklyPay); }} className="w-full border border-border bg-card p-3 text-left hover:border-primary">
-                    <strong className="block text-sm">{n.name}</strong>
-                    <span className="block text-xs text-muted-foreground">{n.specialty}</span>
-                    <span className="mt-1 block text-xs">{g?.title ?? "—"} · {money(c.weeklyPay)}/wk</span>
-                    {c.messages.length > 0 && <span className="mt-1 flex items-center gap-1 text-[11px] text-primary"><MessageSquare className="size-3" /> {c.messages.length}</span>}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <Dialog open={!!open} onOpenChange={(o) => !o && setOpenId(null)}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
-          {open && nurse && (
-            <>
-              <DialogHeader><DialogTitle>{nurse.name}</DialogTitle><DialogDescription>{nurse.specialty} · {nurse.years} yrs · {nurse.home} · {gig?.title}</DialogDescription></DialogHeader>
-              <div className="flex flex-wrap gap-1">{ATS_STAGES.map((s) => <button key={s} type="button" onClick={() => patch(s)} className={cn("px-2 py-1 text-xs font-bold", open.stage === s ? "bg-primary text-primary-foreground" : "bg-muted")}>{s}</button>)}<button type="button" onClick={() => patch("Declined")} className={cn("px-2 py-1 text-xs font-bold", open.stage === "Declined" ? "bg-coral text-primary-foreground" : "bg-muted")}>Declined</button></div>
-
-              <div className="max-h-64 space-y-2 overflow-y-auto bg-muted/50 p-3">
-                {open.messages.length === 0 && <p className="text-sm text-muted-foreground">No messages yet — say hello.</p>}
-                {open.messages.map((m, i) => <div key={i} className={cn("max-w-[80%] p-2 text-sm", m.from === "hospital" ? "ml-auto bg-primary text-primary-foreground" : "bg-card")}>{m.text}</div>)}
-              </div>
-              <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); send(); }}><Input value={msg} onChange={(e) => setMsg(e.target.value)} placeholder={`Message ${nurse.name.split(" ")[0]}`} /><Button type="submit"><Send /></Button></form>
-
-              <div className="border border-border p-4">
-                <p className="text-sm font-black">Negotiate & offer</p>
-                <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <span className="text-sm">Weekly pay</span>
-                  <Input type="number" value={pay} onChange={(e) => setPay(Number(e.target.value))} className="w-28" />
-                  {gig && <span className="text-xs text-muted-foreground">+ {money(packageTotals(gig.perks).retail)} island package</span>}
-                </div>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <Button variant="outline" size="sm" onClick={() => { patch("Negotiating", `Counter proposal: ${money(pay)}/wk + full island package.`, "hospital", pay); toast.success("Counter sent."); }}>Send counter</Button>
-                  <Button size="sm" onClick={() => { patch("Offer sent", `Formal offer: ${money(pay)}/wk, ${gig?.weeks} weeks, starting ${gig?.start}, with the full island package.`, "hospital", pay); toast.success("Offer sent."); }}>Send formal offer</Button>
-                  {open.stage === "Offer sent" && <Button size="sm" variant="secondary" onClick={() => { patch("Accepted", "Offer accepted! 🎉", "nurse"); toast.success(`${nurse.name} accepted.`); }}>Simulate acceptance</Button>}
-                </div>
-                <p className="mt-2 text-xs text-muted-foreground">Start remains conditional on official Puerto Rico authorization and your credentialing.</p>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+      {list.length > limit && <Button variant="outline" className="mt-4 w-full" onClick={() => setLimit((l) => l + 24)}>Show more nurses ({list.length - limit} left)</Button>}
+      <PassportViewer nurse={passport} onClose={() => setPassport(null)} />
     </div>
   );
 }
