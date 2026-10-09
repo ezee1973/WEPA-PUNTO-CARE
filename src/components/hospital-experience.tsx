@@ -5,6 +5,16 @@ import {
 import { toast } from "sonner";
 
 import heroImage from "@/assets/hospital-hero.jpg";
+import coastImg from "@/assets/puerto-rico-coast.jpg";
+import hiltonImg from "@/assets/partners/caribe-hilton.jpg";
+import villaImg from "@/assets/partners/villa-montana.jpg";
+import eastImg from "@/assets/partners/east-island.jpg";
+import bioImg from "@/assets/partners/bio-bay.jpg";
+import toroImg from "@/assets/partners/toro-verde.jpg";
+import bacardiImg from "@/assets/partners/casa-bacardi.jpg";
+import spaImg from "@/assets/partners/copamarina.jpg";
+import doradoImg from "@/assets/partners/dorado-beach.jpg";
+import conqImg from "@/assets/partners/el-conquistador.jpg";
 import hospitalIconAsset from "@/assets/wepa-hospital.png.asset.json";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -12,8 +22,8 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import {
-  ATS_STAGES, COMPETITORS, FACILITIES, LOCATIONS, POOL, matchScore, packageTotals, perksFor, useHospital, weeklyValue,
-  type AtsStage, type HospitalGig, type LocationId, type PerkCategory, type PoolNurse,
+  ATS_STAGES, COMPETITORS, FACILITIES, LOCATIONS, MUNICIPALITIES, POOL, hubFor, offerOf, matchScore, packageTotals, perksFor, useHospital, weeklyValue,
+  type AtsStage, type HospitalGig, type LocationId, type Perk, type PerkCategory, type PoolNurse,
 } from "@/lib/hospital-data";
 
 type Tab = "dashboard" | "pool" | "pipeline" | "build";
@@ -356,13 +366,20 @@ function Pipeline() {
 
 /* ---------------- Gig builder ---------------- */
 
+const CAT_IMG: Record<PerkCategory, string[]> = {
+  Housing: [hiltonImg, villaImg, doradoImg, conqImg], Travel: [coastImg, conqImg], Mobility: [coastImg, villaImg], Adventure: [bioImg, toroImg, eastImg, conqImg],
+  Wellness: [spaImg, doradoImg], "Food & Culture": [bacardiImg, coastImg], Family: [villaImg, coastImg], Professional: [heroImage],
+};
+function perkImage(p: Perk) { const l = CAT_IMG[p.category]; let h = 0; for (const c of p.id) h = (h + c.charCodeAt(0)) % 997; return l[h % l.length]!; }
+
 const CATS: PerkCategory[] = ["Housing", "Travel", "Mobility", "Adventure", "Wellness", "Food & Culture", "Family", "Professional"];
 
 function GigBuilder({ facilityName, facilityLocation, onDone }: { facilityName: string; facilityLocation: LocationId; onDone: () => void }) {
   const { update } = useHospital();
   const [title, setTitle] = useState("");
   const [specialty, setSpecialty] = useState("ICU / Critical Care");
-  const [location, setLocation] = useState<LocationId>(facilityLocation);
+  const [town, setTown] = useState<string>(locName(facilityLocation));
+  const location: LocationId = hubFor(town);
   const [weeks, setWeeks] = useState(13);
   const [weeklyPay, setWeeklyPay] = useState(1750);
   const [shift, setShift] = useState("3 × 12 nights");
@@ -382,7 +399,7 @@ function GigBuilder({ facilityName, facilityLocation, onDone }: { facilityName: 
 
   function toggle(id: string) { setPerks((p) => p.includes(id) ? p.filter((x) => x !== id) : [...p, id]); }
   function save(status: HospitalGig["status"]) {
-    const gig: HospitalGig = { id: `g${Date.now()}`, title: title.trim() || `${specialty} in ${loc.name}`, specialty, location, weeks, weeklyPay, shift, start, perks, status, views: 0 };
+    const gig: HospitalGig = { id: `g${Date.now()}`, title: title.trim() || `${specialty} in ${town}`, specialty, location, town, weeks, weeklyPay, shift, start, perks, status, views: 0 };
     update((s) => ({ ...s, gigs: [gig, ...s.gigs] }));
     toast.success(status === "Published" ? "Gig published to the nurse pool." : "Draft saved.");
     onDone();
@@ -394,7 +411,7 @@ function GigBuilder({ facilityName, facilityLocation, onDone }: { facilityName: 
       <div className="space-y-6">
         <Panel title="1 · The gig">
           <div className="grid gap-3 sm:grid-cols-2">
-            <label className="text-sm sm:col-span-2">Title<Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={`${specialty} in ${loc.name}`} /></label>
+            <label className="text-sm sm:col-span-2">Title<Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={`${specialty} in ${town}`} /></label>
             <label className="text-sm">Specialty<select className={field} value={specialty} onChange={(e) => setSpecialty(e.target.value)}>{Array.from(new Set(POOL.map((n) => n.specialty))).map((s) => <option key={s}>{s}</option>)}</select></label>
             <label className="text-sm">Shift<select className={field} value={shift} onChange={(e) => setShift(e.target.value)}>{["3 × 12 nights", "3 × 12 days", "3 × 12 rotating", "4 × 10 days"].map((s) => <option key={s}>{s}</option>)}</select></label>
             <label className="text-sm">Weekly pay (local)<Input type="number" value={weeklyPay} onChange={(e) => setWeeklyPay(Number(e.target.value))} /></label>
@@ -404,13 +421,16 @@ function GigBuilder({ facilityName, facilityLocation, onDone }: { facilityName: 
         </Panel>
 
         <Panel title="2 · Location shapes the package">
-          <div className="flex flex-wrap gap-2">{LOCATIONS.map((l) => <button key={l.id} type="button" onClick={() => setLocation(l.id)} className={cn("px-3 py-1.5 text-sm font-bold", location === l.id ? "bg-primary text-primary-foreground" : "bg-muted")}>{l.name}</button>)}</div>
+          <label className="text-sm">Town or city (any of Puerto Rico’s 78 municipalities)
+            <Input list="pr-towns" value={town} onChange={(e) => setTown(e.target.value)} placeholder="Start typing — Utuado, Rincón, Vieques…" />
+            <datalist id="pr-towns">{MUNICIPALITIES.map((m) => <option key={m.name} value={m.name} />)}</datalist>
+          </label>
           <div className="mt-4 border-l-4 border-coral bg-coral/5 p-4 text-sm">
-            <p className="font-black">{loc.name} · {loc.region}</p>
+            <p className="font-black">{town || "—"} · {loc.region} <span className="font-normal text-muted-foreground">(perks from the {loc.name} area)</span></p>
             <p className="mt-1 text-muted-foreground">{loc.vibe}</p>
             <p className="mt-2 text-xs"><strong>Housing:</strong> {loc.housingNote}</p>
             <div className="mt-2 flex flex-wrap gap-1">{loc.draws.map((d) => <span key={d} className="bg-card px-2 py-0.5 text-[11px]">{d}</span>)}</div>
-            <p className="mt-2 text-xs font-bold text-primary">{interested} passported nurses want {loc.name}</p>
+            <p className="mt-2 text-xs font-bold text-primary">{interested} passported nurses want the {loc.region.toLowerCase()} region</p>
           </div>
         </Panel>
 
@@ -419,13 +439,30 @@ function GigBuilder({ facilityName, facilityLocation, onDone }: { facilityName: 
           <div className="grid gap-3 sm:grid-cols-2">
             {available.map((p) => {
               const on = perks.includes(p.id);
+              const o = offerOf(p.id);
+              const off = p.retail ? Math.round((1 - p.cost / p.retail) * 100) : 0;
               return (
-                <button key={p.id} type="button" onClick={() => toggle(p.id)} aria-pressed={on} className={cn("flex flex-col border p-4 text-left transition-colors", on ? "border-primary bg-primary/5" : "border-border bg-card hover:border-primary/50")}>
-                  <div className="flex items-center justify-between"><span className="text-[10px] font-black uppercase text-muted-foreground">{p.category}</span><span className={cn("flex size-5 items-center justify-center rounded-full border", on ? "border-primary bg-primary text-primary-foreground" : "border-border text-transparent")}><Check className="size-3" /></span></div>
-                  <strong className="mt-2 leading-tight">{p.title}</strong>
-                  <span className="text-xs text-primary">{p.partner}</span>
-                  {p.note && <span className="mt-1 text-[11px] text-coral">{p.note}</span>}
-                  <span className="mt-2 text-sm">{p.cost === 0 ? <strong className="text-primary">FREE</strong> : <strong>{money(p.cost)}</strong>} <span className="text-xs text-muted-foreground">your cost · nurse value {money(p.retail)}</span></span>
+                <button key={p.id} type="button" onClick={() => toggle(p.id)} aria-pressed={on} className={cn("group flex flex-col overflow-hidden border text-left transition-colors", on ? "border-primary ring-2 ring-primary" : "border-border bg-card hover:border-primary/50")}>
+                  <div className="relative h-36 overflow-hidden">
+                    <img src={perkImage(p)} alt="" loading="lazy" className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-surface-dark/90 via-surface-dark/20 to-transparent" />
+                    <span className={cn("absolute left-2 top-2 px-2 py-0.5 text-[10px] font-black uppercase", o.offerType === "Limited time" ? "bg-coral text-primary-foreground" : o.offerType === "Special" ? "bg-primary text-primary-foreground" : "bg-card text-foreground")}>{o.offerType}</span>
+                    <span className={cn("absolute right-2 top-2 flex size-6 items-center justify-center rounded-full border-2", on ? "border-primary bg-primary text-primary-foreground" : "border-surface-dark-foreground/80 bg-surface-dark/40 text-transparent")}><Check className="size-3.5" /></span>
+                    <div className="absolute inset-x-3 bottom-2 text-surface-dark-foreground">
+                      <p className="text-[10px] font-bold uppercase opacity-80">{p.partner} · {p.category}</p>
+                      <strong className="block leading-tight">{p.title}</strong>
+                    </div>
+                  </div>
+                  <div className="flex flex-1 flex-col p-3">
+                    {o.headline && <p className="text-sm font-black text-coral">{o.headline}</p>}
+                    {o.endsAt && <p className="text-[11px] text-muted-foreground">Ends {new Date(o.endsAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</p>}
+                    {o.requirement && <p className="mt-1 border-l-2 border-primary bg-primary/5 px-2 py-1 text-[11px]"><strong>Requires:</strong> {o.requirement}</p>}
+                    {p.note && <p className="mt-1 text-[11px] text-muted-foreground">{p.note}</p>}
+                    <div className="mt-auto flex items-end justify-between pt-2">
+                      <span>{p.cost === 0 ? <strong className="text-lg text-primary">FREE</strong> : <strong className="text-lg">{money(p.cost)}</strong>} <span className="text-[11px] text-muted-foreground line-through">{money(p.retail)}</span></span>
+                      {off > 0 && <span className="text-xs font-black text-primary">{off}% off</span>}
+                    </div>
+                  </div>
                 </button>
               );
             })}
@@ -436,7 +473,7 @@ function GigBuilder({ facilityName, facilityLocation, onDone }: { facilityName: 
 
       <aside className="h-fit space-y-4 lg:sticky lg:top-24">
         <div className="border-2 border-primary bg-primary/5">
-          <div className="bg-primary px-5 py-4 text-primary-foreground"><h3 className="text-lg font-black">Your gig package</h3><p className="text-xs opacity-80">{specialty} · {weeks} wks · {loc.name}</p></div>
+          <div className="bg-primary px-5 py-4 text-primary-foreground"><h3 className="text-lg font-black">Your gig package</h3><p className="text-xs opacity-80">{specialty} · {weeks} wks · {town}</p></div>
           <ul className="max-h-56 space-y-1.5 overflow-y-auto p-5 text-sm">{totals.list.map((p) => <li key={p.id} className="flex items-start gap-2"><CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" /> {p.title}</li>)}{totals.list.length === 0 && <li className="text-muted-foreground">Add perks to build the package.</li>}</ul>
           <div className="grid grid-cols-2 border-t border-primary/20 text-center">
             <div className="border-r border-primary/20 p-3"><strong className="block text-xl">{money(totals.cost)}</strong><span className="text-[11px] uppercase text-muted-foreground">your cost</span></div>
