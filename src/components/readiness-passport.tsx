@@ -295,7 +295,11 @@ function ProfileDialog({ open, onOpenChange, profile, onSave }: { open: boolean;
   );
 }
 
-function PathwayCheck({ pathway, onChange }: { pathway: Pathway; onChange: (p: Pathway) => void }) {
+function ContinueButton({ label, onClick, disabled }: { label: string; onClick: () => void; disabled?: boolean }) {
+  return <Button size="lg" className="w-full bg-coral text-coral-foreground hover:bg-coral/90" onClick={onClick} disabled={disabled}>{label}</Button>;
+}
+
+function PathwayCheck({ pathway, onChange, onContinue }: { pathway: Pathway; onChange: (p: Pathway) => void; onContinue: () => void }) {
   const qs: [keyof Pathway, string][] = [
     ["active", "Do you hold an active license from a U.S. state or jurisdiction?"],
     ["oneYear", "Have you held it for at least one year?"],
