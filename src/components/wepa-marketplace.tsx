@@ -5,6 +5,8 @@ import {
   Building2,
   Check,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   ClipboardCheck,
   FileCheck2,
   HeartPulse,
@@ -27,7 +29,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
-import { demoGigs, qualificationSteps, type DemoGig } from "@/lib/wepa-data";
+import { demoGigs, demoPartners, qualificationSteps, type DemoGig, type DemoPartner } from "@/lib/wepa-data";
 import { cn } from "@/lib/utils";
 
 const logoUrl = logoAsset.url;
@@ -228,6 +230,8 @@ function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void 
         </div>
       </section>
 
+      <PartnerCarousel />
+
       <section id="ready" className="border-b border-border bg-card">
         <div className="mx-auto grid max-w-[1440px] gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[1.05fr_1.95fr] lg:px-8">
           <div>
@@ -268,6 +272,51 @@ function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void 
 
       <MobileNurseNav />
     </>
+  );
+}
+
+function PartnerCarousel() {
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  function scrollBy(direction: 1 | -1) {
+    const track = trackRef.current;
+    if (!track) return;
+    track.scrollBy({ left: direction * Math.min(track.clientWidth * 0.85, 560), behavior: "smooth" });
+  }
+
+  return (
+    <section id="partners" className="overflow-hidden border-y border-border bg-surface-dark py-12 text-surface-dark-foreground">
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <div className="max-w-2xl">
+            <p className="eyebrow text-primary">The island partners</p>
+            <h2 className="mt-1 text-3xl font-black sm:text-4xl">Real Puerto Rico, built into every gig.</h2>
+            <p className="mt-3 text-sm leading-relaxed text-surface-dark-foreground/75">Hotels, sails, spas, and adventures from the island's best travel & tourism names — bundled into your package instead of a bigger paycheck.</p>
+          </div>
+          <div className="hidden gap-2 sm:flex">
+            <Button variant="outline" size="icon" aria-label="Scroll partners back" className="border-surface-dark-foreground/30 bg-transparent text-surface-dark-foreground hover:bg-surface-dark-foreground/10 hover:text-surface-dark-foreground" onClick={() => scrollBy(-1)}><ChevronLeft /></Button>
+            <Button variant="outline" size="icon" aria-label="Scroll partners forward" className="border-surface-dark-foreground/30 bg-transparent text-surface-dark-foreground hover:bg-surface-dark-foreground/10 hover:text-surface-dark-foreground" onClick={() => scrollBy(1)}><ChevronRight /></Button>
+          </div>
+        </div>
+      </div>
+      <div ref={trackRef} className="mt-7 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 [scrollbar-width:none] sm:px-6 lg:px-8 [&::-webkit-scrollbar]:hidden">
+        {demoPartners.map((partner) => <PartnerCard key={partner.name} partner={partner} />)}
+      </div>
+    </section>
+  );
+}
+
+function PartnerCard({ partner }: { partner: DemoPartner }) {
+  return (
+    <article className="flex w-72 shrink-0 snap-start flex-col border border-surface-dark-foreground/15 bg-surface-dark-foreground/5 p-5 backdrop-blur sm:w-80">
+      <div className="flex items-center justify-between">
+        <span className="bg-primary px-2 py-1 text-[10px] font-black uppercase text-primary-foreground">{partner.category}</span>
+        <span className="flex items-center gap-1 text-xs font-semibold text-surface-dark-foreground/60"><MapPin className="size-3.5" /> {partner.location}</span>
+      </div>
+      <h3 className="mt-4 text-xl font-extrabold leading-tight">{partner.name}</h3>
+      <p className="mt-2 flex-1 text-sm leading-relaxed text-surface-dark-foreground/75">{partner.blurb}</p>
+      <p className="mt-4 flex items-start gap-2 border-t border-surface-dark-foreground/15 pt-3 text-sm font-bold text-primary"><Sparkles className="mt-0.5 size-4 shrink-0" /> {partner.perk}</p>
+    </article>
   );
 }
 
