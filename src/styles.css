@@ -64,6 +64,10 @@
   --color-coral: var(--coral);
   --color-coral-foreground: var(--coral-foreground);
   --color-accent-strong: var(--accent-strong);
+  --color-ocean: var(--ocean);
+  --color-ocean-foreground: var(--ocean-foreground);
+  --color-ivory: var(--ivory);
+  --color-ivory-foreground: var(--ivory-foreground);
   --font-sans: "Avenir Next", Avenir, "Segoe UI", sans-serif;
 }
 
@@ -93,6 +97,10 @@
   --coral: oklch(0.72 0.17 29.5);
   --coral-foreground: oklch(0.245 0.039 208.4);
   --accent-strong: oklch(0.57 0.14 174.7);
+  --ocean: oklch(0.277 0.044 220.3);
+  --ocean-foreground: oklch(0.961 0.012 91.5);
+  --ivory: oklch(0.961 0.012 91.5);
+  --ivory-foreground: oklch(0.277 0.044 220.3);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -141,6 +149,10 @@
   --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.551 0.027 264.364);
+  --ocean: oklch(0.277 0.044 220.3);
+  --ocean-foreground: oklch(0.961 0.012 91.5);
+  --ivory: oklch(0.961 0.012 91.5);
+  --ivory-foreground: oklch(0.277 0.044 220.3);
 }
 
 @layer base {
