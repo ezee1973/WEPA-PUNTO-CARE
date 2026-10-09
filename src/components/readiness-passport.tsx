@@ -193,6 +193,7 @@ export function ReadinessPassport() {
                 <section className="rounded-3xl border-2 border-primary bg-card p-5">
                   <p className="font-display text-xl font-bold">Ready for nurse review</p>
                   <p className="mt-1 text-sm text-muted-foreground">Wepa Guide prepared these answers from your profile. Nothing is submitted until you confirm.</p>
+                  <Button variant="outline" size="sm" className="mt-3" onClick={() => setEditProfile(true)}><Pencil /> Edit profile</Button>
                   <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
                     {[["Name", state.profile.name], ["License", state.profile.license], ["Issued", state.profile.licenseIssued], ["Expires", state.profile.licenseExpires], ["Category", state.pathway.category], ["Certifications", state.profile.certs.join(", ")]].map(([k, v]) => (
                       <div key={k} className="rounded-xl bg-muted p-3"><dt className="text-xs text-muted-foreground">{k}</dt><dd className="font-semibold">{v}</dd></div>
@@ -210,12 +211,23 @@ export function ReadinessPassport() {
                   onSet={(p) => setItem(item.id, p)} />
               ))}
               <p className="text-xs text-muted-foreground">{DISCLAIMER}</p>
+              <ContinueButton label="Continue to the Spanish check" onClick={() => setTab("spanish")} />
             </>
           )}
 
-          {tab === "spanish" && <SpanishScenario result={state.spanish} onResult={(r) => update((s) => ({ ...s, spanish: r }))} />}
+          {tab === "spanish" && (
+            <>
+              <SpanishScenario result={state.spanish} onResult={(r) => update((s) => ({ ...s, spanish: r }))} />
+              <ContinueButton label="Continue to your interests" onClick={() => setTab("interests")} />
+            </>
+          )}
 
-          {tab === "interests" && <InterestsPicker interests={state.interests} onChange={(i) => update((s) => ({ ...s, interests: i }))} />}
+          {tab === "interests" && (
+            <>
+              <InterestsPicker interests={state.interests} onChange={(i) => update((s) => ({ ...s, interests: i }))} />
+              <ContinueButton label="Continue to hospital credentials" onClick={() => setTab("hospital")} />
+            </>
+          )}
 
           {tab === "hospital" && (
             <section className="rounded-3xl border border-border bg-card p-5">
