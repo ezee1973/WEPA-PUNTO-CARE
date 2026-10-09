@@ -123,7 +123,7 @@ export function useReadiness() {
   const [state, setState] = useState<ReadinessState>(seed);
   useEffect(() => {
     const load = () => {
-      try { const raw = localStorage.getItem(KEY); if (raw) setState({ ...seed, ...JSON.parse(raw) }); } catch { /* ignore */ }
+      try { const raw = localStorage.getItem(KEY); if (raw) { const saved = { ...seed, ...JSON.parse(raw) } as ReadinessState; saved.checklist = saved.checklist.map((c) => { const sd = seed.checklist.find((x) => x.id === c.id); return !c.file && sd?.file ? { ...c, file: sd.file, fileType: sd.fileType, fileData: sd.fileData } : c; }); setState(saved); } } catch { /* ignore */ }
     };
     load();
     window.addEventListener(EVT, load);
