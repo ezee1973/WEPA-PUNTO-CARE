@@ -210,13 +210,13 @@ function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
                       src={ROLE_ICONS[door.id]}
                       alt=""
                       aria-hidden
-                      className="h-10 w-10 object-contain transition-transform duration-300 group-hover:scale-110 sm:h-[3.25rem] sm:w-[3.25rem]"
+                      className="h-12 w-12 object-contain transition-transform duration-300 group-hover:scale-110 sm:h-[3.75rem] sm:w-[3.75rem]"
                     />
                   </span>
                   <span className="min-w-0 sm:min-h-[6.75rem] sm:flex-1">
                     <span className="block text-[0.62rem] font-extrabold uppercase tracking-[0.18em] text-accent-deep">{door.audience}</span>
                     <span className="mt-1 block text-base font-black leading-tight text-ivory-foreground sm:text-lg">{door.title}</span>
-                    <span className="mt-1 block text-xs leading-snug text-ivory-foreground/65 sm:text-sm">{door.copy}</span>
+                    <span className="mt-1 block text-xs leading-snug text-ivory-foreground/75 sm:text-sm">{door.copy}</span>
                   </span>
                   <span className="ml-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-coral/15 text-coral ring-1 ring-coral/35 transition-all duration-300 group-hover:translate-x-0.5 group-hover:bg-coral group-hover:text-ivory sm:mt-1 sm:self-end sm:ml-0">
                     <ArrowRight className="h-4 w-4" />
