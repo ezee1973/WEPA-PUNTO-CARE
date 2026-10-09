@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { INTEREST_OPTIONS, interestsComplete, nextBestAction, pathwayResult, preparationProgress, streamGuide, useReadiness, type ChecklistItem, type ItemStatus, type NurseProfile, type Pathway, type ReadinessState } from "@/lib/readiness";
+import { INTEREST_OPTIONS, interestsComplete, nextBestAction, pathwayComplete, pathwayResult, preparationProgress, streamGuide, useReadiness, type ChecklistItem, type ItemStatus, type NurseProfile, type Pathway, type ReadinessState } from "@/lib/readiness";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 
@@ -57,6 +57,19 @@ export function ReadinessPassport() {
     { label: "Clinical Spanish readiness", value: state.spanish ? 100 : 0, note: state.spanish ?? "Scenario not started" },
   ];
   const nextAction = nextBestAction(state);
+  const pathwayDone = pathwayComplete(state.pathway);
+  const stepDone: Partial<Record<Tab, boolean>> = {
+    pathway: pathwayDone,
+    checklist: state.packetConfirmed,
+    spanish: !!state.spanish,
+    interests: interestsComplete(state.interests),
+    hospital: state.credentialing.every((c) => c.done),
+    passport: !!state.applied,
+  };
+  const actionTab: Tab = !pathwayDone ? "pathway"
+    : !state.packetConfirmed || state.checklist.find((c) => c.id === "declaration")?.status !== "Submitted — self-reported" ? "checklist"
+    : !state.spanish ? "spanish"
+    : !interestsComplete(state.interests) ? "interests" : "passport";
 
   async function ask(task: string, detail = "", onDone?: (t: string) => void) {
     abortRef.current?.abort();
@@ -74,6 +87,11 @@ export function ReadinessPassport() {
   }
 
   function preparePacket() {
+    if (!pathwayComplete(state.pathway)) {
+      toast.info("First answer the pathway questions — your document list depends on your authorization route.");
+      setTab("pathway");
+      return;
+    }
     update((s) => ({
       ...s,
       packetPrepared: true,
@@ -119,12 +137,13 @@ export function ReadinessPassport() {
             <p className="truncate font-display text-lg font-bold leading-tight">Puerto Rico Readiness Passport</p>
             <p className="truncate text-xs text-muted-foreground">{state.profile.name} · {state.profile.specialty}</p>
           </div>
-          <Button variant="outline" size="sm" className="shrink-0" onClick={() => setEditProfile(true)}><Pencil /> Edit profile</Button>
           <span className="rounded-full bg-surface-dark px-3 py-1 text-sm font-bold text-surface-dark-foreground">{progress}%</span>
         </div>
         <nav className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-4 pb-2 [scrollbar-width:none]">
           {TABS.map((t) => (
-            <button key={t.id} onClick={() => setTab(t.id)} className={cn("shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold transition", tab === t.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted")}>{t.label}</button>
+            <button key={t.id} onClick={() => setTab(t.id)} className={cn("flex shrink-0 items-center gap-1 rounded-full px-4 py-1.5 text-sm font-semibold transition", tab === t.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted")}>
+              {t.label}{stepDone[t.id] && <CheckCircle2 className="size-3.5" aria-label="Done" />}
+            </button>
           ))}
         </nav>
       </header>
@@ -138,13 +157,14 @@ export function ReadinessPassport() {
                 <p className="font-display text-6xl font-black">{progress}%</p>
                 <Progress value={progress} className="mt-3 h-2" />
                 <p className="mt-4 text-sm opacity-75">Current phase</p>
-                <p className="font-semibold">{state.applied ? "Matching with gigs" : state.packetConfirmed ? "Final documents & Spanish" : "Packet preparation"}</p>
-                <div className="mt-4 rounded-2xl bg-background/10 p-4">
+                <p className="font-semibold">{state.applied ? "Matching with gigs" : !pathwayDone ? "Pathway check" : state.packetConfirmed ? "Final documents & Spanish" : "Packet preparation"}</p>
+                <button onClick={() => setTab(actionTab)} className="mt-4 block w-full rounded-2xl bg-background/10 p-4 text-left transition hover:bg-background/20">
                   <p className="text-xs uppercase tracking-wide opacity-70">Next best action</p>
-                  <p className="mt-1 font-semibold">{nextAction}</p>
-                </div>
-                {!state.packetPrepared && <Button onClick={preparePacket} className="mt-4 w-full bg-coral text-coral-foreground hover:bg-coral/90" size="lg"><Bot /> Prepare my packet</Button>}
-                {state.packetPrepared && !state.packetConfirmed && <Button onClick={() => setTab("checklist")} className="mt-4 w-full bg-coral text-coral-foreground hover:bg-coral/90" size="lg">Ready for nurse review</Button>}
+                  <p className="mt-1 font-semibold">{nextAction} →</p>
+                </button>
+                {!pathwayDone && <Button onClick={() => setTab("pathway")} className="mt-4 w-full bg-coral text-coral-foreground hover:bg-coral/90" size="lg">Start with the pathway questions</Button>}
+                {pathwayDone && !state.packetPrepared && <Button onClick={preparePacket} className="mt-4 w-full bg-coral text-coral-foreground hover:bg-coral/90" size="lg"><Bot /> Prepare my packet</Button>}
+                {pathwayDone && state.packetPrepared && !state.packetConfirmed && <Button onClick={() => setTab("checklist")} className="mt-4 w-full bg-coral text-coral-foreground hover:bg-coral/90" size="lg">Ready for nurse review</Button>}
               </section>
               <section className="rounded-3xl border border-border bg-card p-5">
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Your goal</p>
@@ -165,7 +185,7 @@ export function ReadinessPassport() {
             </>
           )}
 
-          {tab === "pathway" && <PathwayCheck pathway={state.pathway} onChange={(p) => update((s) => ({ ...s, pathway: p }))} />}
+          {tab === "pathway" && <PathwayCheck pathway={state.pathway} onChange={(p) => update((s) => ({ ...s, pathway: p }))} onContinue={() => setTab("checklist")} />}
 
           {tab === "checklist" && (
             <>
@@ -173,6 +193,7 @@ export function ReadinessPassport() {
                 <section className="rounded-3xl border-2 border-primary bg-card p-5">
                   <p className="font-display text-xl font-bold">Ready for nurse review</p>
                   <p className="mt-1 text-sm text-muted-foreground">Wepa Guide prepared these answers from your profile. Nothing is submitted until you confirm.</p>
+                  <Button variant="outline" size="sm" className="mt-3" onClick={() => setEditProfile(true)}><Pencil /> Edit profile</Button>
                   <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
                     {[["Name", state.profile.name], ["License", state.profile.license], ["Issued", state.profile.licenseIssued], ["Expires", state.profile.licenseExpires], ["Category", state.pathway.category], ["Certifications", state.profile.certs.join(", ")]].map(([k, v]) => (
                       <div key={k} className="rounded-xl bg-muted p-3"><dt className="text-xs text-muted-foreground">{k}</dt><dd className="font-semibold">{v}</dd></div>
@@ -190,12 +211,23 @@ export function ReadinessPassport() {
                   onSet={(p) => setItem(item.id, p)} />
               ))}
               <p className="text-xs text-muted-foreground">{DISCLAIMER}</p>
+              <ContinueButton label="Continue to the Spanish check" onClick={() => setTab("spanish")} />
             </>
           )}
 
-          {tab === "spanish" && <SpanishScenario result={state.spanish} onResult={(r) => update((s) => ({ ...s, spanish: r }))} />}
+          {tab === "spanish" && (
+            <>
+              <SpanishScenario result={state.spanish} onResult={(r) => update((s) => ({ ...s, spanish: r }))} />
+              <ContinueButton label="Continue to your interests" onClick={() => setTab("interests")} />
+            </>
+          )}
 
-          {tab === "interests" && <InterestsPicker interests={state.interests} onChange={(i) => update((s) => ({ ...s, interests: i }))} />}
+          {tab === "interests" && (
+            <>
+              <InterestsPicker interests={state.interests} onChange={(i) => update((s) => ({ ...s, interests: i }))} />
+              <ContinueButton label="Continue to hospital credentials" onClick={() => setTab("hospital")} />
+            </>
+          )}
 
           {tab === "hospital" && (
             <section className="rounded-3xl border border-border bg-card p-5">
@@ -211,6 +243,7 @@ export function ReadinessPassport() {
                   </li>
                 ))}
               </ul>
+              <ContinueButton label="Review your Candidate Passport" onClick={() => setTab("passport")} />
             </section>
           )}
 
@@ -224,7 +257,7 @@ export function ReadinessPassport() {
           )}
         </div>
 
-        <GuidePanel guide={guide} onAsk={ask} onPrepare={state.packetPrepared ? undefined : preparePacket} onStop={() => abortRef.current?.abort()} />
+        <GuidePanel guide={guide} onAsk={ask} onPrepare={state.packetPrepared || !pathwayDone ? undefined : preparePacket} onStop={() => abortRef.current?.abort()} />
       </main>
 
       <ProfileDialog open={editProfile} onOpenChange={setEditProfile} profile={state.profile} onSave={(p) => { update((s) => ({ ...s, profile: p })); setEditProfile(false); toast.success("Profile updated everywhere — passport, checklist and Wepa Guide."); }} />
@@ -262,7 +295,11 @@ function ProfileDialog({ open, onOpenChange, profile, onSave }: { open: boolean;
   );
 }
 
-function PathwayCheck({ pathway, onChange }: { pathway: Pathway; onChange: (p: Pathway) => void }) {
+function ContinueButton({ label, onClick, disabled }: { label: string; onClick: () => void; disabled?: boolean }) {
+  return <Button size="lg" className="w-full bg-coral text-coral-foreground hover:bg-coral/90" onClick={onClick} disabled={disabled}>{label}</Button>;
+}
+
+function PathwayCheck({ pathway, onChange, onContinue }: { pathway: Pathway; onChange: (p: Pathway) => void; onContinue: () => void }) {
   const qs: [keyof Pathway, string][] = [
     ["active", "Do you hold an active license from a U.S. state or jurisdiction?"],
     ["oneYear", "Have you held it for at least one year?"],
@@ -272,12 +309,13 @@ function PathwayCheck({ pathway, onChange }: { pathway: Pathway; onChange: (p: P
     ["pending", "Do you have any pending disciplinary investigations?"],
     ["revoked", "Has a license ever been revoked or surrendered?"],
   ];
+  const complete = pathwayComplete(pathway);
   const result = pathwayResult(pathway);
   return (
     <section className="space-y-3">
       <div className="rounded-3xl bg-surface-dark p-5 text-surface-dark-foreground">
-        <p className="text-sm opacity-75">Result</p>
-        <p className="font-display text-2xl font-bold">{result}</p>
+        <p className="text-sm opacity-75">Step 1 · Your authorization route</p>
+        <p className="font-display text-2xl font-bold">{complete ? result : "Answer the questions below to see your route"}</p>
         <p className="mt-2 text-xs opacity-75">{DISCLAIMER}</p>
       </div>
       {qs.map(([k, q]) => (
@@ -291,8 +329,9 @@ function PathwayCheck({ pathway, onChange }: { pathway: Pathway; onChange: (p: P
         </div>
       ))}
       <label className="block rounded-2xl border border-border bg-card p-4 text-sm font-medium">What license category and specialty do you hold?
-        <input value={pathway.category} onChange={(e) => onChange({ ...pathway, category: e.target.value })} className="mt-2 w-full rounded-xl border border-input bg-background px-3 py-2" />
+        <input value={pathway.category} onChange={(e) => onChange({ ...pathway, category: e.target.value })} className="mt-2 w-full rounded-xl border border-input bg-background px-3 py-2" placeholder="e.g. RN — Emergency" />
       </label>
+      <ContinueButton label={complete ? "Continue to your checklist" : "Answer all questions to continue"} onClick={onContinue} disabled={!complete} />
     </section>
   );
 }
