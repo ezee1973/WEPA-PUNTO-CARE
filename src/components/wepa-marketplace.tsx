@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode, type RefObject } from "react";
 import {
   ArrowRight,
   Bell,
@@ -29,6 +29,7 @@ import {
 import { toast } from "sonner";
 
 import coastImage from "@/assets/puerto-rico-coast.jpg";
+import anthemPoster from "@/assets/wepa-anthem-poster.jpg";
 import jingleAsset from "@/assets/wepa-jingle.asset.json";
 import logoAsset from "@/assets/wepa-care-logo.asset.json";
 import { Button } from "@/components/ui/button";
@@ -51,11 +52,14 @@ const roleMeta: Record<DemoRole, { label: string; short: string; icon: typeof He
   tourism: { label: "Tourism partner", short: "Make an offer", icon: Palmtree },
 };
 
+const ANTHEM_SEEN_KEY = "wepa-anthem-experienced";
+
 export function WepaMarketplace() {
   const [role, setRole] = useState<DemoRole>("nurse");
   const [selectedGig, setSelectedGig] = useState<DemoGig | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
   const [soundOn, setSoundOn] = useState(false);
+  const [anthemAuto, setAnthemAuto] = useState(false);
   const [signedInEmail, setSignedInEmail] = useState<string | null>(null);
   const mediaRef = useRef<HTMLVideoElement>(null);
 
@@ -65,6 +69,19 @@ export function WepaMarketplace() {
     return () => data.subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    // First-time "WEPA!" moment only: the anthem plays itself, silently,
+    // on the very first land. Every later visit gets a quiet poster.
+    try {
+      if (!window.localStorage.getItem(ANTHEM_SEEN_KEY)) {
+        window.localStorage.setItem(ANTHEM_SEEN_KEY, "1");
+        setAnthemAuto(true);
+      }
+    } catch {
+      setAnthemAuto(true);
+    }
+  }, []);
+
   async function toggleSound() {
     const media = mediaRef.current;
     if (!media) return;
@@ -72,14 +89,33 @@ export function WepaMarketplace() {
       media.pause();
       media.currentTime = 0;
       setSoundOn(false);
+      if (anthemAuto) {
+        // Settle back into the silent ambient loop.
+        media.muted = true;
+        media.loop = true;
+        void media.play().catch(() => {});
+      }
       return;
     }
     try {
+      media.muted = false;
+      media.loop = false;
       media.currentTime = 0;
       await media.play();
       setSoundOn(true);
     } catch {
       toast.error("Sound is waiting for browser permission. Tap again to play.");
+    }
+  }
+
+  function handleAnthemEnded() {
+    setSoundOn(false);
+    const media = mediaRef.current;
+    if (media && anthemAuto) {
+      media.muted = true;
+      media.loop = true;
+      media.currentTime = 0;
+      void media.play().catch(() => {});
     }
   }
 
@@ -106,7 +142,9 @@ export function WepaMarketplace() {
           onSelectGig={setSelectedGig}
           soundOn={soundOn}
           onSound={() => void toggleSound()}
-          jingleMedia={<video ref={mediaRef} src={jingleUrl} onEnded={() => setSoundOn(false)} playsInline className="aspect-video w-full object-cover" />}
+          anthemAuto={anthemAuto}
+          onAnthemEnded={handleAnthemEnded}
+          mediaRef={mediaRef}
         />
       )}
       {role === "hospital" && <HospitalExperience />}
@@ -188,7 +226,7 @@ function RoleRail({ role, setRole }: { role: DemoRole; setRole: (role: DemoRole)
   );
 }
 
-function NurseExperience({ onSelectGig, soundOn, onSound, jingleMedia }: { onSelectGig: (gig: DemoGig) => void; soundOn: boolean; onSound: () => void; jingleMedia: ReactNode }) {
+function NurseExperience({ onSelectGig, soundOn, onSound, anthemAuto, onAnthemEnded, mediaRef }: { onSelectGig: (gig: DemoGig) => void; soundOn: boolean; onSound: () => void; anthemAuto: boolean; onAnthemEnded: () => void; mediaRef: RefObject<HTMLVideoElement | null> }) {
   const [specialty, setSpecialty] = useState("All specialties");
   const [stepState, setStepState] = useState(qualificationSteps);
   const complete = stepState.filter((step) => step.done).length;
@@ -227,13 +265,28 @@ function NurseExperience({ onSelectGig, soundOn, onSound, jingleMedia }: { onSel
               <span className="text-[11px] font-bold uppercase tracking-widest text-surface-dark-foreground/70">The WEPA anthem</span>
               <span className="text-[11px] text-surface-dark-foreground/50">6 seconds of island</span>
             </div>
-            <button type="button" onClick={onSound} aria-label={soundOn ? "Pause the WEPA anthem" : "Play the WEPA anthem"} className="group relative block w-full cursor-pointer">
-              {jingleMedia}
+            <button type="button" onClick={onSound} aria-label={soundOn ? "Pause the WEPA anthem" : "Play the WEPA anthem with sound"} className="group relative block w-full cursor-pointer">
+              {anthemAuto ? (
+                <video ref={mediaRef} src={jingleUrl} autoPlay muted loop playsInline onEnded={onAnthemEnded} className="aspect-video w-full object-cover" />
+              ) : (
+                <>
+                  <img src={anthemPoster} alt="Frame from the WEPA.care anthem video" className="aspect-video w-full object-cover" />
+                  <video ref={mediaRef} src={jingleUrl} playsInline onEnded={onAnthemEnded} className="hidden" />
+                </>
+              )}
               {soundOn ? (
                 <span className="absolute inset-x-0 bottom-0 flex items-end justify-center gap-1.5 bg-gradient-to-t from-black/60 to-transparent p-4" aria-hidden>
                   {[10, 18, 26, 14, 22, 8, 16, 24, 12].map((h, i) => (
                     <span key={i} className="w-1.5 animate-pulse rounded-full bg-primary" style={{ height: `${h}px`, animationDelay: `${i * 90}ms` }} />
                   ))}
+                </span>
+              ) : anthemAuto ? (
+                <span className="absolute bottom-3 left-3 flex items-center gap-2 rounded-full bg-black/55 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-white backdrop-blur">
+                  <span className="relative flex size-2" aria-hidden>
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-coral opacity-75" />
+                    <span className="relative inline-flex size-2 rounded-full bg-coral" />
+                  </span>
+                  Tap for sound
                 </span>
               ) : (
                 <span className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-surface-dark/35 transition-colors group-hover:bg-surface-dark/20">
@@ -320,7 +373,7 @@ function NurseExperience({ onSelectGig, soundOn, onSound, jingleMedia }: { onSel
 
       {!soundOn && (
         <button type="button" onClick={onSound} className="fixed inset-x-4 bottom-20 z-40 flex items-center justify-center gap-2 rounded-full bg-primary py-3 text-sm font-bold text-primary-foreground shadow-xl md:hidden">
-          <Music2 /> Experience the WEPA anthem
+          <Music2 /> {anthemAuto ? "Turn on the anthem sound" : "Experience the WEPA anthem"}
         </button>
       )}
       <MobileNurseNav />
