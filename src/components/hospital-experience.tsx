@@ -25,7 +25,7 @@ export function HospitalExperience() {
   const [tab, setTab] = useState<Tab>("dashboard");
   const facility = FACILITIES.find((f) => f.id === state.facilityId) ?? FACILITIES[0]!;
 
-  if (!state.loggedIn) return <HospitalLanding onLogin={(id) => update((s) => ({ ...s, loggedIn: true, facilityId: id }))} />;
+  if (!state.loggedIn) return <HospitalLanding onLogin={(id) => { const loc = FACILITIES.find((f) => f.id === id)?.location ?? "dorado"; update((s) => ({ ...s, loggedIn: true, facilityId: id, gigs: s.gigs.map((g) => g.views > 0 ? { ...g, location: loc, title: `${g.specialty} in ${locName(loc)}` } : g) })); }} />;
 
   const tabs: { id: Tab; label: string; icon: typeof BarChart3 }[] = [
     { id: "dashboard", label: "Dashboard", icon: BarChart3 },
