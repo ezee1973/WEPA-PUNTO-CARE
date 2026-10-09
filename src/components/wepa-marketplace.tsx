@@ -189,13 +189,13 @@ function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
               <span className="block text-primary">Care for its People.</span>
             </h1>
             <p className="max-w-xl text-sm leading-relaxed text-ocean-foreground/90 sm:text-base">
-              Puerto Rico hospitals staff nursing gigs at honest local wages — and island partners cover the travel, lodging, and fun.
+              The travel nursing marketplace connecting Puerto Rico’s hospitals, nurses, and tourism partners — bringing care, island stays, and local experiences together.
             </p>
           </div>
 
           <div className="w-full max-w-4xl">
             <p className="mb-3 text-center text-[0.66rem] font-extrabold uppercase tracking-[0.22em] text-ocean-foreground/75">
-              Choose your side
+              Find your place
             </p>
             <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
               {JOURNEY_DOORS.map((door) => (
@@ -205,20 +205,20 @@ function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
                   onClick={() => enter(door.id)}
                   className="group relative flex items-center gap-4 rounded-2xl bg-ivory p-4 text-left shadow-[0_20px_45px_-24px_rgba(9,45,55,0.9)] ring-1 ring-ocean/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_60px_-24px_rgba(255,117,99,0.6)] hover:ring-coral/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral sm:flex-col sm:items-start sm:gap-4 sm:p-5"
                 >
-                  <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-secondary ring-1 ring-primary/25 sm:h-[4.5rem] sm:w-[4.5rem]">
+                  <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-secondary/55 ring-1 ring-primary/15 sm:h-[4.25rem] sm:w-[4.25rem]">
                     <img
                       src={ROLE_ICONS[door.id]}
                       alt=""
                       aria-hidden
-                      className="h-9 w-9 object-contain transition-transform duration-300 group-hover:scale-110 sm:h-12 sm:w-12"
+                      className="h-10 w-10 object-contain transition-transform duration-300 group-hover:scale-110 sm:h-[3.25rem] sm:w-[3.25rem]"
                     />
                   </span>
-                  <span className="min-w-0 sm:flex-1">
+                  <span className="min-w-0 sm:min-h-[6.75rem] sm:flex-1">
                     <span className="block text-[0.62rem] font-extrabold uppercase tracking-[0.18em] text-accent-deep">{door.audience}</span>
                     <span className="mt-1 block text-base font-black leading-tight text-ivory-foreground sm:text-lg">{door.title}</span>
                     <span className="mt-1 block text-xs leading-snug text-ivory-foreground/65 sm:text-sm">{door.copy}</span>
                   </span>
-                  <span className="ml-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-coral/15 text-coral ring-1 ring-coral/35 transition-all duration-300 group-hover:translate-x-0.5 group-hover:bg-coral group-hover:text-ivory sm:absolute sm:bottom-5 sm:right-5 sm:ml-0">
+                  <span className="ml-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-coral/15 text-coral ring-1 ring-coral/35 transition-all duration-300 group-hover:translate-x-0.5 group-hover:bg-coral group-hover:text-ivory sm:mt-1 sm:self-end sm:ml-0">
                     <ArrowRight className="h-4 w-4" />
                   </span>
                 </button>
