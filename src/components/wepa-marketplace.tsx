@@ -242,6 +242,32 @@ function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
               </p>
             </div>
 
+            <div className="wepa-splash-intro mt-8 w-full border-t border-ocean-foreground/15 pt-5 sm:mt-10 sm:pt-6">
+              <dl className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4 sm:gap-x-8">
+                {SPLASH_STATS.map((stat) => (
+                  <div key={stat.label} className="flex flex-col">
+                    <dt className="order-2 mt-1.5 text-[0.7rem] font-semibold leading-snug text-ocean-foreground/85 sm:text-xs">
+                      {tr(stat.label)}
+                    </dt>
+                    <dd
+                      className={cn(
+                        "order-1 text-3xl font-black leading-none sm:text-4xl lg:text-5xl",
+                        stat.tone === "teal" ? "text-primary" : "text-coral",
+                      )}
+                    >
+                      {stat.value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+              <p className="mt-4 max-w-3xl text-xs leading-relaxed text-ocean-foreground/90 sm:text-sm">
+                <span className="font-black text-coral">{tr("The result:")}</span>{" "}
+                {tr(
+                  "Capacity loss drives unsafe nurse:patient ratios, increased mortality from wait times, compromised preventive care, and an overall erosion of patient care.",
+                )}
+              </p>
+            </div>
+
             <div className="relative mt-8 w-full lg:mt-auto lg:pt-10">
               <div className="pointer-events-none absolute left-[8%] right-[8%] top-[4.75rem] hidden h-px bg-gradient-to-r from-coral/20 via-primary/70 to-coral/20 sm:block" />
               <p className="mb-3 text-[0.66rem] font-extrabold uppercase text-ocean-foreground/75">
