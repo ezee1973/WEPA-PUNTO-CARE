@@ -83,10 +83,17 @@ export function WepaMarketplace() {
   );
 }
 
-function AnthemTakeover({ onDone }: { onDone: () => void }) {
+const JOURNEY_DOORS: { id: MarketRole; label: string; hook: string; icon: typeof Stethoscope }[] = [
+  { id: "nurse", label: "I'm a Nurse", hook: "Island gigs, covered living, real adventure.", icon: Stethoscope },
+  { id: "hospital", label: "I'm a Hospital", hook: "Build gig packages nurses actually want.", icon: Building2 },
+  { id: "tourism", label: "I'm a Tourism Partner", hook: "Put your experiences in front of clinicians.", icon: Palmtree },
+];
+
+function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [fading, setFading] = useState(false);
   const [started, setStarted] = useState(false);
+  const chosenRef = useRef<MarketRole>("nurse");
   const doneRef = useRef(false);
   const timersRef = useRef<number[]>([]);
 
@@ -94,16 +101,17 @@ function AnthemTakeover({ onDone }: { onDone: () => void }) {
     if (doneRef.current) return;
     doneRef.current = true;
     setFading(true);
-    window.setTimeout(onDone, 650);
+    window.setTimeout(() => onDone(chosenRef.current), 650);
   }
 
   useEffect(() => () => timersRef.current.forEach((t) => window.clearTimeout(t)), []);
 
-  function enter() {
+  function enter(role: MarketRole) {
+    chosenRef.current = role;
     const video = videoRef.current;
     setStarted(true);
     if (!video) return finish();
-    // The tap unlocks sound in every browser.
+    // The tap on a journey door unlocks sound in every browser.
     video.muted = false;
     video.currentTime = 0;
     void video.play().catch(() => finish());
@@ -119,7 +127,7 @@ function AnthemTakeover({ onDone }: { onDone: () => void }) {
         fading && "pointer-events-none opacity-0",
       )}
       role="dialog"
-      aria-label="Welcome to WEPA.care"
+      aria-label="Welcome to WEPA.care — choose your journey"
     >
       {/* Full-bleed island backdrop blends the welcome into the anthem */}
       <img
@@ -128,10 +136,10 @@ function AnthemTakeover({ onDone }: { onDone: () => void }) {
         aria-hidden
         className={cn(
           "absolute inset-0 h-full w-full object-cover transition-all duration-700",
-          started ? "opacity-0" : "opacity-60 scale-105",
+          started ? "opacity-0" : "opacity-50",
         )}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-surface-dark/70 via-surface-dark/40 to-surface-dark/85" />
+      <div className="absolute inset-0 bg-gradient-to-b from-surface-dark/80 via-surface-dark/55 to-surface-dark/90" />
       <video
         ref={videoRef}
         src={jingleUrl}
@@ -141,23 +149,25 @@ function AnthemTakeover({ onDone }: { onDone: () => void }) {
         className={cn("absolute inset-0 h-full w-full object-cover transition-opacity duration-500", started ? "opacity-100" : "opacity-0")}
       />
       {!started && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-10 px-6">
-          <img
-            src={logoUrl}
-            alt="WEPA.care"
-            className="h-24 w-auto rounded-3xl bg-background/95 px-6 py-4 shadow-2xl shadow-surface-dark/60 sm:h-32 sm:px-8"
-          />
-          <p className="max-w-xs text-center text-sm font-bold uppercase tracking-widest text-surface-dark-foreground/90 sm:max-w-none sm:text-base">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-8 overflow-y-auto px-5 py-10 sm:gap-10">
+          <img src={logoUrl} alt="WEPA.care" className="h-20 w-auto drop-shadow-2xl sm:h-28" />
+          <p className="text-center text-sm font-bold uppercase tracking-[0.25em] text-surface-dark-foreground/90 sm:text-base">
             Come for the Island. Care for its People.
           </p>
-          <Button
-            size="lg"
-            className="min-w-52 animate-pulse rounded-full bg-coral px-14 py-7 text-xl font-black text-coral-foreground shadow-xl shadow-coral/30 hover:bg-coral/90"
-            onClick={enter}
-            autoFocus
-          >
-            Enter
-          </Button>
+          <div className="grid w-full max-w-4xl gap-4 sm:grid-cols-3">
+            {JOURNEY_DOORS.map((door) => (
+              <button
+                key={door.id}
+                type="button"
+                onClick={() => enter(door.id)}
+                className="group flex flex-col items-start gap-3 rounded-3xl border border-surface-dark-foreground/15 bg-surface-dark-foreground/5 p-6 text-left backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-coral/60 hover:bg-surface-dark-foreground/10 hover:shadow-2xl hover:shadow-coral/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral"
+              >
+                <door.icon className="h-8 w-8 text-teal transition-colors group-hover:text-coral" aria-hidden />
+                <span className="text-lg font-black text-surface-dark-foreground">{door.label}</span>
+                <span className="text-sm leading-snug text-surface-dark-foreground/70">{door.hook}</span>
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>
