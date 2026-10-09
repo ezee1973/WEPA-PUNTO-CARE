@@ -23,7 +23,7 @@ const locName = (id: LocationId) => LOCATIONS.find((l) => l.id === id)?.name ?? 
 export function HospitalExperience() {
   const { state, update, reset } = useHospital();
   const [tab, setTab] = useState<Tab>("dashboard");
-  const facility = FACILITIES.find((f) => f.id === state.facilityId) ?? FACILITIES[0];
+  const facility = FACILITIES.find((f) => f.id === state.facilityId) ?? FACILITIES[0]!;
 
   if (!state.loggedIn) return <HospitalLanding onLogin={(id) => update((s) => ({ ...s, loggedIn: true, facilityId: id }))} />;
 
@@ -377,7 +377,7 @@ function GigBuilder({ facilityName, facilityLocation, onDone }: { facilityName: 
   const mine = weeklyValue(weeklyPay, totals.retail, weeks);
   const board = useMemo(() => [...COMPETITORS.map((c) => ({ name: c.name, loc: c.location, pay: c.weeklyPay, value: weeklyValue(c.weeklyPay, c.perkValue, 13), me: false })), { name: `${facilityName} (this gig)`, loc: location, pay: weeklyPay, value: mine, me: true }].sort((a, b) => b.value - a.value), [mine, weeklyPay, location, facilityName]);
   const rank = board.findIndex((b) => b.me) + 1;
-  const maxV = board[0].value;
+  const maxV = board[0]?.value ?? 1;
   const interested = POOL.filter((n) => n.regions.includes(location)).length;
 
   function toggle(id: string) { setPerks((p) => p.includes(id) ? p.filter((x) => x !== id) : [...p, id]); }
