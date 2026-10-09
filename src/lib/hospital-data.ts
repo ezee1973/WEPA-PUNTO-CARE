@@ -106,6 +106,7 @@ export type PoolNurse = {
   id: string; name: string; specialty: string; years: number; home: string; readiness: number;
   spanish: "Basic" | "Conversational" | "Fluent"; regions: LocationId[]; experiences: string[]; length: number;
   family: string; status: "Passport ready" | "Pathway in review";
+  certs?: string[]; email?: string; phone?: string; available?: string;
 };
 
 export const POOL: PoolNurse[] = [
@@ -121,6 +122,38 @@ export const POOL: PoolNurse[] = [
   { id: "n10", name: "Rachel Kim", specialty: "Telemetry", years: 5, home: "Phoenix, AZ", readiness: 90, spanish: "Conversational", regions: ["utuado", "fajardo"], experiences: ["Hiking", "Coffee", "Wellness"], length: 13, family: "Solo", status: "Passport ready" },
 ];
 
+/* ---------- 110 more synthetic nurses (deterministic, all fictional) ---------- */
+const FIRST = ["Alex","Brianna","Carlos","Danielle","Ethan","Fatima","Gabriel","Hannah","Isaiah","Jasmine","Kayla","Liam","Mariana","Nathan","Olivia","Pedro","Quinn","Rosa","Samuel","Tara","Uriel","Valeria","Wesley","Ximena","Yara","Zoe","Andre","Bianca","Caleb","Diana","Elijah","Gloria","Hector","Ivy","Jamal","Kendra","Lucia","Mateo","Nadia","Owen"];
+const LAST = ["Alvarez","Bennett","Castillo","Dawson","Espinoza","Foster","Garcia","Hughes","Ibarra","Jenkins","Kowalski","Lopez","Mendez","Nguyen","Ortiz","Patel","Quintana","Reyes","Santiago","Turner","Underwood","Vargas","Walker","Young","Zamora","Brooks","Cruz","Diaz","Ellis","Flores"];
+const HOMES = ["Orlando, FL","Tampa, FL","Miami, FL","Houston, TX","Dallas, TX","Austin, TX","Atlanta, GA","Charlotte, NC","Newark, NJ","New York, NY","Philadelphia, PA","Boston, MA","Chicago, IL","Columbus, OH","Nashville, TN","Denver, CO","Phoenix, AZ","San Diego, CA","Los Angeles, CA","Seattle, WA","Portland, OR","Minneapolis, MN","Hartford, CT","Baltimore, MD","Richmond, VA"];
+const SPECS = ["Emergency Room","ICU / Critical Care","Med-Surg","NICU","Labor & Delivery","Operating Room","Telemetry","Pediatrics","Oncology","Step-Down / PCU"];
+const EXPS = ["Beach","Hiking","Surf","Food","Culture","Diving","Sailing","Coffee","Wellness","Family","Golf","Nightlife"];
+const FAM = ["Solo","Solo","Partner","Spouse","Spouse + child","Child","Friend","Spouse + 2 kids"];
+const CERTS = [["BLS","ACLS"],["BLS","ACLS","TNCC"],["BLS","PALS"],["BLS","NRP"],["BLS","ACLS","CCRN"],["BLS","ACLS","PALS"],["BLS","CEN"]];
+const LOC_IDS = ["san-juan","dorado","ponce","utuado","mayaguez","aguadilla","fajardo"] as LocationId[];
+function rng(seed: number) { return () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }; }
+const r = rng(20261009);
+const pick = <T,>(a: readonly T[]) => a[Math.floor(r() * a.length)]!;
+function pickN<T>(a: readonly T[], n: number) { const c = [...a]; const out: T[] = []; while (out.length < n && c.length) out.push(c.splice(Math.floor(r() * c.length), 1)[0]!); return out; }
+for (let i = 11; i <= 120; i++) {
+  const name = `${pick(FIRST)} ${pick(LAST)}`;
+  const readiness = 55 + Math.floor(r() * 45);
+  const month = 11 + Math.floor(r() * 6);
+  POOL.push({
+    id: `n${i}`, name, specialty: pick(SPECS), years: 1 + Math.floor(r() * 18), home: pick(HOMES), readiness,
+    spanish: pick(["Basic", "Basic", "Conversational", "Conversational", "Fluent"] as const), regions: pickN(LOC_IDS, 1 + Math.floor(r() * 3)),
+    experiences: pickN(EXPS, 1 + Math.floor(r() * 3)), length: pick([4, 8, 8, 13, 13]), family: pick(FAM),
+    status: readiness >= 78 ? "Passport ready" : "Pathway in review", certs: pick(CERTS),
+    available: `${month > 12 ? 2027 : 2026}-${String(month > 12 ? month - 12 : month).padStart(2, "0")}-${String(1 + Math.floor(r() * 27)).padStart(2, "0")}`,
+  });
+}
+for (const n of POOL) {
+  n.certs ??= ["BLS", "ACLS"];
+  n.email ??= `${n.name.toLowerCase().normalize("NFD").replace(/[^a-z ]/g, "").replace(" ", ".")}@example.com`;
+  n.phone ??= `(555) ${String(100 + (n.id.length * 37 + Number(n.id.slice(1)) * 13) % 900)}-${String(1000 + Number(n.id.slice(1)) * 71 % 9000)}`;
+  n.available ??= "2026-11-02";
+}
+
 export function matchScore(n: PoolNurse, loc: LocationId, specialty?: string) {
   let s = 50 + Math.round((n.readiness - 70) * 0.8);
   if (n.regions.includes(loc)) s += 22;
@@ -133,16 +166,24 @@ export type AtsStage = "Shortlisted" | "Contacted" | "Negotiating" | "Offer sent
 export const ATS_STAGES: AtsStage[] = ["Shortlisted", "Contacted", "Negotiating", "Offer sent", "Accepted"];
 
 export type Message = { from: "hospital" | "nurse"; text: string; at: string };
-export type Candidate = { nurseId: string; gigId: string; stage: AtsStage; weeklyPay: number; messages: Message[] };
+export type Activity = { text: string; at: string };
+export type Task = { id: string; text: string; due: string; done: boolean };
+export type Candidate = {
+  nurseId: string; gigId: string; stage: AtsStage; weeklyPay: number; messages: Message[];
+  rating?: number; tags?: string[]; owner?: string; source?: string; notes?: Activity[]; tasks?: Task[]; activity?: Activity[]; updatedAt?: string;
+};
+export const RECRUITERS = ["You", "Marisol (Nurse Recruiter)", "Dr. Ortiz (ED Director)", "Luis (HR)"];
 
 export type HospitalGig = {
   id: string; title: string; specialty: string; location: LocationId; weeks: number; weeklyPay: number; shift: string;
-  start: string; perks: string[]; status: "Draft" | "Published"; views: number; town?: string;
+  start: string; perks: string[]; status: "Draft" | "Published"; views: number; town?: string; service?: boolean;
 };
 
 export type HospitalState = { loggedIn: boolean; facilityId: string; gigs: HospitalGig[]; candidates: Candidate[] };
 
 const now = () => new Date().toISOString();
+const ago = (d: number) => new Date(Date.now() - d * 86400000).toISOString();
+const inDays = (d: number) => new Date(Date.now() + d * 86400000).toISOString().slice(0, 10);
 
 export const hospitalSeed: HospitalState = {
   loggedIn: false,
@@ -152,18 +193,31 @@ export const hospitalSeed: HospitalState = {
     { id: "g2", title: "Med-Surg, family-friendly coast", specialty: "Med-Surg", location: "dorado", weeks: 8, weeklyPay: 1700, shift: "3 × 12 days", start: "2026-12-07", perks: ["hospital-housing", "flight", "car-contract", "childcare", "school"], status: "Published", views: 188 },
   ],
   candidates: [
-    { nurseId: "n1", gigId: "g1", stage: "Negotiating", weeklyPay: 1800, messages: [
-      { from: "hospital", text: "Hi Elena — your passport looks great. Interested in our ER nights gig in Dorado?", at: now() },
-      { from: "nurse", text: "Yes! Traveling with my spouse and son — is a 2-bedroom villa possible?", at: now() },
-    ] },
-    { nurseId: "n8", gigId: "g2", stage: "Offer sent", weeklyPay: 1750, messages: [{ from: "hospital", text: "Offer sent: $1,750/wk + full package. Let us know!", at: now() }] },
-    { nurseId: "n7", gigId: "g1", stage: "Contacted", weeklyPay: 1800, messages: [{ from: "hospital", text: "Tyler, want to dive Fajardo on your off days?", at: now() }] },
-    { nurseId: "n4", gigId: "g1", stage: "Shortlisted", weeklyPay: 1800, messages: [] },
-    { nurseId: "n6", gigId: "g2", stage: "Accepted", weeklyPay: 1700, messages: [{ from: "nurse", text: "Accepted — see you in December!", at: now() }] },
+    { nurseId: "n1", gigId: "g1", stage: "Negotiating", weeklyPay: 1800, rating: 5, tags: ["Family", "ER nights"], owner: "Marisol (Nurse Recruiter)", source: "WEPA pool match", updatedAt: ago(1),
+      messages: [
+        { from: "hospital", text: "Hi Elena — your passport looks great. Interested in our ER nights gig in Dorado?", at: ago(4) },
+        { from: "nurse", text: "Yes! Traveling with my spouse and son — is a 2-bedroom villa possible?", at: ago(3) },
+      ],
+      notes: [{ text: "Strong ED background. Needs 2-bedroom villa + childcare info.", at: ago(3) }],
+      tasks: [{ id: "t1", text: "Confirm 2-bedroom villa with Dorado partner", due: inDays(1), done: false }],
+      activity: [{ text: "Shortlisted from pool (96% match)", at: ago(5) }, { text: "Moved to Contacted", at: ago(4) }, { text: "Moved to Negotiating", at: ago(2) }] },
+    { nurseId: "n8", gigId: "g2", stage: "Offer sent", weeklyPay: 1750, rating: 4, tags: ["Fluent Spanish"], owner: "You", source: "Applied to gig", updatedAt: ago(1),
+      messages: [{ from: "hospital", text: "Offer sent: $1,750/wk + full package. Let us know!", at: ago(1) }],
+      tasks: [{ id: "t2", text: "Follow up on offer", due: inDays(2), done: false }], activity: [{ text: "Formal offer sent · $1,750/wk", at: ago(1) }] },
+    { nurseId: "n7", gigId: "g1", stage: "Contacted", weeklyPay: 1800, rating: 3, tags: ["Diver"], owner: "You", source: "WEPA pool match", updatedAt: ago(2),
+      messages: [{ from: "hospital", text: "Tyler, want to dive Fajardo on your off days?", at: ago(2) }], activity: [{ text: "Moved to Contacted", at: ago(2) }] },
+    { nurseId: "n4", gigId: "g1", stage: "Shortlisted", weeklyPay: 1800, rating: 4, owner: "Dr. Ortiz (ED Director)", source: "WEPA pool match", updatedAt: ago(1), messages: [], activity: [{ text: "Shortlisted from pool", at: ago(1) }] },
+    { nurseId: "n6", gigId: "g2", stage: "Accepted", weeklyPay: 1700, rating: 5, tags: ["L&D", "Family"], owner: "Marisol (Nurse Recruiter)", source: "Referral", updatedAt: ago(6),
+      messages: [{ from: "nurse", text: "Accepted — see you in December!", at: ago(6) }], activity: [{ text: "Offer accepted", at: ago(6) }],
+      tasks: [{ id: "t3", text: "Start credentialing packet", due: inDays(3), done: false }] },
+    { nurseId: "n14", gigId: "g1", stage: "Shortlisted", weeklyPay: 1800, rating: 3, owner: "You", source: "WEPA pool match", updatedAt: ago(0), messages: [], activity: [{ text: "Shortlisted from pool", at: ago(0) }] },
+    { nurseId: "n22", gigId: "g2", stage: "Contacted", weeklyPay: 1700, rating: 2, owner: "Luis (HR)", source: "Applied to gig", updatedAt: ago(3), messages: [{ from: "hospital", text: "Thanks for applying! Free for a quick call this week?", at: ago(3) }], tasks: [{ id: "t4", text: "Schedule intro call", due: inDays(-1), done: false }] },
+    { nurseId: "n31", gigId: "g1", stage: "Negotiating", weeklyPay: 1850, rating: 4, tags: ["Wants 13 wks"], owner: "Marisol (Nurse Recruiter)", source: "WEPA pool match", updatedAt: ago(1), messages: [{ from: "nurse", text: "Could you do $1,900 if I extend to 13 weeks?", at: ago(1) }] },
+    { nurseId: "n47", gigId: "g2", stage: "Declined", weeklyPay: 1700, rating: 2, owner: "You", source: "WEPA pool match", updatedAt: ago(8), messages: [{ from: "nurse", text: "I've accepted another assignment — thank you!", at: ago(8) }] },
   ],
 };
 
-const KEY = "wepa-hospital-v1";
+const KEY = "wepa-hospital-v2";
 const EVT = "wepa-hospital-change";
 
 export function useHospital() {

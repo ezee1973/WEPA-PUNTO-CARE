@@ -627,6 +627,10 @@ function InterestsPicker({ interests, onChange }: { interests: ReadinessState["i
           <div className="mt-3 flex flex-wrap gap-2">{g.body}</div>
         </div>
       ))}
+      <label className="flex items-start gap-3 rounded-2xl border border-dashed border-border p-4 text-sm">
+        <input type="checkbox" className="mt-1" checked={!!interests.service} onChange={(e) => onChange({ ...interests, service: e.target.checked })} />
+        <span><span className="font-semibold">Open to unpaid community service gigs</span><span className="block text-xs text-muted-foreground">Short stays serving rural and underserved communities, with faith-based or secular hosts. Lodging and meals are covered; the reward is the work itself.</span></span>
+      </label>
     </section>
   );
 }

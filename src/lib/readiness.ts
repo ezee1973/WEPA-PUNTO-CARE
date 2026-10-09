@@ -32,7 +32,7 @@ export const INTEREST_OPTIONS = {
   housing: ["Beachside", "City / walkable", "Quiet countryside"],
 } as const;
 
-export type Interests = { regions: string[]; experiences: string[]; length: string; housing: string; settings: string[] };
+export type Interests = { regions: string[]; experiences: string[]; length: string; housing: string; settings: string[]; service?: boolean };
 
 export type Pathway = {
   active: boolean | null; oneYear: boolean | null; continuous: boolean | null; inactive: boolean | null; goodStanding: boolean | null; pending: boolean | null; revoked: boolean | null; category: string;
