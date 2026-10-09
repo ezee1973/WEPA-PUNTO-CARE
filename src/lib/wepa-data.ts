@@ -119,12 +119,24 @@ export const demoGigs: DemoGig[] = [
   },
 ];
 
+import caribeHiltonImg from "@/assets/partners/caribe-hilton.jpg";
+import laConchaImg from "@/assets/partners/la-concha.jpg";
+import doradoBeachImg from "@/assets/partners/dorado-beach.jpg";
+import elConquistadorImg from "@/assets/partners/el-conquistador.jpg";
+import eastIslandImg from "@/assets/partners/east-island.jpg";
+import bioBayImg from "@/assets/partners/bio-bay.jpg";
+import toroVerdeImg from "@/assets/partners/toro-verde.jpg";
+import casaBacardiImg from "@/assets/partners/casa-bacardi.jpg";
+import copamarinaImg from "@/assets/partners/copamarina.jpg";
+import villaMontanaImg from "@/assets/partners/villa-montana.jpg";
+
 export type DemoPartner = {
   name: string;
   category: "Hotel" | "Adventure" | "Spa & Wellness" | "Beach & Sailing" | "Food & Culture";
   location: string;
   blurb: string;
   perk: string;
+  image: string;
 };
 
 // Real Puerto Rico travel & tourism partners featured in the marketplace.
