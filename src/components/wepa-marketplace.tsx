@@ -226,7 +226,7 @@ function RoleRail({ role, setRole }: { role: DemoRole; setRole: (role: DemoRole)
   );
 }
 
-function NurseExperience({ onSelectGig, soundOn, onSound, jingleMedia }: { onSelectGig: (gig: DemoGig) => void; soundOn: boolean; onSound: () => void; jingleMedia: ReactNode }) {
+function NurseExperience({ onSelectGig, soundOn, onSound, anthemAuto, onAnthemEnded, mediaRef }: { onSelectGig: (gig: DemoGig) => void; soundOn: boolean; onSound: () => void; anthemAuto: boolean; onAnthemEnded: () => void; mediaRef: React.RefObject<HTMLVideoElement | null> }) {
   const [specialty, setSpecialty] = useState("All specialties");
   const [stepState, setStepState] = useState(qualificationSteps);
   const complete = stepState.filter((step) => step.done).length;
