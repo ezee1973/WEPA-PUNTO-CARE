@@ -264,9 +264,6 @@ function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
                 </button>
               ))}
             </div>
-            <p className="mt-4 text-center text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-ocean-foreground/85">
-              {tr(" No account needed to look around ")}
-            </p>
           </div>
         </div>
       )}
