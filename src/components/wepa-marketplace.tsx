@@ -1,4 +1,5 @@
 import { LanguageToggle } from "@/components/language-toggle";
+import { TourismExperience } from "@/components/tourism-partner";
 import { useLanguage } from "@/lib/i18n";
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import {
@@ -591,122 +592,6 @@ function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void 
 
       <MobileNurseNav />
     </>
-  );
-}
-
-function TourismExperience() {
-  const { t: tr } = useLanguage();
-  const [offers, setOffers] = useState(demoOffers);
-  const [formOpen, setFormOpen] = useState(false);
-
-  function markLive(id: string) {
-    setOffers((current) =>
-      current.map((offer) => (offer.id === id ? { ...offer, selected: true } : offer)),
-    );
-    toast.success(tr("Offer is now visible to hospitals."));
-  }
-
-  return (
-    <section className="mx-auto max-w-[1440px] px-4 py-12 sm:px-6 lg:px-8">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-        <div className="max-w-2xl">
-          <p className="eyebrow">{tr("Travel & tourism workspace")}</p>
-          <h2 className="mt-1 text-3xl font-black sm:text-4xl">
-            {tr("Put your experience in front of hospitals.")}
-          </h2>
-          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            {tr(
-              "Your offers stay private to hospitals until one selects them into a nurse-facing gig package. Compete on what makes your corner of the island unforgettable.",
-            )}
-          </p>
-        </div>
-        <Button size="lg" onClick={() => setFormOpen(true)}>
-          {tr("Create an offer ")}
-          <ArrowRight />
-        </Button>
-      </div>
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {offers.map((offer) => (
-          <TourismOfferCard key={offer.id} offer={offer} onPublish={() => markLive(offer.id)} />
-        ))}
-      </div>
-      <Dialog open={formOpen} onOpenChange={setFormOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-black">{tr("New partner offer")}</DialogTitle>
-            <DialogDescription>
-              {tr("Hospitals see this privately. Nurses only see it once it's in a gig package.")}
-            </DialogDescription>
-          </DialogHeader>
-          <form
-            className="space-y-4"
-            onSubmit={(event) => {
-              event.preventDefault();
-              setFormOpen(false);
-              toast.success(tr("Offer submitted for hospital review."));
-            }}
-          >
-            <Field label={tr("Experience title")}>
-              <Input required placeholder={tr("e.g. Sunset sail for two")} />
-            </Field>
-            <Field label={tr("Location")}>
-              <Input required placeholder={tr("e.g. Fajardo")} />
-            </Field>
-            <div className="grid grid-cols-2 gap-3">
-              <Field label={tr("Retail value ($)")}>
-                <Input required type="number" min={0} placeholder={tr("740")} />
-              </Field>
-              <Field label={tr("Partner price ($)")}>
-                <Input required type="number" min={0} placeholder={tr("180")} />
-              </Field>
-            </div>
-            <Button type="submit" className="w-full">
-              {tr("Submit offer")}
-            </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
-    </section>
-  );
-}
-
-function TourismOfferCard({ offer, onPublish }: { offer: DemoOffer; onPublish: () => void }) {
-  const { t: tr } = useLanguage();
-  return (
-    <article className="flex flex-col border border-border bg-card p-5">
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] font-black uppercase text-muted-foreground">
-          {tr(offer.category)}
-        </span>
-        <span
-          className={cn(
-            "px-2 py-0.5 text-[10px] font-black uppercase",
-            offer.selected ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground",
-          )}
-        >
-          {tr(offer.selected ? "Live" : "Draft")}
-        </span>
-      </div>
-      <h3 className="mt-3 text-lg font-extrabold leading-tight">{tr(offer.title)}</h3>
-      <p className="mt-1 text-xs font-bold text-primary">
-        {tr(offer.partner)} · {tr(offer.location)}
-      </p>
-      <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
-        {tr(offer.description)}
-      </p>
-      <p className="mt-4 border-t border-border pt-3 text-sm">
-        <strong className="text-lg">${tr(offer.price.toLocaleString())}</strong>{" "}
-        <span className="text-xs text-muted-foreground">
-          {tr("to hospitals · retail $")}
-          {tr(offer.retail.toLocaleString())}
-        </span>
-      </p>
-      {!offer.selected && (
-        <Button variant="outline" size="sm" className="mt-3" onClick={onPublish}>
-          {tr("Publish to hospitals")}
-        </Button>
-      )}
-    </article>
   );
 }
 
