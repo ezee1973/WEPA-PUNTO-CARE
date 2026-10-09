@@ -13,4 +13,5 @@
 - [x] Hospital side: demo log in, nurse pool, location-based gig builder with perks + competitive rating, hiring pipeline, dashboard
 - [x] Splash landing: deep ocean stage, restrained coast, warm white audience cards with action-led copy
 - [x] Splash copy + polish: 'Find your place', marketplace one-liner, larger icons, arrow in its own space
-- [ ] Passport back button returns to nurse home (skip splash)
+- [x] Passport back button returns to nurse home (skip splash)
+- [x] Profile photo, Island Passport display with QR, wallet pass, social badge
