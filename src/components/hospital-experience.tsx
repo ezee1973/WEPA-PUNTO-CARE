@@ -42,6 +42,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import { perkImage, usePartner } from "@/lib/partner-offers";
 import { PassportThumb, PassportViewer, Pipeline } from "@/components/hospital-ats";
 import {
   ATS_STAGES,
@@ -700,23 +701,6 @@ function NursePool({ facilityLocation }: { facilityLocation: LocationId }) {
 }
 
 /* ---------------- Gig builder ---------------- */
-
-const CAT_IMG: Record<PerkCategory, string[]> = {
-  Housing: [hiltonImg, villaImg, doradoImg, conqImg],
-  Travel: [coastImg, conqImg],
-  Mobility: [coastImg, villaImg],
-  Adventure: [bioImg, toroImg, eastImg, conqImg],
-  Wellness: [spaImg, doradoImg],
-  "Food & Culture": [bacardiImg, coastImg],
-  Family: [villaImg, coastImg],
-  Professional: [heroImage],
-};
-function perkImage(p: Perk) {
-  const l = CAT_IMG[p.category];
-  let h = 0;
-  for (const c of p.id) h = (h + c.charCodeAt(0)) % 997;
-  return l[h % l.length]!;
-}
 
 const CATS: PerkCategory[] = [
   "Housing",

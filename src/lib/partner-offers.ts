@@ -32,7 +32,7 @@ PERKS.push(
   { id: "la-concha-week", title: "Condado oceanfront week at La Concha", partner: "La Concha Resort", category: "Housing", retail: 2400, cost: 900, locations: ["san-juan"] },
   { id: "el-conquistador-weekend", title: "Cliffside weekend + Palomino Island", partner: "El Conquistador Resort", category: "Housing", retail: 1300, cost: 420, locations: ["fajardo"] },
   { id: "villa-montana-stay", title: "Beach villa nights in Isabela", partner: "Villa Montaña Beach Resort", category: "Housing", retail: 1600, cost: 600, locations: ["aguadilla"] },
-  { id: "dorado-ritz", title: "Ritz-Carlson Reserve spa afternoon", partner: "Dorado Beach, a Ritz-Carlton Reserve", category: "Wellness", retail: 950, cost: 380, locations: ["dorado"] },
+  { id: "dorado-ritz", title: "Ritz-Carlton Reserve spa afternoon", partner: "Dorado Beach, a Ritz-Carlton Reserve", category: "Wellness", retail: 950, cost: 380, locations: ["dorado"] },
   { id: "bacardi-mixology", title: "Mixology class at Casa Bacardí", partner: "Casa Bacardí", category: "Food & Culture", retail: 150, cost: 45, locations: ["san-juan", "dorado"] },
   { id: "old-sj-food", title: "Old San Juan food walk", partner: "Flavors of San Juan", category: "Food & Culture", retail: 110, cost: 35, locations: ["san-juan"] },
   { id: "pinones-bike", title: "Piñones bike & kiosko trail", partner: "Piñones Bike Tours", category: "Food & Culture", retail: 85, cost: 25, locations: ["san-juan"] },
@@ -46,10 +46,6 @@ PERKS.push(
   { id: "seaborne-hop", title: "Culebra & Vieques island hop flight", partner: "Cape Air", category: "Travel", retail: 260, cost: 120, locations: ["fajardo", "san-juan"] },
 );
 
-Object.assign(
-  {},
-  // marketing terms for the new partner deals
-);
 const NEW_TERMS: Record<string, PerkOffer> = {
   "la-concha-week": { offerType: "Limited time", headline: "Nurse week at 60% off", endsAt: "2026-12-18" },
   "el-conquistador-weekend": { offerType: "Special", headline: "Free Palomino ferry", requirement: "Resort poster in the ED break room" },
