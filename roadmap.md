@@ -20,3 +20,4 @@
 - [x] Nurse home pitch line → marketplace one-liner
 - [x] English / Español toggle on welcome and across nurse, hospital, tourism and passport journeys
 - [x] Nurse community: connections, travel teams, experience reviews, and approved testimonials
+- [x] Center nurse journey on Passport; embed community and route its actions through profile/readiness completion

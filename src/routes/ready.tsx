@@ -20,5 +20,5 @@ export const Route = createFileRoute("/ready")({
 
 function ReadyPage() {
   const { section } = Route.useSearch();
-  return <ReadinessPassport initialTab={section} />;
+  return section ? <ReadinessPassport initialTab={section} /> : <ReadinessPassport />;
 }
