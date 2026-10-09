@@ -22,6 +22,7 @@ export const elena = {
   license: "Florida RN #RN9481726 (fictional)", licenseIssued: "2018-06-14", licenseExpires: "2027-07-31",
   certs: ["BLS (exp. 2027-03)", "ACLS (exp. 2026-12)"], availability: "4-week assignment, from Nov 2 2026",
   spanish: "Conversational", travelingWith: "Spouse and child", email: "elena.rivera@example.com",
+  photo: "" as string,
 };
 
 export const INTEREST_OPTIONS = {

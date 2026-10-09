@@ -13,6 +13,8 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { INTEREST_OPTIONS, interestsComplete, nextBestAction, pathwayComplete, pathwayResult, preparationProgress, streamGuide, useReadiness, type ChecklistItem, type ItemStatus, type NurseProfile, type Pathway, type ReadinessState } from "@/lib/readiness";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
+import { Avatar, PassportDocument, PassportShare } from "@/components/passport-card";
+import { toShared } from "@/lib/passport-share";
 
 const DISCLAIMER = "WEPA provides preparation and process guidance. Only the appropriate Puerto Rico licensing authority can determine eligibility or authorize practice.";
 const TABS = [
@@ -132,7 +134,8 @@ export function ReadinessPassport() {
     <div className="min-h-dvh bg-background pb-32 lg:pb-12">
       <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
-          <Button asChild variant="ghost" size="icon" aria-label="Back to WEPA.care"><Link to="/"><ArrowLeft /></Link></Button>
+          <Button asChild variant="ghost" size="icon" aria-label="Back to WEPA.care"><Link to="/" search={{ home: "nurse" }}><ArrowLeft /></Link></Button>
+          <button onClick={() => setEditProfile(true)} aria-label="Edit profile photo"><Avatar photo={state.profile.photo} name={state.profile.name} className="size-10 text-sm" /></button>
           <div className="min-w-0 flex-1">
             <p className="truncate font-display text-lg font-bold leading-tight">Puerto Rico Readiness Passport</p>
             <p className="truncate text-xs text-muted-foreground">{state.profile.name} · {state.profile.specialty}</p>
@@ -249,6 +252,8 @@ export function ReadinessPassport() {
 
           {tab === "passport" && (
             <section className="space-y-4">
+              <PassportDocument p={toShared(state)} photo={state.profile.photo} />
+              <PassportShare p={toShared(state)} photo={state.profile.photo} />
               <CandidatePassport state={state} />
               {!state.applied ? (
                 <Button size="lg" className="w-full bg-coral text-coral-foreground hover:bg-coral/90" onClick={apply}><Send /> Join the gig pool & start matching</Button>
@@ -278,6 +283,13 @@ function ProfileDialog({ open, onOpenChange, profile, onSave }: { open: boolean;
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85dvh] overflow-y-auto sm:max-w-lg">
         <DialogTitle>Edit your profile</DialogTitle>
+        <div className="flex items-center gap-4">
+          <Avatar photo={draft.photo} name={draft.name} className="size-20 text-2xl" />
+          <div className="flex flex-wrap gap-2">
+            <Button asChild variant="outline" size="sm"><label className="cursor-pointer"><Upload /> {draft.photo ? "Change photo" : "Add photo"}<input type="file" accept="image/*" className="sr-only" onChange={async (e) => { const f = e.target.files?.[0]; if (f) { const photo = await squarePhoto(f); setDraft((d) => ({ ...d, photo })); } }} /></label></Button>
+            {draft.photo && <Button variant="ghost" size="sm" onClick={() => setDraft((d) => ({ ...d, photo: "" }))}>Remove</Button>}
+          </div>
+        </div>
         <div className="grid gap-3 sm:grid-cols-2">
           {fields.map(([k, label, type]) => (
             <label key={k} className={cn("text-xs font-semibold", (k === "license" || k === "certs" || k === "availability") && "sm:col-span-2")}>
@@ -293,6 +305,15 @@ function ProfileDialog({ open, onOpenChange, profile, onSave }: { open: boolean;
       </DialogContent>
     </Dialog>
   );
+}
+
+async function squarePhoto(f: File): Promise<string> {
+  const url = URL.createObjectURL(f);
+  const img = await new Promise<HTMLImageElement>((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+  const s = Math.min(img.width, img.height); const c = document.createElement("canvas"); c.width = c.height = 320;
+  c.getContext("2d")!.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, 320, 320);
+  URL.revokeObjectURL(url);
+  return c.toDataURL("image/jpeg", 0.85);
 }
 
 function ContinueButton({ label, onClick, disabled }: { label: string; onClick: () => void; disabled?: boolean }) {
