@@ -188,7 +188,7 @@ function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
               Come for the Island.
               <span className="block text-primary">Care for its People.</span>
             </h1>
-            <p className="max-w-xl text-sm leading-relaxed text-ocean-foreground/70 sm:text-base">
+            <p className="max-w-xl text-sm leading-relaxed text-ocean-foreground/85 sm:text-base">
               Puerto Rico hospitals staff nursing gigs at honest local wages — and island partners cover the travel, lodging, and fun.
             </p>
           </div>
@@ -214,7 +214,7 @@ function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
                     />
                   </span>
                   <span className="min-w-0">
-                    <span className="block text-[0.62rem] font-extrabold uppercase tracking-[0.18em] text-accent-strong">{door.audience}</span>
+                    <span className="block text-[0.62rem] font-extrabold uppercase tracking-[0.18em] text-accent-deep">{door.audience}</span>
                     <span className="mt-1 block text-base font-black leading-tight text-ivory-foreground sm:text-lg">{door.title}</span>
                     <span className="mt-1 block text-xs leading-snug text-ivory-foreground/65 sm:text-sm">{door.copy}</span>
                   </span>
@@ -222,7 +222,7 @@ function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
                 </button>
               ))}
             </div>
-            <p className="mt-4 text-center text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-ocean-foreground/45">
+            <p className="mt-4 text-center text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-ocean-foreground/70">
               No account needed to look around
             </p>
           </div>
