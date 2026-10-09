@@ -1,8 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
-
-import { NurseCommunity } from "@/components/nurse-community";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/community")({
+  beforeLoad: () => {
+    throw redirect({ to: "/ready", search: { section: "community" }, replace: true });
+  },
   head: () => ({
     meta: [
       { title: "Nurse Community & Island Stories | WEPA.care" },
@@ -13,5 +14,5 @@ export const Route = createFileRoute("/community")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: NurseCommunity,
+  component: () => null,
 });

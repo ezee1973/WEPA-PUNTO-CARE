@@ -64,7 +64,17 @@ const RATING_LABELS: { key: keyof ExperienceReview["ratings"]; label: string }[]
   { key: "community", label: "Sense of community" },
 ];
 
-export function NurseCommunity() {
+export function NurseCommunity({
+  embedded = false,
+  passportProgress = 0,
+  onEditProfile,
+  onPassportAction,
+}: {
+  embedded?: boolean;
+  passportProgress?: number;
+  onEditProfile?: () => void;
+  onPassportAction?: () => void;
+} = {}) {
   const { t: tr } = useLanguage();
   const { state, update } = useCommunity();
   const [query, setQuery] = useState("");
@@ -131,8 +141,8 @@ export function NurseCommunity() {
   }
 
   return (
-    <main className="min-h-screen bg-background pb-16 text-foreground">
-      <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur">
+    <main className={cn("bg-background text-foreground", embedded ? "-mx-4 -my-6" : "min-h-screen pb-16")}>
+      {!embedded && <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-[1440px] items-center gap-3 px-4 sm:px-6 lg:px-8">
           <Button asChild variant="ghost" size="icon" aria-label={tr("Back to nurse home")}>
             <Link to="/" search={{ home: "nurse" }}><ArrowLeft /></Link>
@@ -143,14 +153,15 @@ export function NurseCommunity() {
           </div>
           <LanguageToggle />
         </div>
-      </header>
+      </header>}
 
       <section className="bg-surface-dark text-surface-dark-foreground">
         <div className="mx-auto grid max-w-[1440px] gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1.15fr_.85fr] lg:items-end lg:px-8 lg:py-14">
           <div>
-            <Badge className="bg-primary text-primary-foreground">{tr("Synthetic demo community")}</Badge>
-            <h1 className="mt-4 max-w-3xl text-4xl font-black leading-tight sm:text-6xl">{tr("Come on your own. Never arrive alone.")}</h1>
-            <p className="mt-4 max-w-2xl text-base leading-relaxed text-surface-dark-foreground/80 sm:text-lg">{tr("Meet nurses headed your way, join a low-pressure group, or build a small travel team around the gig that fits you.")}</p>
+            <Badge className="bg-primary text-primary-foreground">{tr("Part of your Readiness Passport")}</Badge>
+            <h1 className="mt-4 max-w-3xl text-4xl font-black leading-tight sm:text-6xl">{tr("Build your Passport. Find your people.")}</h1>
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-surface-dark-foreground/80 sm:text-lg">{tr("Complete your profile and island interests to meet nurses headed your way, join a group, and build a travel team around matching gigs.")}</p>
+            {embedded && <div className="mt-6 flex flex-wrap items-center gap-3"><Button onClick={onPassportAction}>{passportProgress < 100 ? tr("Continue building my Passport") : tr("Review my Passport")}<ChevronRight /></Button><Button variant="outline" onClick={onEditProfile} className="border-surface-dark-foreground/30 bg-transparent text-surface-dark-foreground hover:bg-surface-dark-foreground/10 hover:text-surface-dark-foreground">{tr("Complete my profile")}</Button><span className="text-sm font-bold text-primary">{passportProgress}% {tr("Passport complete")}</span></div>}
           </div>
           <div className="grid grid-cols-3 gap-3 border-t border-surface-dark-foreground/20 pt-5 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
             <CommunityStat value="120" label={tr("nurses in the demo pool")} />
@@ -294,7 +305,7 @@ export function NurseStorySpotlight() {
   if (!story) return null;
   const nurse = COMMUNITY_NURSES.find((item) => item.id === story.nurseId);
   if (!nurse) return null;
-  return <section className="overflow-hidden bg-surface-dark text-surface-dark-foreground"><div className="mx-auto grid max-w-[1440px] lg:grid-cols-[.72fr_1.28fr]"><div className="relative min-h-80 lg:min-h-[34rem]"><img src={nurse.photo} alt={nurse.name} width={512} height={512} className="absolute inset-0 h-full w-full object-cover" /><div className="absolute inset-0 bg-gradient-to-t from-surface-dark via-transparent to-transparent lg:bg-gradient-to-r lg:from-transparent lg:to-surface-dark" /></div><div className="flex flex-col justify-center px-5 py-8 sm:px-10 lg:px-14"><p className="eyebrow text-primary">{tr("Real island life, told by nurses")}</p><div className="mt-5 flex text-coral">{Array.from({ length: story.rating }, (_, i) => <Star key={i} className="size-4 fill-current" />)}</div><blockquote className="mt-4 max-w-3xl text-2xl font-black leading-tight sm:text-4xl">“{tr(story.quote)}”</blockquote><div className="mt-5"><p className="font-bold">{nurse.name} · {tr(nurse.specialty)}</p><p className="text-sm text-surface-dark-foreground/65">{story.hospital} · {story.location}</p></div><div className="mt-7 flex flex-wrap items-center gap-3"><Button asChild><Link to="/community">{tr("See more nurse stories")}<ChevronRight /></Link></Button><Button variant="outline" size="icon" className="border-surface-dark-foreground/30 bg-transparent text-surface-dark-foreground hover:bg-surface-dark-foreground/10 hover:text-surface-dark-foreground" aria-label={tr("Previous story")} onClick={() => setIndex((index - 1 + STORIES.length) % STORIES.length)}><ChevronLeft /></Button><Button variant="outline" size="icon" className="border-surface-dark-foreground/30 bg-transparent text-surface-dark-foreground hover:bg-surface-dark-foreground/10 hover:text-surface-dark-foreground" aria-label={tr("Next story")} onClick={() => setIndex((index + 1) % STORIES.length)}><ChevronRight /></Button></div><p className="mt-5 text-xs text-surface-dark-foreground/45">{tr("Synthetic nurse and testimonial for MVP demonstration.")}</p></div></div></section>;
+  return <section className="overflow-hidden bg-surface-dark text-surface-dark-foreground"><div className="mx-auto grid max-w-[1440px] lg:grid-cols-[.72fr_1.28fr]"><div className="relative min-h-80 lg:min-h-[34rem]"><img src={nurse.photo} alt={nurse.name} width={512} height={512} className="absolute inset-0 h-full w-full object-cover" /><div className="absolute inset-0 bg-gradient-to-t from-surface-dark via-transparent to-transparent lg:bg-gradient-to-r lg:from-transparent lg:to-surface-dark" /></div><div className="flex flex-col justify-center px-5 py-8 sm:px-10 lg:px-14"><p className="eyebrow text-primary">{tr("Your Passport opens the island community")}</p><div className="mt-5 flex text-coral">{Array.from({ length: story.rating }, (_, i) => <Star key={i} className="size-4 fill-current" />)}</div><blockquote className="mt-4 max-w-3xl text-2xl font-black leading-tight sm:text-4xl">“{tr(story.quote)}”</blockquote><div className="mt-5"><p className="font-bold">{nurse.name} · {tr(nurse.specialty)}</p><p className="text-sm text-surface-dark-foreground/65">{story.hospital} · {story.location}</p></div><div className="mt-7 flex flex-wrap items-center gap-3"><Button asChild><Link to="/ready" search={{ section: "community" }}>{tr("Build your Passport & meet nurses")}<ChevronRight /></Link></Button><Button variant="outline" size="icon" className="border-surface-dark-foreground/30 bg-transparent text-surface-dark-foreground hover:bg-surface-dark-foreground/10 hover:text-surface-dark-foreground" aria-label={tr("Previous story")} onClick={() => setIndex((index - 1 + STORIES.length) % STORIES.length)}><ChevronLeft /></Button><Button variant="outline" size="icon" className="border-surface-dark-foreground/30 bg-transparent text-surface-dark-foreground hover:bg-surface-dark-foreground/10 hover:text-surface-dark-foreground" aria-label={tr("Next story")} onClick={() => setIndex((index + 1) % STORIES.length)}><ChevronRight /></Button></div><p className="mt-5 text-xs text-surface-dark-foreground/45">{tr("Synthetic nurse and testimonial for MVP demonstration.")}</p></div></div></section>;
 }
 
 function StoryCard({ story, onOpen }: { story: NurseStory; onOpen: () => void }) { const { t: tr } = useLanguage(); const nurse = COMMUNITY_NURSES.find((item) => item.id === story.nurseId); if (!nurse) return null; return <article className="overflow-hidden border border-border bg-card"><div className="relative aspect-[4/3]"><img src={nurse.photo} alt={nurse.name} loading="lazy" width={512} height={512} className="h-full w-full object-cover" /><Badge className="absolute left-3 top-3 bg-card text-foreground">{tr(story.type)}</Badge></div><div className="p-5"><div className="flex text-coral">{Array.from({ length: story.rating }, (_, i) => <Star key={i} className="size-3.5 fill-current" />)}</div><blockquote className="mt-3 text-lg font-black leading-snug">“{tr(story.quote)}”</blockquote><p className="mt-4 text-sm font-bold">{nurse.name}</p><p className="text-xs text-muted-foreground">{tr(nurse.specialty)} · {story.location}</p><Button variant="link" className="mt-3 h-auto p-0" onClick={onOpen}>{tr("Read the full story")}<ChevronRight /></Button></div></article>; }
