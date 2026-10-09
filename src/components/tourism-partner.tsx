@@ -632,3 +632,100 @@ function BoostDialog({ offer, current, onClose, onSet }: { offer: CustomOffer | 
     </Dialog>
   );
 }
+
+/* ---------- Operator picker (landing) ---------- */
+function OperatorCard({ a, onPick }: { a: PartnerAccount; onPick: () => void }) {
+  const { t: tr } = useLanguage();
+  const live = accountOffers(a.id).filter((o) => o.status === "Live").length;
+  return (
+    <button type="button" onClick={onPick} className="group flex overflow-hidden border border-border bg-card text-left transition hover:border-primary">
+      <img src={a.image} alt={tr(a.name)} loading="lazy" className="h-24 w-24 shrink-0 object-cover" />
+      <div className="min-w-0 p-3">
+        <p className="truncate font-extrabold">{a.name}</p>
+        <p className="truncate text-xs font-semibold text-primary">{tr(a.town)} · {tr(a.category)}</p>
+        <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{tr(a.blurb)}</p>
+        <p className="mt-1 text-[11px] font-bold text-muted-foreground">{live} {tr("live offers")} · {tr("Partner since")} {a.since}</p>
+      </div>
+    </button>
+  );
+}
+
+/* ---------- Partner billing (placement spend, simulated) ---------- */
+function PartnerBilling({ account, slice, onBoostOffer }: { account: PartnerAccount; slice: AccountSlice; onBoostOffer: (o: CustomOffer) => void }) {
+  const { t: tr, language } = useLanguage();
+  const spend = boostSpend(slice.boosts);
+  const charges = Object.entries(slice.boosts)
+    .map(([id, tier]) => ({ id, tier, title: slice.offers.find((o) => o.id === id)?.title ?? id, price: boostTier(tier)?.price ?? 0 }))
+    .sort((a, b) => b.price - a.price);
+  const now = new Date();
+  const dateOf = (seed: string) =>
+    new Date(now.getFullYear(), now.getMonth(), 1 + (hash(account.id + seed) % 6)).toLocaleDateString(language === "es" ? "es-PR" : "en-US", { month: "short", day: "numeric" });
+  const live = slice.offers.filter((o) => o.status === "Live");
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-3 md:grid-cols-3">
+        <div className="border-2 border-primary bg-primary/5 p-5">
+          <p className="text-xs font-bold uppercase text-muted-foreground">{tr("This month")}</p>
+          <p className="mt-2 text-3xl font-black">{money(spend)}<span className="text-sm font-bold text-muted-foreground">{tr("/mo")}</span></p>
+          <p className="text-sm text-muted-foreground">{tr(`${charges.length} active boosts on your offers`)}</p>
+        </div>
+        <div className="border border-border bg-card p-5">
+          <p className="text-xs font-bold uppercase text-muted-foreground">{tr("Listing fee")}</p>
+          <p className="mt-2 text-3xl font-black">{money(0)}</p>
+          <p className="text-sm text-muted-foreground">{tr("Free to list, forever. You only pay for placement.")}</p>
+        </div>
+        <div className="border border-border bg-card p-5">
+          <p className="text-xs font-bold uppercase text-muted-foreground">{tr("Payment method")}</p>
+          <p className="mt-2 text-lg font-black">{account.card}</p>
+          <p className="text-sm text-muted-foreground">{tr(`Next invoice ${dateOf("invoice")} · ${live.length} live offers`)}</p>
+        </div>
+      </div>
+
+      <div className="overflow-x-auto border border-border bg-card">
+        <h3 className="flex items-center gap-2 p-4 font-black"><CreditCard className="size-4" />{tr("Charges this month")}</h3>
+        <table className="w-full min-w-[560px] text-sm">
+          <thead className="bg-muted text-left text-xs uppercase text-muted-foreground">
+            <tr><th className="p-2">{tr("Date")}</th><th className="p-2">{tr("Item")}</th><th className="p-2">{tr("Placement")}</th><th className="p-2 text-right">{tr("Amount")}</th></tr>
+          </thead>
+          <tbody>
+            {charges.map((c) => (
+              <tr key={c.id} className="border-t border-border">
+                <td className="p-2 text-muted-foreground">{dateOf(c.id)}</td>
+                <td className="p-2 font-semibold">{tr(c.title)}</td>
+                <td className="p-2">{tr(boostTier(c.tier)!.name)}</td>
+                <td className="p-2 text-right font-black">{money(c.price)}</td>
+              </tr>
+            ))}
+            <tr className="border-t border-border">
+              <td className="p-2 text-muted-foreground">{dateOf("listing")}</td>
+              <td className="p-2 font-semibold">{tr("Directory listing")}</td>
+              <td className="p-2 text-muted-foreground">{tr("Standard placement")}</td>
+              <td className="p-2 text-right font-black">{money(0)}</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr className="border-t-2 border-border font-black">
+              <td className="p-2" colSpan={3}>{tr("Total this month")}</td>
+              <td className="p-2 text-right">{money(spend)}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div className="border border-border bg-card p-5">
+        <h3 className="font-black">{tr("Buy placement")}</h3>
+        <p className="text-sm text-muted-foreground">{tr("Pick a live offer and choose how high it ranks in the directory and in hospitals' perk menu.")}</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {live.map((o) => (
+            <Button key={o.id} size="sm" variant={slice.boosts[o.id] ? "default" : "outline"} onClick={() => onBoostOffer(o)}>
+              <Megaphone />{o.title}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      <FeeSchedule />
+      <p className="text-center text-xs text-muted-foreground">{tr("Simulated billing for demonstration. No real invoices or charges.")}</p>
+    </div>
+  );
+}
