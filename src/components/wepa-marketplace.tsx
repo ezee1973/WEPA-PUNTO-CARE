@@ -429,6 +429,10 @@ function WorkspaceShell({ role, title, subtitle, children }: { role: DemoRole; t
   return <><section className="border-b border-border bg-card"><div className="mx-auto flex max-w-[1440px] items-center gap-4 px-4 py-8 sm:px-6 lg:px-8"><span className="flex size-12 items-center justify-center rounded-full bg-primary/15 text-primary"><Icon className="size-6" /></span><div><p className="text-xs font-bold uppercase text-muted-foreground">{roleMeta[role].label} workspace · {subtitle}</p><h1 className="mt-1 text-3xl font-black sm:text-4xl">{title}</h1></div></div></section><div className="mx-auto max-w-[1440px] px-4 py-10 sm:px-6 lg:px-8">{children}</div></>;
 }
 
+function HeroStat({ value, label }: { value: string; label: string }) {
+  return <div className="border border-surface-dark-foreground/20 bg-surface-dark/50 px-3 py-3 backdrop-blur"><strong className="block text-lg font-black text-primary sm:text-xl">{value}</strong><span className="mt-0.5 block text-[11px] leading-tight text-surface-dark-foreground/70">{label}</span></div>;
+}
+
 function Stat({ label, value, icon: Icon }: { label: string; value: string; icon: typeof Star }) {
   return <div className="border border-border bg-card p-4"><Icon className="size-5 text-primary" /><strong className="mt-5 block text-2xl font-black">{value}</strong><span className="text-xs text-muted-foreground">{label}</span></div>;
 }
