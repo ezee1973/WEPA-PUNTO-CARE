@@ -222,10 +222,11 @@ function Header({
               onClick={() => onRole(tab.id)}
               aria-pressed={role === tab.id}
               className={cn(
-                "rounded-full px-3 py-1.5 text-xs font-bold transition-colors sm:px-4 sm:text-sm",
+                "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-colors sm:px-4 sm:text-sm",
                 role === tab.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
               )}
             >
+              <img src={ROLE_ICONS[tab.id]} alt="" aria-hidden className="h-5 w-5 object-contain sm:h-6 sm:w-6" />
               {tab.label}
             </button>
           ))}
