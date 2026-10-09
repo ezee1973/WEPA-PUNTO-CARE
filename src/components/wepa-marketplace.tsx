@@ -580,7 +580,7 @@ function MobileNurseNav() {
 function HospitalCandidate() {
   const { state, update } = useReadiness();
   if (!state.applied) {
-    return <div className="mt-6 rounded-2xl border border-dashed border-border bg-card p-4 text-sm text-muted-foreground">Hospital del Mar · ED 4-week gig — no Candidate Passports shared yet. When Elena applies from her Readiness Passport, she appears here.</div>;
+    return <div className="mt-6 rounded-2xl border border-dashed border-border bg-card p-4 text-sm text-muted-foreground">No Candidate Passports in the gig pool yet. When Elena finishes her Readiness Passport and joins the pool, she appears here as a match.</div>;
   }
   const idx = STAGES.indexOf(state.stage);
   const next = STAGES[idx + 1];
