@@ -308,14 +308,18 @@ function PartnerCarousel() {
 
 function PartnerCard({ partner }: { partner: DemoPartner }) {
   return (
-    <article className="flex w-72 shrink-0 snap-start flex-col border border-surface-dark-foreground/15 bg-surface-dark-foreground/5 p-5 backdrop-blur sm:w-80">
-      <div className="flex items-center justify-between">
+    <article className="group relative flex h-96 w-72 shrink-0 snap-start flex-col justify-end overflow-hidden border border-surface-dark-foreground/15 sm:w-80">
+      <img src={partner.image} alt={partner.name} loading="lazy" width={1024} height={768} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+      <div className="absolute inset-0 bg-gradient-to-t from-surface-dark via-surface-dark/35 to-transparent" />
+      <div className="absolute left-4 top-4 flex items-center gap-2">
         <span className="bg-primary px-2 py-1 text-[10px] font-black uppercase text-primary-foreground">{partner.category}</span>
-        <span className="flex items-center gap-1 text-xs font-semibold text-surface-dark-foreground/60"><MapPin className="size-3.5" /> {partner.location}</span>
+        <span className="flex items-center gap-1 bg-surface-dark/60 px-2 py-1 text-[10px] font-bold uppercase text-surface-dark-foreground backdrop-blur"><MapPin className="size-3" /> {partner.location}</span>
       </div>
-      <h3 className="mt-4 text-xl font-extrabold leading-tight">{partner.name}</h3>
-      <p className="mt-2 flex-1 text-sm leading-relaxed text-surface-dark-foreground/75">{partner.blurb}</p>
-      <p className="mt-4 flex items-start gap-2 border-t border-surface-dark-foreground/15 pt-3 text-sm font-bold text-primary"><Sparkles className="mt-0.5 size-4 shrink-0" /> {partner.perk}</p>
+      <div className="relative p-5">
+        <h3 className="text-2xl font-black leading-tight text-surface-dark-foreground">{partner.name}</h3>
+        <p className="mt-2 text-sm leading-relaxed text-surface-dark-foreground/80">{partner.blurb}</p>
+        <p className="mt-3 flex items-start gap-2 border-t border-surface-dark-foreground/25 pt-3 text-sm font-bold text-primary"><Sparkles className="mt-0.5 size-4 shrink-0" /> {partner.perk}</p>
+      </div>
     </article>
   );
 }
