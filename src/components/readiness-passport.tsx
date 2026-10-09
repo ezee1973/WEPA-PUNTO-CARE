@@ -157,13 +157,14 @@ export function ReadinessPassport() {
                 <p className="font-display text-6xl font-black">{progress}%</p>
                 <Progress value={progress} className="mt-3 h-2" />
                 <p className="mt-4 text-sm opacity-75">Current phase</p>
-                <p className="font-semibold">{state.applied ? "Matching with gigs" : state.packetConfirmed ? "Final documents & Spanish" : "Packet preparation"}</p>
-                <div className="mt-4 rounded-2xl bg-background/10 p-4">
+                <p className="font-semibold">{state.applied ? "Matching with gigs" : !pathwayDone ? "Pathway check" : state.packetConfirmed ? "Final documents & Spanish" : "Packet preparation"}</p>
+                <button onClick={() => setTab(actionTab)} className="mt-4 block w-full rounded-2xl bg-background/10 p-4 text-left transition hover:bg-background/20">
                   <p className="text-xs uppercase tracking-wide opacity-70">Next best action</p>
-                  <p className="mt-1 font-semibold">{nextAction}</p>
-                </div>
-                {!state.packetPrepared && <Button onClick={preparePacket} className="mt-4 w-full bg-coral text-coral-foreground hover:bg-coral/90" size="lg"><Bot /> Prepare my packet</Button>}
-                {state.packetPrepared && !state.packetConfirmed && <Button onClick={() => setTab("checklist")} className="mt-4 w-full bg-coral text-coral-foreground hover:bg-coral/90" size="lg">Ready for nurse review</Button>}
+                  <p className="mt-1 font-semibold">{nextAction} →</p>
+                </button>
+                {!pathwayDone && <Button onClick={() => setTab("pathway")} className="mt-4 w-full bg-coral text-coral-foreground hover:bg-coral/90" size="lg">Start with the pathway questions</Button>}
+                {pathwayDone && !state.packetPrepared && <Button onClick={preparePacket} className="mt-4 w-full bg-coral text-coral-foreground hover:bg-coral/90" size="lg"><Bot /> Prepare my packet</Button>}
+                {pathwayDone && state.packetPrepared && !state.packetConfirmed && <Button onClick={() => setTab("checklist")} className="mt-4 w-full bg-coral text-coral-foreground hover:bg-coral/90" size="lg">Ready for nurse review</Button>}
               </section>
               <section className="rounded-3xl border border-border bg-card p-5">
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Your goal</p>
@@ -184,7 +185,7 @@ export function ReadinessPassport() {
             </>
           )}
 
-          {tab === "pathway" && <PathwayCheck pathway={state.pathway} onChange={(p) => update((s) => ({ ...s, pathway: p }))} />}
+          {tab === "pathway" && <PathwayCheck pathway={state.pathway} onChange={(p) => update((s) => ({ ...s, pathway: p }))} onContinue={() => setTab("checklist")} />}
 
           {tab === "checklist" && (
             <>
