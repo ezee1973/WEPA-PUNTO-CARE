@@ -11,3 +11,4 @@
 - [x] Consolidate nurse-home readiness into one live passport band (single source of truth)
 - [x] Move Edit profile button from passport header into the Ready for nurse review box
 - [x] Hospital side: demo log in, nurse pool, location-based gig builder with perks + competitive rating, hiring pipeline, dashboard
+- [x] Splash landing: deep ocean stage, restrained coast, warm white audience cards with action-led copy
