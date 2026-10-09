@@ -163,7 +163,7 @@ function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void 
       <section className="relative isolate overflow-hidden bg-surface-dark text-surface-dark-foreground">
         <img src={coastImage} alt="Puerto Rico coast and turquoise Caribbean water" className="absolute inset-0 -z-20 h-full w-full object-cover object-center" />
         <div className="absolute inset-0 -z-10 bg-hero-wash" />
-        <div className="mx-auto grid max-w-[1440px] items-end gap-10 px-4 pb-12 pt-20 sm:px-6 lg:grid-cols-[1.05fr_.95fr] lg:px-8 lg:pb-16">
+        <div className="mx-auto max-w-[1440px] px-4 pb-12 pt-20 sm:px-6 lg:px-8 lg:pb-16">
           <div>
             <div className="mb-5 inline-flex items-center gap-2 border-l-2 border-accent px-3 text-xs font-bold uppercase text-surface-dark-foreground/80">
               <Sparkles className="size-4 text-accent" /> Travel nursing, Puerto Rico remixed
@@ -180,18 +180,6 @@ function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void 
               <Button size="lg" variant="outline" className="border-surface-dark-foreground/30 bg-surface-dark/30 text-surface-dark-foreground hover:bg-surface-dark-foreground/10 hover:text-surface-dark-foreground" onClick={() => document.getElementById("ready")?.scrollIntoView({ behavior: "smooth" })}>Get Puerto Rico ready</Button>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onAnthem}
-            aria-label="Replay the WEPA anthem"
-            className="group relative block w-full cursor-pointer overflow-hidden border border-surface-dark-foreground/25 shadow-2xl"
-          >
-            <img src={anthemPoster} alt="Frame from the WEPA.care anthem video" className="aspect-video w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-            <span className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-surface-dark/35 transition-colors group-hover:bg-surface-dark/20">
-              <span className="flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform group-hover:scale-105"><Play className="ml-0.5 size-6" /></span>
-              <span className="text-xs font-bold uppercase tracking-wide text-surface-dark-foreground">Replay the anthem · 6s</span>
-            </span>
-          </button>
         </div>
       </section>
 
