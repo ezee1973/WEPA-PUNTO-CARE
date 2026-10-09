@@ -415,13 +415,13 @@ export function CandidatePassport({ state, compact }: { state: ReadinessState; c
   const outstanding = state.checklist.filter((c) => !["Nurse confirmed", "Submitted — self-reported", "Accepted"].includes(c.status)).map((c) => c.title);
   const credDone = state.credentialing.filter((c) => c.done).length;
   const rows: [string, string][] = [
-    ["Specialty & experience", `${elena.specialty} · ${elena.years} years`],
+    ["Specialty & experience", `${state.profile.specialty} · ${state.profile.years} years`],
     ["License pathway", `${pathwayResult(state.pathway)} · Official authorization ${state.officialAuthorization.toLowerCase()}`],
     ["PR application preparation", `${preparationProgress(state)}% preparation progress`],
     ["Gig interests", interestsComplete(state.interests) ? `${state.interests.regions.join(", ")} · ${state.interests.experiences.join(", ")} · ${state.interests.length}, ${state.interests.housing}` : "Not set yet"],
     ["Hospital credentials", `${credDone}/${state.credentialing.length} candidate-reported`],
     ["Spanish readiness", state.spanish ?? "Not completed"],
-    ["Availability", elena.availability],
+    ["Availability", state.profile.availability],
     ["Outstanding items", outstanding.length ? outstanding.join("; ") : "None"],
     ["Consent to share", state.applied ? new Date(state.applied).toLocaleString() : "Not yet shared"],
   ];
@@ -429,7 +429,7 @@ export function CandidatePassport({ state, compact }: { state: ReadinessState; c
     <section className="overflow-hidden rounded-3xl border border-border bg-card">
       <div className="flex items-center gap-3 bg-surface-dark p-4 text-surface-dark-foreground">
         <img src={nurseIconAsset.url} alt="" aria-hidden className="size-11 rounded-full object-contain" />
-        <div className="min-w-0"><p className="font-display text-lg font-bold">{elena.name}</p><p className="text-xs opacity-75">Candidate Passport · {elena.city}</p></div>
+        <div className="min-w-0"><p className="font-display text-lg font-bold">{state.profile.name}</p><p className="text-xs opacity-75">Candidate Passport · {state.profile.city}</p></div>
         <ShieldCheck className="ml-auto size-6 text-primary" />
       </div>
       <dl className={cn("grid gap-px bg-border", !compact && "sm:grid-cols-2")}>
