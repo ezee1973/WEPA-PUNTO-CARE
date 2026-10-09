@@ -120,6 +120,13 @@ const ROLE_ICONS: Record<MarketRole, string> = {
   tourism: tourismIconAsset.url,
 };
 
+const SPLASH_STATS: { value: string; label: string; tone: "coral" | "teal" }[] = [
+  { value: "92%", label: "experience burnout", tone: "coral" },
+  { value: "63%", label: "seek additional income", tone: "teal" },
+  { value: "42%", label: "plan to remain in healthcare", tone: "coral" },
+  { value: "50%", label: "San Juan median RN pay v U.S.", tone: "coral" },
+];
+
 const JOURNEY_DOORS: { id: MarketRole; audience: string; title: string; copy: string }[] = [
   {
     id: "nurse",
