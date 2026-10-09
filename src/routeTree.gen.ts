@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ReadyRouteImport } from './routes/ready'
 import { Route as ApiWepaGuideRouteImport } from './routes/api/wepa-guide'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReadyRoute = ReadyRouteImport.update({
+  id: '/ready',
+  path: '/ready',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiWepaGuideRoute = ApiWepaGuideRouteImport.update({
@@ -25,27 +31,31 @@ const ApiWepaGuideRoute = ApiWepaGuideRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ready': typeof ReadyRoute
   '/api/wepa-guide': typeof ApiWepaGuideRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ready': typeof ReadyRoute
   '/api/wepa-guide': typeof ApiWepaGuideRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/ready': typeof ReadyRoute
   '/api/wepa-guide': typeof ApiWepaGuideRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/wepa-guide'
+  fullPaths: '/' | '/ready' | '/api/wepa-guide'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/wepa-guide'
-  id: '__root__' | '/' | '/api/wepa-guide'
+  to: '/' | '/ready' | '/api/wepa-guide'
+  id: '__root__' | '/' | '/ready' | '/api/wepa-guide'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ReadyRoute: typeof ReadyRoute
   ApiWepaGuideRoute: typeof ApiWepaGuideRoute
 }
 
@@ -56,6 +66,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ready': {
+      id: '/ready'
+      path: '/ready'
+      fullPath: '/ready'
+      preLoaderRoute: typeof ReadyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/wepa-guide': {
@@ -70,6 +87,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ReadyRoute: ReadyRoute,
   ApiWepaGuideRoute: ApiWepaGuideRoute,
 }
 export const routeTree = rootRouteImport
