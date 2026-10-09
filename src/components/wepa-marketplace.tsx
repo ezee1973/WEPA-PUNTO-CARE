@@ -45,10 +45,8 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   islandGigs,
   demoGigs,
-  demoOffers,
   demoPartners,
   type DemoGig,
-  type DemoOffer,
   type DemoPartner,
 } from "@/lib/wepa-data";
 import { cn } from "@/lib/utils";
