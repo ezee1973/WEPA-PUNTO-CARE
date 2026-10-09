@@ -1223,7 +1223,7 @@ function MobileNurseNav() {
         {tr(" Gigs")}
       </Button>
       <Button asChild variant="ghost" className="h-auto flex-col gap-1 text-[10px]">
-        <Link to="/community">
+        <Link to="/ready" search={{ section: "community" }}>
           <MessageCircle />
           {tr(" Community")}
         </Link>

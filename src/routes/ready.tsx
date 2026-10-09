@@ -3,6 +3,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ReadinessPassport } from "@/components/readiness-passport";
 
 export const Route = createFileRoute("/ready")({
+  validateSearch: (search: Record<string, unknown>): { section?: "community" } =>
+    search["section"] === "community" ? { section: "community" } : {},
   head: () => ({
     meta: [
       { title: "Puerto Rico Readiness Passport — WEPA.care" },
@@ -13,5 +15,10 @@ export const Route = createFileRoute("/ready")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: ReadinessPassport,
+  component: ReadyPage,
 });
+
+function ReadyPage() {
+  const { section } = Route.useSearch();
+  return section ? <ReadinessPassport initialTab={section} /> : <ReadinessPassport />;
+}

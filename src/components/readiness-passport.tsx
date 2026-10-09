@@ -45,6 +45,7 @@ import {
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import { Avatar, PassportDocument, PassportShare } from "@/components/passport-card";
+import { NurseCommunity } from "@/components/nurse-community";
 import { toShared } from "@/lib/passport-share";
 
 const DISCLAIMER =
@@ -57,6 +58,7 @@ const TABS = [
   { id: "interests", label: "Interests" },
   { id: "hospital", label: "Credentials" },
   { id: "passport", label: "Passport" },
+  { id: "community", label: "Community" },
 ] as const;
 type Tab = (typeof TABS)[number]["id"];
 
@@ -87,10 +89,10 @@ function guideContext(s: ReadinessState) {
   };
 }
 
-export function ReadinessPassport() {
+export function ReadinessPassport({ initialTab }: { initialTab?: "community" } = {}) {
   const { t: tr, language } = useLanguage();
   const { state, update, reset } = useReadiness();
-  const [tab, setTab] = useState<Tab>("overview");
+  const [tab, setTab] = useState<Tab>(initialTab ?? "overview");
   const [guide, setGuide] = useState({ text: "", busy: false, error: "" });
   const [editProfile, setEditProfile] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
@@ -563,6 +565,15 @@ export function ReadinessPassport() {
                 ),
               )}
             </section>
+          )}
+
+          {tab === "community" && (
+            <NurseCommunity
+              embedded
+              passportProgress={progress}
+              onEditProfile={() => setEditProfile(true)}
+              onPassportAction={() => setTab(actionTab)}
+            />
           )}
         </div>
 
