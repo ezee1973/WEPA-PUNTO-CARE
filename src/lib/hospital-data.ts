@@ -190,3 +190,60 @@ export function packageTotals(perkIds: string[]) {
 export function weeklyValue(weeklyPay: number, perkValue: number, weeks: number) {
   return Math.round(weeklyPay + perkValue / Math.max(1, weeks));
 }
+
+/* ---------- Any town in Puerto Rico, mapped to its nearest region hub ---------- */
+const TOWNS: Record<LocationId, string[]> = {
+  "san-juan": ["San Juan", "Guaynabo", "Bayamón", "Carolina", "Trujillo Alto", "Cataño", "Toa Baja", "Caguas", "Gurabo", "Aguas Buenas", "Cidra", "San Lorenzo", "Canóvanas", "Loíza"],
+  dorado: ["Dorado", "Toa Alta", "Vega Alta", "Vega Baja", "Manatí", "Barceloneta", "Corozal", "Naranjito", "Morovis", "Ciales"],
+  ponce: ["Ponce", "Juana Díaz", "Santa Isabel", "Coamo", "Salinas", "Guayama", "Arroyo", "Patillas", "Villalba", "Peñuelas", "Guayanilla", "Yauco", "Guánica"],
+  utuado: ["Utuado", "Jayuya", "Adjuntas", "Orocovis", "Barranquitas", "Comerío", "Aibonito", "Lares", "Maricao", "Las Marías"],
+  mayaguez: ["Mayagüez", "Cabo Rojo", "Hormigueros", "San Germán", "Lajas", "Sabana Grande", "Añasco", "Rincón"],
+  fajardo: ["Fajardo", "Luquillo", "Río Grande", "Ceiba", "Naguabo", "Humacao", "Las Piedras", "Juncos", "Yabucoa", "Maunabo", "Vieques", "Culebra"],
+  aguadilla: ["Aguadilla", "Isabela", "Aguada", "Moca", "San Sebastián", "Quebradillas", "Camuy", "Hatillo", "Arecibo", "Florida"],
+};
+export const MUNICIPALITIES = (Object.entries(TOWNS) as [LocationId, string[]][]).flatMap(([hub, ts]) => ts.map((name) => ({ name, hub }))).sort((a, b) => a.name.localeCompare(b.name, "es"));
+export function hubFor(town: string): LocationId { return MUNICIPALITIES.find((m) => m.name.toLowerCase() === town.trim().toLowerCase())?.hub ?? "san-juan"; }
+
+/* ---------- Enough competing facilities for a real ranking ---------- */
+const COMP_NAMES: [string, string, number, number][] = [
+  ["Hospital Pavía Santurce", "San Juan", 1950, 12400], ["Ashford Presbyterian", "San Juan", 2050, 9800], ["Hospital San Francisco", "San Juan", 1800, 5200], ["Hospital Hermanos Meléndez", "Bayamón", 1700, 4100], ["Hospital Universitario UPR", "Carolina", 1650, 3200], ["HIMA San Pablo Caguas", "Caguas", 1850, 7600], ["Hospital Menonita Caguas", "Caguas", 1750, 6400], ["Hospital San Carlos Borromeo", "Moca", 1600, 3800], ["Hospital Wilma N. Vázquez", "Vega Baja", 1700, 5600], ["Doctors’ Center Manatí", "Manatí", 1800, 8200], ["Hospital Menonita Aibonito", "Aibonito", 1650, 4600], ["Hospital Episcopal San Lucas Guayama", "Guayama", 1650, 3500], ["Hospital Damas", "Ponce", 1800, 7300], ["Hospital de la Concepción", "San Germán", 1700, 6900], ["Hospital Perea", "Mayagüez", 1650, 4300], ["Hospital Ryder", "Humacao", 1750, 8800], ["Hospital Susoni", "Arecibo", 1700, 5000], ["Hospital Metropolitano Cabo Rojo", "Cabo Rojo", 1600, 9600], ["Hospital Castañer", "Lares", 1550, 3100], ["Centro de Salud Vieques", "Vieques", 1700, 13800], ["Hospital Dr. Pila", "Ponce", 1600, 2400],
+];
+COMP_NAMES.forEach(([name, town, weeklyPay, perkValue]) => COMPETITORS.push({ name: `${name}`, location: hubFor(town), weeklyPay, perkValue }));
+
+/* ---------- Partner perks are marketed offers ---------- */
+export type OfferType = "Standard" | "Limited time" | "Special";
+export type PerkOffer = { offerType: OfferType; headline?: string; endsAt?: string; requirement?: string };
+const OFFER_PATCH: Record<string, PerkOffer> = {
+  "hilton-month": { offerType: "Limited time", headline: "65% off first month", endsAt: "2026-12-15" },
+  "villa-dorado": { offerType: "Special", headline: "Rate cut in exchange for signage", requirement: "Partner banner in staff lounge + logo on your careers page" },
+  "eco-lodge": { offerType: "Special", headline: "Founding mountain partner", requirement: "Co-branded post on your hospital site" },
+  "coffee-casita": { offerType: "Limited time", headline: "Harvest-season rate", endsAt: "2027-01-31" },
+  flight: { offerType: "Limited time", headline: "Winter fare lock", endsAt: "2026-11-30" },
+  "car-contract": { offerType: "Special", headline: "Fleet rate — 50% off", requirement: "Rental desk flyer at main lobby" },
+  biobay: { offerType: "Limited time", headline: "New-moon nights 2-for-1", endsAt: "2026-11-20" },
+  catamaran: { offerType: "Special", headline: "Free seat each month", requirement: "Poster in nurses’ station" },
+  zipline: { offerType: "Limited time", headline: "Holiday 70% off", endsAt: "2026-12-31" },
+  surf: { offerType: "Special", headline: "Surf school sponsor", requirement: "Logo on hospital website partner page" },
+  vieques: { offerType: "Limited time", headline: "Off-season escape", endsAt: "2027-02-28" },
+  spa: { offerType: "Special", headline: "Wellness sponsor rate", requirement: "Table-top signage in cafeteria" },
+  "dorado-spa": { offerType: "Limited time", headline: "Weekday spa deal", endsAt: "2026-12-20" },
+  bacardi: { offerType: "Special", headline: "Welcome-week class", requirement: "Mention in nurse onboarding email" },
+  gym: { offerType: "Special", headline: "Corporate wellness rate", requirement: "Flyer at employee entrance" },
+};
+export function offerOf(id: string): PerkOffer { return OFFER_PATCH[id] ?? { offerType: "Standard" }; }
+
+// More partner perks so every corner of the island has a real menu.
+PERKS.push(
+  { id: "culebra-flamenco", title: "Flamenco Beach day by ferry", partner: "Culebra Ferry Tours", category: "Adventure", retail: 160, cost: 45, locations: ["fajardo"] },
+  { id: "rincon-whales", title: "Whale-watching sunset sail", partner: "Rincón Sailing", category: "Adventure", retail: 210, cost: 70, locations: ["mayaguez", "aguadilla"] },
+  { id: "cabo-rojo-light", title: "Los Morrillos lighthouse & salt flats tour", partner: "Cabo Rojo Tours", category: "Food & Culture", retail: 95, cost: 25, locations: ["mayaguez"] },
+  { id: "arecibo-cave", title: "Cueva Ventana guided hike", partner: "Cueva Ventana", category: "Adventure", retail: 85, cost: 20, locations: ["aguadilla", "utuado", "dorado"] },
+  { id: "jayuya-coffee", title: "Jayuya coffee harvest weekend", partner: "Hacienda San Pedro", category: "Food & Culture", retail: 280, cost: 80, locations: ["utuado"] },
+  { id: "guavate-lechon", title: "Guavate lechonera crawl", partner: "Ruta del Lechón", category: "Food & Culture", retail: 120, cost: 35, locations: ["san-juan", "ponce"] },
+  { id: "humacao-golf", title: "Palmas del Mar golf & beach club", partner: "Palmas del Mar", category: "Wellness", retail: 900, cost: 350, locations: ["fajardo"] },
+  { id: "salinas-mangrove", title: "Bahía de Jobos mangrove kayak", partner: "Salinas Eco Kayak", category: "Adventure", retail: 110, cost: 30, locations: ["ponce"] },
+  { id: "guanica-forest", title: "Guánica dry-forest & Gilligan’s Island trip", partner: "Guánica Boat Trips", category: "Adventure", retail: 140, cost: 40, locations: ["ponce", "mayaguez"] },
+  { id: "lajas-biobay", title: "La Parguera bio-bay swim", partner: "Parguera Tours", category: "Adventure", retail: 150, cost: 45, locations: ["mayaguez"] },
+  { id: "isabela-horse", title: "Beach horseback ride", partner: "Tropical Trail Rides", category: "Adventure", retail: 180, cost: 60, locations: ["aguadilla"] },
+  { id: "caguas-botanical", title: "Caguas botanical garden & food hall pass", partner: "Caguas Gastronomy", category: "Food & Culture", retail: 90, cost: 20, locations: ["san-juan"] },
+);
