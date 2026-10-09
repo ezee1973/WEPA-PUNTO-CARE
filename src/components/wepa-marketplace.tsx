@@ -32,6 +32,9 @@ import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
 import { demoGigs, demoOffers, demoPartners, qualificationSteps, type DemoGig, type DemoOffer, type DemoPartner } from "@/lib/wepa-data";
 import { cn } from "@/lib/utils";
+import { Link } from "@tanstack/react-router";
+import { CandidatePassport } from "@/components/readiness-passport";
+import { STAGES, useReadiness } from "@/lib/readiness";
 
 const logoUrl = logoAsset.url;
 const jingleUrl = jingleAsset.url;
@@ -261,7 +264,7 @@ function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void 
             </div>
             <div className="mt-7 flex flex-wrap gap-3">
               <Button size="lg" onClick={() => document.getElementById("gigs")?.scrollIntoView({ behavior: "smooth" })}>Explore live gigs <ArrowRight /></Button>
-              <Button size="lg" variant="outline" className="border-surface-dark-foreground/30 bg-surface-dark/30 text-surface-dark-foreground hover:bg-surface-dark-foreground/10 hover:text-surface-dark-foreground" onClick={() => document.getElementById("ready")?.scrollIntoView({ behavior: "smooth" })}>Get Puerto Rico ready</Button>
+              <Button asChild size="lg" variant="outline" className="border-surface-dark-foreground/30 bg-surface-dark/30 text-surface-dark-foreground hover:bg-surface-dark-foreground/10 hover:text-surface-dark-foreground"><Link to="/ready">Get Puerto Rico ready</Link></Button>
             </div>
           </div>
         </div>
@@ -363,6 +366,7 @@ function HospitalExperience() {
         <h2 className="mt-1 text-3xl font-black sm:text-4xl">Build a gig nurses actually want.</h2>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">Centro Médico del Caribe · San Juan. Pick from private partner offers to assemble the island package that ships with your gig. Nurses see the package — never the pricing.</p>
       </div>
+      <HospitalCandidate />
       <div className="mt-8 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
         <div className="grid gap-4 sm:grid-cols-2">
           {offers.map((offer) => (
@@ -561,5 +565,29 @@ function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open
 function Field({ label, children }: { label: string; children: ReactNode }) { return <Label className="flex flex-col gap-1.5"><span>{label}</span>{children}</Label>; }
 
 function MobileNurseNav() {
-  return <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-border bg-card/95 px-2 pb-[max(.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur md:hidden"><Button variant="ghost" className="h-auto flex-col gap-1 text-[10px] text-primary"><HeartPulse /> Home</Button><Button variant="ghost" className="h-auto flex-col gap-1 text-[10px]"><Search /> Gigs</Button><Button variant="ghost" className="h-auto flex-col gap-1 text-[10px]"><ClipboardCheck /> Ready</Button><Button variant="ghost" className="h-auto flex-col gap-1 text-[10px]"><FileCheck2 /> Applications</Button></nav>;
+  return <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-border bg-card/95 px-2 pb-[max(.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur md:hidden"><Button variant="ghost" className="h-auto flex-col gap-1 text-[10px] text-primary" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}><HeartPulse /> Home</Button><Button variant="ghost" className="h-auto flex-col gap-1 text-[10px]" onClick={() => document.getElementById("gigs")?.scrollIntoView({ behavior: "smooth" })}><Search /> Gigs</Button><Button asChild variant="ghost" className="h-auto flex-col gap-1 text-[10px]"><Link to="/ready"><ClipboardCheck /> Ready</Link></Button><Button asChild variant="ghost" className="h-auto flex-col gap-1 text-[10px]"><Link to="/ready"><FileCheck2 /> Passport</Link></Button></nav>;
+}
+
+function HospitalCandidate() {
+  const { state, update } = useReadiness();
+  if (!state.applied) {
+    return <div className="mt-6 rounded-2xl border border-dashed border-border bg-card p-4 text-sm text-muted-foreground">Hospital del Mar · ED 4-week gig — no Candidate Passports shared yet. When Elena applies from her Readiness Passport, she appears here.</div>;
+  }
+  const idx = STAGES.indexOf(state.stage);
+  const next = STAGES[idx + 1];
+  const blocked = next === "Cleared to start" && state.officialAuthorization !== "Issued";
+  return (
+    <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_320px]">
+      <CandidatePassport state={state} />
+      <div className="rounded-3xl border border-border bg-card p-4">
+        <p className="font-display text-lg font-bold">Application stage</p>
+        <ol className="mt-3 space-y-1.5 text-sm">
+          {STAGES.map((s, i) => <li key={s} className={cn("flex items-center gap-2", i <= idx ? "font-semibold" : "text-muted-foreground")}><span className={cn("size-2.5 rounded-full", i < idx ? "bg-primary" : i === idx ? "bg-coral" : "bg-border")} />{s}</li>)}
+        </ol>
+        {next && <Button className="mt-4 w-full" disabled={blocked} onClick={() => { update((s) => ({ ...s, stage: next })); toast.success(`Elena advanced to ${next}.`); }}>Advance to {next}</Button>}
+        {blocked && <p className="mt-2 text-xs text-muted-foreground">Official authorization pending — “Cleared to start” unlocks only once Puerto Rico issues authorization.</p>}
+        {next && idx < 2 && <p className="mt-2 text-xs text-muted-foreground">You can move to Clinical review while Puerto Rico authorization is pending.</p>}
+      </div>
+    </div>
+  );
 }
