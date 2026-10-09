@@ -303,7 +303,7 @@ function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
                         <span className="mt-1 block text-base font-black leading-tight sm:text-lg">
                           {tr(door.title)}
                         </span>
-                        <span className="mt-1 hidden text-xs font-normal leading-snug text-ivory-foreground/75 xs:block sm:text-sm">
+                        <span className="mt-1 hidden text-xs font-normal leading-snug text-ivory-foreground/75 xs:block sm:block sm:text-sm">
                           {tr(door.copy)}
                         </span>
                       </span>
