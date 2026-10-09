@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CommunityRouteImport } from './routes/community'
 import { Route as PassportRouteImport } from './routes/passport'
 import { Route as ReadyRouteImport } from './routes/ready'
 import { Route as ApiWepaGuideRouteImport } from './routes/api/wepa-guide'
@@ -17,6 +18,11 @@ import { Route as ApiWepaGuideRouteImport } from './routes/api/wepa-guide'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityRoute = CommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PassportRoute = PassportRouteImport.update({
@@ -37,12 +43,14 @@ const ApiWepaGuideRoute = ApiWepaGuideRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/community': typeof CommunityRoute
   '/passport': typeof PassportRoute
   '/ready': typeof ReadyRoute
   '/api/wepa-guide': typeof ApiWepaGuideRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/community': typeof CommunityRoute
   '/passport': typeof PassportRoute
   '/ready': typeof ReadyRoute
   '/api/wepa-guide': typeof ApiWepaGuideRoute
@@ -50,20 +58,23 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/community': typeof CommunityRoute
   '/passport': typeof PassportRoute
   '/ready': typeof ReadyRoute
   '/api/wepa-guide': typeof ApiWepaGuideRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/passport' | '/ready' | '/api/wepa-guide'
+  fullPaths: '/' | '/community' | '/passport' | '/ready' | '/api/wepa-guide'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/passport' | '/ready' | '/api/wepa-guide'
-  id: '__root__' | '/' | '/passport' | '/ready' | '/api/wepa-guide'
+  to: '/' | '/community' | '/passport' | '/ready' | '/api/wepa-guide'
+  id:
+    '__root__' | '/' | '/community' | '/passport' | '/ready' | '/api/wepa-guide'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CommunityRoute: typeof CommunityRoute
   PassportRoute: typeof PassportRoute
   ReadyRoute: typeof ReadyRoute
   ApiWepaGuideRoute: typeof ApiWepaGuideRoute
@@ -76,6 +87,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community': {
+      id: '/community'
+      path: '/community'
+      fullPath: '/community'
+      preLoaderRoute: typeof CommunityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/passport': {
@@ -104,6 +122,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CommunityRoute: CommunityRoute,
   PassportRoute: PassportRoute,
   ReadyRoute: ReadyRoute,
   ApiWepaGuideRoute: ApiWepaGuideRoute,
