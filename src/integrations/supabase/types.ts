@@ -14,7 +14,268 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      applications: {
+        Row: {
+          created_at: string
+          gig_id: string
+          id: string
+          nurse_id: string
+          status: Database["public"]["Enums"]["application_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          gig_id: string
+          id?: string
+          nurse_id: string
+          status?: Database["public"]["Enums"]["application_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          gig_id?: string
+          id?: string
+          nurse_id?: string
+          status?: Database["public"]["Enums"]["application_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applications_gig_id_fkey"
+            columns: ["gig_id"]
+            isOneToOne: false
+            referencedRelation: "gigs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gig_offers: {
+        Row: {
+          added_by: string
+          created_at: string
+          gig_id: string
+          offer_id: string
+        }
+        Insert: {
+          added_by: string
+          created_at?: string
+          gig_id: string
+          offer_id: string
+        }
+        Update: {
+          added_by?: string
+          created_at?: string
+          gig_id?: string
+          offer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gig_offers_gig_id_fkey"
+            columns: ["gig_id"]
+            isOneToOne: false
+            referencedRelation: "gigs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gig_offers_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "tourism_offers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gigs: {
+        Row: {
+          city: string
+          created_at: string
+          description: string
+          duration_weeks: number
+          hospital_id: string
+          id: string
+          owner_id: string
+          shift: string
+          specialty: string
+          start_date: string
+          status: Database["public"]["Enums"]["gig_status"]
+          title: string
+          weekly_pay: number
+        }
+        Insert: {
+          city: string
+          created_at?: string
+          description?: string
+          duration_weeks?: number
+          hospital_id: string
+          id?: string
+          owner_id: string
+          shift: string
+          specialty: string
+          start_date: string
+          status?: Database["public"]["Enums"]["gig_status"]
+          title: string
+          weekly_pay: number
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          description?: string
+          duration_weeks?: number
+          hospital_id?: string
+          id?: string
+          owner_id?: string
+          shift?: string
+          specialty?: string
+          start_date?: string
+          status?: Database["public"]["Enums"]["gig_status"]
+          title?: string
+          weekly_pay?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gigs_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hospitals: {
+        Row: {
+          city: string
+          created_at: string
+          description: string
+          id: string
+          name: string
+          owner_id: string
+        }
+        Insert: {
+          city: string
+          created_at?: string
+          description?: string
+          id?: string
+          name: string
+          owner_id: string
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          description?: string
+          id?: string
+          name?: string
+          owner_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string
+          home_state: string | null
+          id: string
+          organization_name: string | null
+          role: Database["public"]["Enums"]["account_role"]
+          specialty: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string
+          home_state?: string | null
+          id: string
+          organization_name?: string | null
+          role?: Database["public"]["Enums"]["account_role"]
+          specialty?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string
+          home_state?: string | null
+          id?: string
+          organization_name?: string | null
+          role?: Database["public"]["Enums"]["account_role"]
+          specialty?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      qualification_steps: {
+        Row: {
+          id: string
+          nurse_id: string
+          response: Json
+          status: string
+          step_key: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          nurse_id: string
+          response?: Json
+          status?: string
+          step_key: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          nurse_id?: string
+          response?: Json
+          status?: string
+          step_key?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      tourism_offers: {
+        Row: {
+          active: boolean
+          capacity: number
+          category: string
+          created_at: string
+          description: string
+          hospital_price: number
+          id: string
+          location: string
+          owner_id: string
+          partner_name: string
+          retail_value: number
+          title: string
+        }
+        Insert: {
+          active?: boolean
+          capacity?: number
+          category: string
+          created_at?: string
+          description?: string
+          hospital_price?: number
+          id?: string
+          location: string
+          owner_id: string
+          partner_name: string
+          retail_value?: number
+          title: string
+        }
+        Update: {
+          active?: boolean
+          capacity?: number
+          category?: string
+          created_at?: string
+          description?: string
+          hospital_price?: number
+          id?: string
+          location?: string
+          owner_id?: string
+          partner_name?: string
+          retail_value?: number
+          title?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +284,15 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      account_role: "nurse" | "hospital" | "tourism"
+      application_status:
+        | "applied"
+        | "reviewing"
+        | "qualified"
+        | "interview"
+        | "offered"
+        | "accepted"
+      gig_status: "draft" | "published" | "closed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +419,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      account_role: ["nurse", "hospital", "tourism"],
+      application_status: [
+        "applied",
+        "reviewing",
+        "qualified",
+        "interview",
+        "offered",
+        "accepted",
+      ],
+      gig_status: ["draft", "published", "closed"],
+    },
   },
 } as const
