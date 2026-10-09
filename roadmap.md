@@ -25,3 +25,4 @@
 - [x] Hospital billing: replace "How WEPA earns" with a fee schedule covering every audience
 - [x] T&T partner login: multiple real operators to choose from, each with own offers, stats, and billing
 - [x] Gig builder perk cards: boost badge moved beside the offer-type pill so it no longer overlaps the offer title
+- [x] Splash: workforce stats strip (92/63/42/50) + "The result" line, bilingual, between headline and journey doors
