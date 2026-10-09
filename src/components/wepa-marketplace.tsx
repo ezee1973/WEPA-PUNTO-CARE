@@ -209,20 +209,27 @@ function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
       />
       {!started && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-7 overflow-y-auto px-5 py-8 sm:gap-9 sm:py-12">
-          <div className="flex w-full max-w-3xl flex-col items-center gap-3 text-center sm:gap-4">
+          <div className="flex w-full max-w-4xl flex-col items-center gap-3 text-center sm:gap-4">
             <img
               src={logoUrl}
               alt={tr("WEPA.care")}
               className="h-11 w-auto object-contain [filter:brightness(0)_invert(1)_drop-shadow(0_10px_24px_rgba(9,45,55,0.55))] sm:h-16"
             />
-            <h1 className="max-w-2xl text-balance text-[1.85rem] font-black leading-[1.06] tracking-tight text-ocean-foreground sm:text-5xl">
-              {tr(" Come for the Island. ")}
-              <span className="block text-primary">{tr("Care for its People.")}</span>
+            <h1 className="max-w-3xl text-balance text-[1.85rem] font-black leading-[1.06] tracking-tight text-ocean-foreground sm:text-5xl">
+              {tr("Puerto Rico needs nurses.")}
             </h1>
-            <p className="max-w-xl text-sm leading-relaxed text-ocean-foreground/90 sm:text-base">
+            <p className="max-w-2xl text-sm font-semibold leading-relaxed text-ocean-foreground/95 sm:text-base">
               {tr(
-                " The travel nursing marketplace connecting Puerto Rico’s hospitals, nurses, and tourism partners — bringing care, island stays, and local experiences together. ",
+                "Travel nurses are licensed professionals who take temporary hospital assignments. Puerto Rico competes with higher-paying mainland contracts, making critical vacancies harder to fill.",
               )}
+            </p>
+            <p className="max-w-3xl text-xs leading-relaxed text-ocean-foreground/80 sm:text-sm">
+              {tr(
+                "WEPA closes the gap: hospitals offer local-pay gigs, tourism partners add stays and experiences, and U.S. nurses get ready and match.",
+              )}
+            </p>
+            <p className="text-sm font-black text-primary sm:text-base">
+              {tr("Come for the Island. Care for its People.")}
             </p>
           </div>
 
