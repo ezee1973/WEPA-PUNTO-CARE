@@ -89,7 +89,7 @@ export function WepaMarketplace() {
 
   return (
     <main className="min-h-screen bg-background text-foreground">
-      <video ref={mediaRef} src={jingleUrl} className="hidden" onEnded={() => setSoundOn(false)} playsInline />
+      {role !== "nurse" && <video ref={mediaRef} src={jingleUrl} className="hidden" onEnded={() => setSoundOn(false)} playsInline />}
       <Header
         role={role}
         setRole={setRole}
@@ -100,7 +100,14 @@ export function WepaMarketplace() {
         onSignOut={() => void signOut()}
       />
       <RoleRail role={role} setRole={setRole} />
-      {role === "nurse" && <NurseExperience onSelectGig={setSelectedGig} />}
+      {role === "nurse" && (
+        <NurseExperience
+          onSelectGig={setSelectedGig}
+          soundOn={soundOn}
+          onSound={() => void toggleSound()}
+          jingleMedia={<video ref={mediaRef} src={jingleUrl} onEnded={() => setSoundOn(false)} playsInline className="aspect-video w-full object-cover" />}
+        />
+      )}
       {role === "hospital" && <HospitalExperience />}
       {role === "tourism" && <TourismExperience />}
       <GigDialog gig={selectedGig} onClose={() => setSelectedGig(null)} signedIn={Boolean(signedInEmail)} onAuth={() => setAuthOpen(true)} />
@@ -131,7 +138,7 @@ function Header({
       <div className="mx-auto flex h-16 max-w-[1440px] items-center gap-3 px-4 sm:px-6 lg:px-8">
         <img src={logoUrl} alt="WEPA.care" className="h-11 w-auto object-contain" />
         <div className="hidden h-7 w-px bg-border sm:block" />
-        <p className="hidden text-xs font-semibold uppercase text-muted-foreground sm:block">Puerto Rico<br />travel health</p>
+        <p className="hidden text-xs font-semibold uppercase text-muted-foreground sm:block">Come for the Island.<br />Care for its People.</p>
         <div className="ml-auto hidden rounded-md bg-muted p-1 md:flex" aria-label="Demo role switcher">
           {(Object.keys(roleMeta) as DemoRole[]).map((key) => {
             const Icon = roleMeta[key].icon;
@@ -180,7 +187,7 @@ function RoleRail({ role, setRole }: { role: DemoRole; setRole: (role: DemoRole)
   );
 }
 
-function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void }) {
+function NurseExperience({ onSelectGig, soundOn, onSound, jingleMedia }: { onSelectGig: (gig: DemoGig) => void; soundOn: boolean; onSound: () => void; jingleMedia: ReactNode }) {
   const [specialty, setSpecialty] = useState("All specialties");
   const [stepState, setStepState] = useState(qualificationSteps);
   const complete = stepState.filter((step) => step.done).length;
