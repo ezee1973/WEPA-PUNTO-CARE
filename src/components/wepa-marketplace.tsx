@@ -227,17 +227,15 @@ function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
                   "Travel nurses are licensed professionals who take temporary hospital assignments. Puerto Rico competes with higher-paying mainland contracts, making critical vacancies harder to fill.",
                 )}
               </p>
-              <p className="mt-3 flex max-w-2xl flex-wrap items-center gap-x-1.5 gap-y-1 text-xs leading-relaxed text-ocean-foreground/80 sm:text-base">
+              <p className="mt-3 max-w-2xl text-xs leading-relaxed text-ocean-foreground/80 sm:text-base">
                 <img
                   src={logoUrl}
                   alt="WEPA! care"
-                  className="h-4 w-auto object-contain [filter:brightness(0)_invert(1)] sm:h-5"
+                  className="mr-1.5 inline-block h-4 w-auto -translate-y-px object-contain align-middle [filter:brightness(0)_invert(1)] sm:h-5"
                 />
-                <span>
-                  {tr(
-                    "closes the gap: hospitals offer local-pay gigs, tourism partners add stays and experiences, and U.S. nurses get ready and match.",
-                  )}
-                </span>
+                {tr(
+                  "closes the gap: hospitals offer local-pay gigs, tourism partners add stays and experiences, and U.S. nurses get ready and match.",
+                )}
               </p>
               <p className="mt-3 text-sm font-black text-primary sm:text-lg">
                 {tr("Come for the Island. Care for its People.")}
