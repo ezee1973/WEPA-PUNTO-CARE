@@ -87,9 +87,23 @@ function AnthemTakeover({ onDone }: { onDone: () => void }) {
       video.muted = true;
       void video.play().catch(() => {});
     });
+
+    // Close the takeover 3 seconds before the clip would otherwise end.
+    let closeTimer = 0;
+    const schedule = () => {
+      const remaining = Math.max(1200, (video.duration || 6) * 1000 - 3000);
+      closeTimer = window.setTimeout(finish, remaining);
+    };
+    if (video.readyState >= 1) schedule();
+    else video.addEventListener("loadedmetadata", schedule, { once: true });
+
     // Safety net: never trap the visitor if "ended" never fires.
-    const timer = window.setTimeout(finish, 9000);
-    return () => window.clearTimeout(timer);
+    const safety = window.setTimeout(finish, 6000);
+    return () => {
+      video.removeEventListener("loadedmetadata", schedule);
+      window.clearTimeout(closeTimer);
+      window.clearTimeout(safety);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
