@@ -46,6 +46,7 @@ export function ReadinessPassport() {
   const { state, update, reset } = useReadiness();
   const [tab, setTab] = useState<Tab>("overview");
   const [guide, setGuide] = useState({ text: "", busy: false, error: "" });
+  const [editProfile, setEditProfile] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const progress = preparationProgress(state);
   const remaining = state.checklist.filter((c) => !["Nurse confirmed", "Submitted — self-reported", "Accepted"].includes(c.status));
@@ -173,7 +174,7 @@ export function ReadinessPassport() {
                   <p className="font-display text-xl font-bold">Ready for nurse review</p>
                   <p className="mt-1 text-sm text-muted-foreground">Wepa Guide prepared these answers from your profile. Nothing is submitted until you confirm.</p>
                   <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
-                    {[["Name", elena.name], ["License", elena.license], ["Issued", elena.licenseIssued], ["Expires", elena.licenseExpires], ["Category", state.pathway.category], ["Certifications", elena.certs.join(", ")]].map(([k, v]) => (
+                    {[["Name", state.profile.name], ["License", state.profile.license], ["Issued", state.profile.licenseIssued], ["Expires", state.profile.licenseExpires], ["Category", state.pathway.category], ["Certifications", state.profile.certs.join(", ")]].map(([k, v]) => (
                       <div key={k} className="rounded-xl bg-muted p-3"><dt className="text-xs text-muted-foreground">{k}</dt><dd className="font-semibold">{v}</dd></div>
                     ))}
                   </dl>
