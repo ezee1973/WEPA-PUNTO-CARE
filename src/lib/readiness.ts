@@ -84,6 +84,7 @@ const seedChecklist: ChecklistItem[] = [
 ];
 
 export const seed: ReadinessState = {
+  profile: elena,
   pathway: { active: true, oneYear: true, continuous: true, inactive: false, goodStanding: true, pending: false, revoked: false, category: "RN — Emergency" },
   checklist: seedChecklist,
   packetPrepared: false,
