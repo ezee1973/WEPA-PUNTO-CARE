@@ -37,7 +37,10 @@ export type Pathway = {
   active: boolean; oneYear: boolean; continuous: boolean; inactive: boolean; goodStanding: boolean; pending: boolean; revoked: boolean; category: string;
 };
 
+export type NurseProfile = typeof elena;
+
 export type ReadinessState = {
+  profile: NurseProfile;
   pathway: Pathway;
   checklist: ChecklistItem[];
   packetPrepared: boolean;
