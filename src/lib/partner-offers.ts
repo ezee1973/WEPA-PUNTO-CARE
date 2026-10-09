@@ -93,7 +93,7 @@ export type DirectoryOffer = Perk & PerkOffer & {
   region: string; towns: string; image: string; pitch: string; perkPitch: string; included: string[];
   capacity: number; free: boolean; stats: { views: number; saves: number; hospitalAdds: number; nurseInterest: number; trend: number };
   status: OfferStatus;
-  boost?: BoostId;
+  boost?: BoostId | undefined;
 };
 export type OfferStatus = "Draft" | "Live" | "Paused" | "Ended";
 
