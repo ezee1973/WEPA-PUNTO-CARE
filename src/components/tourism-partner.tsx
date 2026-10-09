@@ -50,6 +50,7 @@ import {
   type DirectoryOffer,
   type OfferStatus,
 } from "@/lib/partner-offers";
+import { BOOST_TIERS, boostTier, type BoostId } from "@/lib/business";
 import heroImg from "@/assets/partners/el-conquistador.jpg";
 
 const money = (n: number) => `$${n.toLocaleString()}`;
@@ -61,6 +62,7 @@ export function TourismExperience() {
   const [tab, setTab] = useState<Tab>("directory");
   const [editing, setEditing] = useState<CustomOffer | null>(null);
   const [wizard, setWizard] = useState(false);
+  const [boosting, setBoosting] = useState<CustomOffer | null>(null);
   const directory = useMemo(() => fullDirectory(state), [state]);
 
   if (!state.loggedIn) return <PartnerLanding count={directory.length} onLogin={() => update((s) => ({ ...s, loggedIn: true }))} />;
@@ -99,6 +101,8 @@ export function TourismExperience() {
         {tab === "mine" && (
           <MyOffers
             offers={state.offers}
+            boosts={state.boosts ?? {}}
+            onBoost={setBoosting}
             onEdit={(o) => { setEditing(o); setWizard(true); }}
             onStatus={(id, status) => update((s) => ({ ...s, offers: s.offers.map((o) => (o.id === id ? { ...o, status } : o)) }))}
             onDuplicate={(o) => update((s) => ({ ...s, offers: [{ ...o, id: `partner-${Date.now()}`, title: `${o.title} (copy)`, status: "Draft" }, ...s.offers] }))}
@@ -109,6 +113,16 @@ export function TourismExperience() {
       <p className="mt-10 text-center text-xs text-muted-foreground">
         {tr("Real Puerto Rico businesses shown for demonstration. All deals, prices, and performance figures are synthetic.")}
       </p>
+      <BoostDialog
+        offer={boosting}
+        current={boosting ? state.boosts?.[boosting.id] : undefined}
+        onClose={() => setBoosting(null)}
+        onSet={(id, tier) => {
+          update((s) => { const b = { ...(s.boosts ?? {}) }; if (tier) b[id] = tier; else delete b[id]; return { ...s, boosts: b }; });
+          toast.success(tr(tier ? "Boost active. Your offer now ranks higher for hospitals." : "Boost removed."));
+          setBoosting(null);
+        }}
+      />
       <OfferWizard open={wizard} initial={editing} onClose={() => { setWizard(false); setEditing(null); }} onSave={save} />
     </section>
   );
@@ -234,7 +248,7 @@ export function OfferCard({ o, onOpen }: { o: DirectoryOffer; onOpen?: () => voi
           <p className="text-[11px] font-bold uppercase tracking-wide opacity-80">{o.partner}</p>
           {o.headline && <p className="text-lg font-black leading-tight">{tr(o.headline)}</p>}
         </div>
-        <div className="absolute left-2 top-2"><TypeBadge t={o.offerType} /></div>
+        <div className="absolute left-2 top-2 flex gap-1"><TypeBadge t={o.offerType} />{o.boost && <span className="bg-coral px-2 py-0.5 text-[10px] font-black uppercase text-coral-foreground">{tr("Featured")}</span>}</div>
         {save > 0 && <span className="absolute right-2 top-2 bg-background px-2 py-0.5 text-[11px] font-black">-{save}%</span>}
       </div>
       <div className="flex flex-1 flex-col p-4">
@@ -382,8 +396,8 @@ function Ranked({ title, list, metric }: { title: string; list: DirectoryOffer[]
 }
 
 /* ---------- My offers ---------- */
-function MyOffers({ offers, onEdit, onStatus, onDuplicate, onReset }: {
-  offers: CustomOffer[]; onEdit: (o: CustomOffer) => void; onStatus: (id: string, s: OfferStatus) => void; onDuplicate: (o: CustomOffer) => void; onReset: () => void;
+function MyOffers({ offers, boosts, onBoost, onEdit, onStatus, onDuplicate, onReset }: {
+  offers: CustomOffer[]; boosts: Record<string, BoostId>; onBoost: (o: CustomOffer) => void; onEdit: (o: CustomOffer) => void; onStatus: (id: string, s: OfferStatus) => void; onDuplicate: (o: CustomOffer) => void; onReset: () => void;
 }) {
   const { t: tr } = useLanguage();
   const d = offers.map(customToDirectory);
@@ -406,12 +420,13 @@ function MyOffers({ offers, onEdit, onStatus, onDuplicate, onReset }: {
                 <div className="flex flex-wrap items-center gap-2">
                   <span className={cn("px-2 py-0.5 text-[10px] font-black uppercase", o.status === "Live" ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground")}>{tr(o.status)}</span>
                   <TypeBadge t={o.offerType} />
+                  {boosts[o.id] && <span className="bg-coral px-2 py-0.5 text-[10px] font-black uppercase text-coral-foreground">{tr(boostTier(boosts[o.id])!.name)}</span>}
                 </div>
                 <h3 className="mt-1 font-extrabold">{tr(o.title)}</h3>
                 <p className="text-xs text-muted-foreground">{tr(o.headline ?? "")} · {o.free ? tr("Free") : money(o.cost)} {tr("to hospitals")} · {tr(o.towns)}</p>
                 {o.status === "Live" && (
                   <p className="mt-2 flex flex-wrap gap-3 text-xs">
-                    <span className="flex items-center gap-1"><Eye className="size-3" />{o.stats.views}</span>
+                    <span className="flex items-center gap-1"><Eye className="size-3" />{Math.round(o.stats.views * (boostTier(boosts[o.id])?.lift ?? 1))}</span>
                     <span className="flex items-center gap-1"><Bookmark className="size-3" />{o.stats.saves}</span>
                     <span className="flex items-center gap-1"><Hospital className="size-3" />{o.stats.hospitalAdds} {tr("packages")}</span>
                     <span className="flex items-center gap-1"><Users className="size-3" />{o.stats.hospitalAdds * 6} {tr("nurses reached")}</span>
@@ -425,6 +440,7 @@ function MyOffers({ offers, onEdit, onStatus, onDuplicate, onReset }: {
                 ) : o.status !== "Ended" ? (
                   <Button size="sm" onClick={() => onStatus(o.id, "Live")}><Play />{tr("Publish")}</Button>
                 ) : null}
+                {o.status === "Live" && <Button size="sm" onClick={() => onBoost(raw)}><Megaphone />{tr(boosts[o.id] ? "Boosted" : "Boost")}</Button>}
                 <Button size="sm" variant="outline" onClick={() => onDuplicate(raw)}><Copy />{tr("Duplicate")}</Button>
                 {o.status !== "Ended" && <Button size="sm" variant="ghost" onClick={() => onStatus(o.id, "Ended")}><X />{tr("End")}</Button>}
               </div>
@@ -556,4 +572,35 @@ function F({ label, children }: { label: string; children: ReactNode }) {
 }
 function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; children: ReactNode }) {
   return <button type="button" onClick={onClick} className={cn("px-3 py-1.5 text-xs font-bold", on ? "bg-foreground text-background" : "bg-muted")}>{children}</button>;
+}
+
+/* ---------- Boost (paid placement, simulated checkout) ---------- */
+function BoostDialog({ offer, current, onClose, onSet }: { offer: CustomOffer | null; current?: BoostId; onClose: () => void; onSet: (id: string, tier?: BoostId) => void }) {
+  const { t: tr } = useLanguage();
+  const [pick, setPick] = useState<BoostId>("featured");
+  if (!offer) return null;
+  const tier = BOOST_TIERS.find((t) => t.id === pick)!;
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-black">{tr("Boost this offer")}</DialogTitle>
+          <DialogDescription>{tr(offer.title)}</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2">
+          {BOOST_TIERS.map((t) => (
+            <button key={t.id} type="button" onClick={() => setPick(t.id)} className={cn("flex w-full items-start justify-between gap-3 border p-3 text-left", pick === t.id ? "border-primary ring-2 ring-primary" : "border-border")}>
+              <div><p className="font-black">{tr(t.name)}{current === t.id && <span className="ml-2 text-xs text-primary">{tr("Current")}</span>}</p><p className="text-xs text-muted-foreground">{tr(t.blurb)}</p><p className="mt-1 text-xs font-semibold text-primary">{tr(`About ${t.lift}× hospital views`)}</p></div>
+              <strong className="shrink-0 text-lg">{money(t.price)}<span className="text-xs text-muted-foreground">{tr("/mo")}</span></strong>
+            </button>
+          ))}
+        </div>
+        <div className="flex flex-wrap justify-between gap-2 border-t border-border pt-3">
+          {current ? <Button variant="ghost" onClick={() => onSet(offer.id)}>{tr("Remove boost")}</Button> : <span />}
+          <Button onClick={() => onSet(offer.id, pick)}><Sparkles />{tr(`Pay ${money(tier.price)}/mo · simulated`)}</Button>
+        </div>
+        <p className="text-xs text-muted-foreground">{tr("Simulated checkout for demonstration. No card is charged.")}</p>
+      </DialogContent>
+    </Dialog>
+  );
 }
