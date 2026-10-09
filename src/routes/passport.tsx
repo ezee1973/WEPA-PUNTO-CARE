@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { decodePassport } from "@/lib/passport-share";
 
 export const Route = createFileRoute("/passport")({
-  validateSearch: (s: Record<string, unknown>) => ({ d: typeof s.d === "string" ? s.d : "" }),
+  validateSearch: (s: Record<string, unknown>) => ({ d: typeof s["d"] === "string" ? (s["d"] as string) : "" }),
   head: () => ({
     meta: [
       { title: "Island Passport — WEPA.care" },

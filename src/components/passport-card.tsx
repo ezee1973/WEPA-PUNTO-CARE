@@ -52,7 +52,7 @@ export function PassportDocument({ p, photo, showQr = true }: { p: SharedPasspor
         </div>
         <div className="mt-3 flex flex-wrap gap-1.5">
           <Stamp tone="teal">{p.pathway}</Stamp>
-          <Stamp tone="coral">Spanish: {p.spanish}</Stamp>
+          <Stamp tone="coral">{`Spanish: ${p.spanish}`}</Stamp>
           {p.pool && <Stamp tone="navy">In the WEPA gig pool</Stamp>}
         </div>
         {showQr && (
