@@ -119,18 +119,31 @@ export const demoGigs: DemoGig[] = [
   },
 ];
 
+import caribeHiltonImg from "@/assets/partners/caribe-hilton.jpg";
+import laConchaImg from "@/assets/partners/la-concha.jpg";
+import doradoBeachImg from "@/assets/partners/dorado-beach.jpg";
+import elConquistadorImg from "@/assets/partners/el-conquistador.jpg";
+import eastIslandImg from "@/assets/partners/east-island.jpg";
+import bioBayImg from "@/assets/partners/bio-bay.jpg";
+import toroVerdeImg from "@/assets/partners/toro-verde.jpg";
+import casaBacardiImg from "@/assets/partners/casa-bacardi.jpg";
+import copamarinaImg from "@/assets/partners/copamarina.jpg";
+import villaMontanaImg from "@/assets/partners/villa-montana.jpg";
+
 export type DemoPartner = {
   name: string;
   category: "Hotel" | "Adventure" | "Spa & Wellness" | "Beach & Sailing" | "Food & Culture";
   location: string;
   blurb: string;
   perk: string;
+  image: string;
 };
 
 // Real Puerto Rico travel & tourism partners featured in the marketplace.
 export const demoPartners: DemoPartner[] = [
   {
     name: "Caribe Hilton",
+    image: caribeHiltonImg,
     category: "Hotel",
     location: "San Juan",
     blurb: "The iconic beachfront resort where the piña colada was born — private beach, pools, and ten minutes from the metro hospitals.",
@@ -138,6 +151,7 @@ export const demoPartners: DemoPartner[] = [
   },
   {
     name: "La Concha Renaissance",
+    image: laConchaImg,
     category: "Hotel",
     location: "Condado, San Juan",
     blurb: "Condado's landmark resort with a casino, oceanfront pools, and the liveliest beach strip on the island.",
@@ -145,6 +159,7 @@ export const demoPartners: DemoPartner[] = [
   },
   {
     name: "Dorado Beach, a Ritz-Carlton Reserve",
+    image: doradoBeachImg,
     category: "Hotel",
     location: "Dorado",
     blurb: "Ultra-luxury beachfront reserve on a former Rockefeller estate — the island's most storied coastline.",
@@ -152,6 +167,7 @@ export const demoPartners: DemoPartner[] = [
   },
   {
     name: "El Conquistador Resort",
+    image: elConquistadorImg,
     category: "Hotel",
     location: "Fajardo",
     blurb: "Cliff-top resort with its own private island, Palomino, reached by catamaran from the marina below.",
@@ -159,6 +175,7 @@ export const demoPartners: DemoPartner[] = [
   },
   {
     name: "East Island Excursions",
+    image: eastIslandImg,
     category: "Beach & Sailing",
     location: "Fajardo",
     blurb: "Catamaran day sails to Cayo Icacos and Culebra — snorkeling, lunch, and open bar on the water.",
@@ -166,6 +183,7 @@ export const demoPartners: DemoPartner[] = [
   },
   {
     name: "Kayaking Puerto Rico",
+    image: bioBayImg,
     category: "Adventure",
     location: "Fajardo & Vieques",
     blurb: "Guided night paddles through the brightest bioluminescent bays in the world.",
@@ -173,6 +191,7 @@ export const demoPartners: DemoPartner[] = [
   },
   {
     name: "Toro Verde Adventure Park",
+    image: toroVerdeImg,
     category: "Adventure",
     location: "Orocovis",
     blurb: "Home of The Monster — one of the longest ziplines on Earth — deep in the central mountains.",
@@ -180,6 +199,7 @@ export const demoPartners: DemoPartner[] = [
   },
   {
     name: "Casa Bacardí",
+    image: casaBacardiImg,
     category: "Food & Culture",
     location: "Cataño",
     blurb: "The Cathedral of Rum — distillery tours, mixology classes, and sunset views across the bay to Old San Juan.",
@@ -187,6 +207,7 @@ export const demoPartners: DemoPartner[] = [
   },
   {
     name: "Copamarina Beach Resort & Spa",
+    image: copamarinaImg,
     category: "Spa & Wellness",
     location: "Guánica",
     blurb: "South-coast hideaway on the edge of the Guánica Dry Forest with a full spa and calm Caribbean coves.",
@@ -194,6 +215,7 @@ export const demoPartners: DemoPartner[] = [
   },
   {
     name: "Villa Montaña Beach Resort",
+    image: villaMontanaImg,
     category: "Beach & Sailing",
     location: "Isabela",
     blurb: "Barefoot-luxury villas on three miles of west-coast beach — surf, horses, and legendary sunsets.",

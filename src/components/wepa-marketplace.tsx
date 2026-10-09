@@ -29,11 +29,13 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
-import { demoGigs, demoPartners, qualificationSteps, type DemoGig, type DemoPartner } from "@/lib/wepa-data";
+import { demoGigs, demoOffers, demoPartners, qualificationSteps, type DemoGig, type DemoOffer, type DemoPartner } from "@/lib/wepa-data";
 import { cn } from "@/lib/utils";
 
 const logoUrl = logoAsset.url;
 const jingleUrl = jingleAsset.url;
+
+type MarketRole = "nurse" | "hospital" | "tourism";
 
 export function WepaMarketplace() {
   const [selectedGig, setSelectedGig] = useState<DemoGig | null>(null);
@@ -41,6 +43,7 @@ export function WepaMarketplace() {
   // Every land opens with the anthem takeover; it plays, fades, and you're in.
   const [anthemPlaying, setAnthemPlaying] = useState(true);
   const [signedInEmail, setSignedInEmail] = useState<string | null>(null);
+  const [role, setRole] = useState<MarketRole>("nurse");
 
   useEffect(() => {
     void supabase.auth.getUser().then(({ data }) => setSignedInEmail(data.user?.email ?? null));
@@ -60,8 +63,12 @@ export function WepaMarketplace() {
         signedInEmail={signedInEmail}
         onAuth={() => setAuthOpen(true)}
         onSignOut={() => void signOut()}
+        role={role}
+        onRole={setRole}
       />
-      <NurseExperience onSelectGig={setSelectedGig} />
+      {role === "nurse" && <NurseExperience onSelectGig={setSelectedGig} />}
+      {role === "hospital" && <HospitalExperience />}
+      {role === "tourism" && <TourismExperience />}
       <GigDialog gig={selectedGig} onClose={() => setSelectedGig(null)} signedIn={Boolean(signedInEmail)} onAuth={() => setAuthOpen(true)} />
       <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
     </main>
@@ -130,22 +137,48 @@ function AnthemTakeover({ onDone }: { onDone: () => void }) {
   );
 }
 
+const ROLE_TABS: { id: MarketRole; label: string }[] = [
+  { id: "nurse", label: "Nurses" },
+  { id: "hospital", label: "Hospitals" },
+  { id: "tourism", label: "Travel & Tourism" },
+];
+
 function Header({
   signedInEmail,
   onAuth,
   onSignOut,
+  role,
+  onRole,
 }: {
   signedInEmail: string | null;
   onAuth: () => void;
   onSignOut: () => void;
+  role: MarketRole;
+  onRole: (role: MarketRole) => void;
 }) {
   return (
     <header className="sticky top-0 z-40 border-b border-border/80 bg-background/95 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-[1440px] items-center gap-3 px-4 sm:px-6 lg:px-8">
         <img src={logoUrl} alt="WEPA.care" className="h-11 w-auto object-contain" />
         <div className="hidden h-7 w-px bg-border sm:block" />
-        <p className="hidden text-xs font-semibold uppercase text-muted-foreground sm:block">Come for the Island.<br />Care for its People.</p>
-        <div className="ml-auto flex items-center gap-1">
+        <p className="hidden text-xs font-semibold uppercase text-muted-foreground lg:block">Come for the Island.<br />Care for its People.</p>
+        <nav aria-label="Marketplace sides" className="mx-auto flex items-center gap-1 rounded-full border border-border bg-muted/60 p-1">
+          {ROLE_TABS.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => onRole(tab.id)}
+              aria-pressed={role === tab.id}
+              className={cn(
+                "rounded-full px-3 py-1.5 text-xs font-bold transition-colors sm:px-4 sm:text-sm",
+                role === tab.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+        <div className="ml-auto flex items-center gap-1 sm:ml-0">
           <Button variant="ghost" size="icon" aria-label="Notifications"><Bell /></Button>
           {signedInEmail ? (
             <Button variant="outline" size="sm" onClick={onSignOut} className="hidden sm:inline-flex">Sign out</Button>
@@ -275,6 +308,114 @@ function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void 
   );
 }
 
+function HospitalExperience() {
+  const [offers, setOffers] = useState(demoOffers);
+  const selected = offers.filter((offer) => offer.selected);
+  const packageCost = selected.reduce((sum, offer) => sum + offer.price, 0);
+  const packageRetail = selected.reduce((sum, offer) => sum + offer.retail, 0);
+
+  function toggle(id: string) {
+    setOffers((current) => current.map((offer) => offer.id === id ? { ...offer, selected: !offer.selected } : offer));
+  }
+
+  return (
+    <section className="mx-auto max-w-[1440px] px-4 py-12 sm:px-6 lg:px-8">
+      <div className="max-w-2xl">
+        <p className="eyebrow">Hospital workspace</p>
+        <h2 className="mt-1 text-3xl font-black sm:text-4xl">Build a gig nurses actually want.</h2>
+        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">Centro Médico del Caribe · San Juan. Pick from private partner offers to assemble the island package that ships with your gig. Nurses see the package — never the pricing.</p>
+      </div>
+      <div className="mt-8 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
+        <div className="grid gap-4 sm:grid-cols-2">
+          {offers.map((offer) => (
+            <button key={offer.id} type="button" onClick={() => toggle(offer.id)} aria-pressed={offer.selected} className={cn("flex flex-col border p-5 text-left transition-colors", offer.selected ? "border-primary bg-primary/5" : "border-border bg-card hover:border-primary/50")}>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-black uppercase text-muted-foreground">{offer.category}</span>
+                <span className={cn("flex size-6 items-center justify-center rounded-full border", offer.selected ? "border-primary bg-primary text-primary-foreground" : "border-border text-transparent")}><Check className="size-3.5" /></span>
+              </div>
+              <h3 className="mt-3 text-lg font-extrabold leading-tight">{offer.title}</h3>
+              <p className="mt-1 text-xs font-bold text-primary">{offer.partner} · {offer.location}</p>
+              <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">{offer.description}</p>
+              <p className="mt-4 border-t border-border pt-3 text-sm"><strong className="text-lg">${offer.price.toLocaleString()}</strong> <span className="text-xs text-muted-foreground">partner price · retail ${offer.retail.toLocaleString()}</span></p>
+            </button>
+          ))}
+        </div>
+        <aside className="h-fit border-2 border-primary bg-primary/5 lg:sticky lg:top-24">
+          <div className="border-b border-primary/20 bg-primary px-5 py-4 text-primary-foreground">
+            <h3 className="text-lg font-black">Your gig package</h3>
+            <p className="text-xs text-primary-foreground/75">Cardiac ICU · 13 weeks · San Juan</p>
+          </div>
+          <ul className="space-y-2 p-5">
+            {selected.length === 0 && <li className="text-sm text-muted-foreground">Select offers to build the package.</li>}
+            {selected.map((offer) => <li key={offer.id} className="flex items-center gap-2 text-sm font-medium"><CheckCircle2 className="size-4 text-primary" /> {offer.title}</li>)}
+          </ul>
+          <div className="grid grid-cols-2 border-t border-primary/20 text-center">
+            <div className="border-r border-primary/20 p-4"><strong className="block text-xl">${packageCost.toLocaleString()}</strong><span className="text-[11px] uppercase text-muted-foreground">your cost</span></div>
+            <div className="p-4"><strong className="block text-xl text-primary">${packageRetail.toLocaleString()}</strong><span className="text-[11px] uppercase text-muted-foreground">nurse sees value</span></div>
+          </div>
+          <div className="p-5 pt-0"><Button className="w-full" onClick={() => toast.success("Gig published with its island package.")}>Publish this gig <ArrowRight /></Button></div>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
+function TourismExperience() {
+  const [offers, setOffers] = useState(demoOffers);
+  const [formOpen, setFormOpen] = useState(false);
+
+  function markLive(id: string) {
+    setOffers((current) => current.map((offer) => offer.id === id ? { ...offer, selected: true } : offer));
+    toast.success("Offer is now visible to hospitals.");
+  }
+
+  return (
+    <section className="mx-auto max-w-[1440px] px-4 py-12 sm:px-6 lg:px-8">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div className="max-w-2xl">
+          <p className="eyebrow">Travel & tourism workspace</p>
+          <h2 className="mt-1 text-3xl font-black sm:text-4xl">Put your experience in front of hospitals.</h2>
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">Your offers stay private to hospitals until one selects them into a nurse-facing gig package. Compete on what makes your corner of the island unforgettable.</p>
+        </div>
+        <Button size="lg" onClick={() => setFormOpen(true)}>Create an offer <ArrowRight /></Button>
+      </div>
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {offers.map((offer) => <TourismOfferCard key={offer.id} offer={offer} onPublish={() => markLive(offer.id)} />)}
+      </div>
+      <Dialog open={formOpen} onOpenChange={setFormOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle className="text-2xl font-black">New partner offer</DialogTitle><DialogDescription>Hospitals see this privately. Nurses only see it once it's in a gig package.</DialogDescription></DialogHeader>
+          <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); setFormOpen(false); toast.success("Offer submitted for hospital review."); }}>
+            <Field label="Experience title"><Input required placeholder="e.g. Sunset sail for two" /></Field>
+            <Field label="Location"><Input required placeholder="e.g. Fajardo" /></Field>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Retail value ($)"><Input required type="number" min={0} placeholder="740" /></Field>
+              <Field label="Partner price ($)"><Input required type="number" min={0} placeholder="180" /></Field>
+            </div>
+            <Button type="submit" className="w-full">Submit offer</Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </section>
+  );
+}
+
+function TourismOfferCard({ offer, onPublish }: { offer: DemoOffer; onPublish: () => void }) {
+  return (
+    <article className="flex flex-col border border-border bg-card p-5">
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-black uppercase text-muted-foreground">{offer.category}</span>
+        <span className={cn("px-2 py-0.5 text-[10px] font-black uppercase", offer.selected ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>{offer.selected ? "Live" : "Draft"}</span>
+      </div>
+      <h3 className="mt-3 text-lg font-extrabold leading-tight">{offer.title}</h3>
+      <p className="mt-1 text-xs font-bold text-primary">{offer.partner} · {offer.location}</p>
+      <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">{offer.description}</p>
+      <p className="mt-4 border-t border-border pt-3 text-sm"><strong className="text-lg">${offer.price.toLocaleString()}</strong> <span className="text-xs text-muted-foreground">to hospitals · retail ${offer.retail.toLocaleString()}</span></p>
+      {!offer.selected && <Button variant="outline" size="sm" className="mt-3" onClick={onPublish}>Publish to hospitals</Button>}
+    </article>
+  );
+}
+
 function PartnerCarousel() {
   const trackRef = useRef<HTMLDivElement>(null);
 
@@ -308,14 +449,18 @@ function PartnerCarousel() {
 
 function PartnerCard({ partner }: { partner: DemoPartner }) {
   return (
-    <article className="flex w-72 shrink-0 snap-start flex-col border border-surface-dark-foreground/15 bg-surface-dark-foreground/5 p-5 backdrop-blur sm:w-80">
-      <div className="flex items-center justify-between">
+    <article className="group relative flex h-96 w-72 shrink-0 snap-start flex-col justify-end overflow-hidden border border-surface-dark-foreground/15 sm:w-80">
+      <img src={partner.image} alt={partner.name} loading="lazy" width={1024} height={768} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+      <div className="absolute inset-0 bg-gradient-to-t from-surface-dark via-surface-dark/35 to-transparent" />
+      <div className="absolute left-4 top-4 flex items-center gap-2">
         <span className="bg-primary px-2 py-1 text-[10px] font-black uppercase text-primary-foreground">{partner.category}</span>
-        <span className="flex items-center gap-1 text-xs font-semibold text-surface-dark-foreground/60"><MapPin className="size-3.5" /> {partner.location}</span>
+        <span className="flex items-center gap-1 bg-surface-dark/60 px-2 py-1 text-[10px] font-bold uppercase text-surface-dark-foreground backdrop-blur"><MapPin className="size-3" /> {partner.location}</span>
       </div>
-      <h3 className="mt-4 text-xl font-extrabold leading-tight">{partner.name}</h3>
-      <p className="mt-2 flex-1 text-sm leading-relaxed text-surface-dark-foreground/75">{partner.blurb}</p>
-      <p className="mt-4 flex items-start gap-2 border-t border-surface-dark-foreground/15 pt-3 text-sm font-bold text-primary"><Sparkles className="mt-0.5 size-4 shrink-0" /> {partner.perk}</p>
+      <div className="relative p-5">
+        <h3 className="text-2xl font-black leading-tight text-surface-dark-foreground">{partner.name}</h3>
+        <p className="mt-2 text-sm leading-relaxed text-surface-dark-foreground/80">{partner.blurb}</p>
+        <p className="mt-3 flex items-start gap-2 border-t border-surface-dark-foreground/25 pt-3 text-sm font-bold text-primary"><Sparkles className="mt-0.5 size-4 shrink-0" /> {partner.perk}</p>
+      </div>
     </article>
   );
 }
