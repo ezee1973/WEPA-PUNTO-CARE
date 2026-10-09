@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 import {
   ArrowRight,
   Bell,
@@ -28,6 +28,8 @@ import {
 import { toast } from "sonner";
 
 import coastImage from "@/assets/puerto-rico-coast.jpg";
+import jingleAsset from "@/assets/wepa-jingle.asset.json";
+import logoAsset from "@/assets/wepa-care-logo.asset.json";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -39,8 +41,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { demoGigs, demoOffers, qualificationSteps, type DemoGig, type DemoOffer, type DemoRole } from "@/lib/wepa-data";
 import { cn } from "@/lib/utils";
 
-const logoUrl = "/__l5e/assets-v1/a667f135-36c1-41b1-9c4a-77fe7195cb39/wepa-care-logo.webp";
-const jingleUrl = "/__l5e/assets-v1/8bdd4a37-d5df-43eb-8f9a-42817fb0a0e7/wepa-jingle.mp4";
+const logoUrl = logoAsset.url;
+const jingleUrl = jingleAsset.url;
 
 const roleMeta: Record<DemoRole, { label: string; short: string; icon: typeof HeartPulse }> = {
   nurse: { label: "Nurse", short: "Find my gig", icon: HeartPulse },
@@ -349,7 +351,7 @@ function TourismExperience() {
   );
 }
 
-function WorkspaceShell({ role, title, subtitle, children }: { role: DemoRole; title: string; subtitle: string; children: React.ReactNode }) {
+function WorkspaceShell({ role, title, subtitle, children }: { role: DemoRole; title: string; subtitle: string; children: ReactNode }) {
   const Icon = roleMeta[role].icon;
   return <><section className="border-b border-border bg-card"><div className="mx-auto flex max-w-[1440px] items-center gap-4 px-4 py-8 sm:px-6 lg:px-8"><span className="flex size-12 items-center justify-center rounded-full bg-primary/15 text-primary"><Icon className="size-6" /></span><div><p className="text-xs font-bold uppercase text-muted-foreground">{roleMeta[role].label} workspace · {subtitle}</p><h1 className="mt-1 text-3xl font-black sm:text-4xl">{title}</h1></div></div></section><div className="mx-auto max-w-[1440px] px-4 py-10 sm:px-6 lg:px-8">{children}</div></>;
 }
@@ -389,7 +391,7 @@ function AuthDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open
   return <Dialog open={open} onOpenChange={onOpenChange}><DialogContent><DialogHeader><DialogTitle className="text-2xl font-black">{mode === "signin" ? "Welcome back." : "Start your Puerto Rico journey."}</DialogTitle><DialogDescription>One account. Your role and workspace follow you.</DialogDescription></DialogHeader><Button variant="outline" className="w-full" disabled={busy} onClick={() => void google()}><svg viewBox="0 0 24 24" className="size-4" aria-hidden><path fill="currentColor" d="M21.35 11.1h-9.17v2.98h5.26c-.23 1.5-1.73 4.4-5.26 4.4A6.48 6.48 0 1 1 12.18 5c2.01 0 3.36.86 4.13 1.6l2.82-2.73A10.3 10.3 0 0 0 12.18 1.2a10.8 10.8 0 1 0 0 21.6c6.23 0 10.36-4.38 10.36-10.54 0-.7-.08-1.23-.17-1.76z" /></svg>Continue with Google</Button><div className="flex items-center gap-3 text-xs uppercase text-muted-foreground"><span className="h-px flex-1 bg-border" /> or <span className="h-px flex-1 bg-border" /></div><form onSubmit={submit} className="space-y-4"><Field label="Email"><Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></Field><Field label="Password"><Input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} /></Field><Button type="submit" className="w-full" disabled={busy}>{busy ? "One moment…" : mode === "signin" ? "Sign in" : "Create account"}</Button></form><Button variant="ghost" className="w-full" onClick={() => setMode(mode === "signin" ? "signup" : "signin")}>{mode === "signin" ? "New to WEPA.care? Create an account" : "Already have an account? Sign in"}</Button></DialogContent></Dialog>;
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) { return <div className="space-y-1.5"><Label>{label}</Label>{children}</div>; }
+function Field({ label, children }: { label: string; children: ReactNode }) { return <div className="space-y-1.5"><Label>{label}</Label>{children}</div>; }
 
 function MobileNurseNav() {
   return <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-border bg-card/95 px-2 pb-[max(.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur md:hidden"><Button variant="ghost" className="h-auto flex-col gap-1 text-[10px] text-primary"><HeartPulse /> Home</Button><Button variant="ghost" className="h-auto flex-col gap-1 text-[10px]"><Search /> Gigs</Button><Button variant="ghost" className="h-auto flex-col gap-1 text-[10px]"><ClipboardCheck /> Ready</Button><Button variant="ghost" className="h-auto flex-col gap-1 text-[10px]"><FileCheck2 /> Applications</Button></nav>;
