@@ -5,7 +5,7 @@ export type ItemStatus =
   | "Official review" | "Accepted" | "Expired" | "Manual review";
 
 export type ChecklistItem = {
-  id: string; title: string; status: ItemStatus; source: string; expires?: string; next: string; help: string; file?: string; fileData?: string; fileType?: string;
+  id: string; title: string; status: ItemStatus; source: string; expires?: string; next: string; help: string; file?: string; fileData?: string | undefined; fileType?: string | undefined;
 };
 
 function sampleDoc(title: string, lines: string[], tone = "#16C9AD") {
