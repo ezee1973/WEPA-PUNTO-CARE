@@ -255,22 +255,22 @@ function WalletPass({ p, photo }: { p: SharedPassport; photo?: string | undefine
     x.fill();
     x.fillStyle = TEAL;
     x.font = "bold 28px sans-serif";
-    x.fillText("WEPA.CARE · ISLAND PASSPORT", 50, 80);
+    x.fillText(tr("WEPA.CARE · ISLAND PASSPORT"), 50, 80);
     await drawAvatar(x, photo, p.name, 50, 130, 160);
     x.fillStyle = IVORY;
     x.font = "bold 48px sans-serif";
     x.fillText(p.name, 240, 200);
     x.font = "28px sans-serif";
     x.globalAlpha = 0.8;
-    x.fillText(`${p.specialty} · ${p.years} yrs`, 240, 250);
+    x.fillText(tr(`${p.specialty} · ${p.years} yrs`), 240, 250, 460);
     x.fillText(p.city, 240, 290);
     x.globalAlpha = 1;
     x.fillStyle = CORAL;
     x.font = "bold 30px sans-serif";
-    x.fillText(`${p.progress}% Puerto Rico ready`, 50, 380);
+    x.fillText(tr(`${p.progress}% Puerto Rico ready`), 50, 380, 650);
     x.fillStyle = IVORY;
     x.font = "26px sans-serif";
-    x.fillText(p.pathway, 50, 425);
+    x.fillText(tr(p.pathway), 50, 425, 650);
     x.fillStyle = "#fff";
     roundRect(x, 175, 480, 400, 400, 24);
     x.fill();
@@ -281,7 +281,7 @@ function WalletPass({ p, photo }: { p: SharedPassport; photo?: string | undefine
     x.fillText(p.id, 375, 940);
     x.font = "20px sans-serif";
     x.globalAlpha = 0.6;
-    x.fillText("Candidate-reported · not a license", 375, 990);
+    x.fillText(tr("Candidate-reported · not a license"), 375, 990, 650);
     downloadCanvas(c, `wepa-pass-${p.id}.png`);
   }
   return (
@@ -330,10 +330,10 @@ function BadgeDialog({
   const [style, setStyle] = useState<BadgeStyle>("seal");
   const url = shareUrl(p);
   async function download() {
-    const c = style === "seal" ? await drawSeal(p) : await drawBanner(p, photo);
+    const c = style === "seal" ? await drawSeal(p, tr) : await drawBanner(p, photo, tr);
     downloadCanvas(c, `wepa-badge-${style}-${p.id}.png`);
   }
-  const caption = `I'm getting Puerto Rico ready with WEPA.care 🌴 ${p.specialty}, ${p.progress}% prepared for island nursing gigs. Verify my Island Passport: ${url}`;
+  const caption = tr(`I'm getting Puerto Rico ready with WEPA.care 🌴 ${p.specialty}, ${p.progress}% prepared for island nursing gigs. Verify my Island Passport: ${url}`);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-md">
@@ -505,7 +505,7 @@ async function drawAvatar(
   x.textAlign = "left";
   x.textBaseline = "alphabetic";
 }
-async function drawSeal(p: SharedPassport) {
+async function drawSeal(p: SharedPassport, tr: (text: string) => string) {
   const c = document.createElement("canvas");
   c.width = c.height = 800;
   const x = c.getContext("2d")!;
@@ -530,18 +530,18 @@ async function drawSeal(p: SharedPassport) {
   x.fillText("W E P A . C A R E", 400, 250);
   x.fillStyle = IVORY;
   x.font = "bold 110px Georgia, serif";
-  x.fillText("Island", 400, 380);
-  x.fillText("Nurse", 400, 490);
+  x.fillText(tr("Island"), 400, 380, 580);
+  x.fillText(tr("Nurse"), 400, 490, 580);
   x.fillStyle = CORAL;
   x.font = "bold 38px sans-serif";
-  x.fillText("PUERTO RICO READY", 400, 570);
+  x.fillText(tr("Puerto Rico Ready").toUpperCase(), 400, 570, 580);
   x.fillStyle = IVORY;
   x.globalAlpha = 0.7;
   x.font = "30px monospace";
   x.fillText(p.id, 400, 625);
   return c;
 }
-async function drawBanner(p: SharedPassport, photo?: string) {
+async function drawBanner(p: SharedPassport, photo: string | undefined, tr: (text: string) => string) {
   const c = document.createElement("canvas");
   c.width = 1200;
   c.height = 627;
@@ -558,17 +558,17 @@ async function drawBanner(p: SharedPassport, photo?: string) {
   await drawAvatar(x, photo, p.name, 92, 165, 296);
   x.fillStyle = TEAL;
   x.font = "bold 30px sans-serif";
-  x.fillText("WEPA ISLAND NURSE · PUERTO RICO READY", 470, 210);
+  x.fillText(tr("WEPA Island Nurse · Puerto Rico Ready"), 470, 210, 680);
   x.fillStyle = IVORY;
   x.font = "bold 76px sans-serif";
   x.fillText(p.name, 470, 300);
   x.globalAlpha = 0.85;
   x.font = "36px sans-serif";
-  x.fillText(`${p.specialty} · ${p.years} yrs`, 470, 360);
+  x.fillText(tr(`${p.specialty} · ${p.years} yrs`), 470, 360, 680);
   x.globalAlpha = 1;
   x.fillStyle = CORAL;
   x.font = "bold 32px sans-serif";
-  x.fillText("Come for the Island. Care for its People.", 470, 440);
+  x.fillText(tr("Come for the Island. Care for its People."), 470, 440, 680);
   x.fillStyle = IVORY;
   x.globalAlpha = 0.6;
   x.font = "24px monospace";
