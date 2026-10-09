@@ -59,7 +59,14 @@ export function WepaMarketplace() {
 
   return (
     <main className="min-h-screen bg-background text-foreground">
-      {anthemPlaying && <AnthemTakeover onDone={() => setAnthemPlaying(false)} />}
+      {anthemPlaying && (
+        <AnthemTakeover
+          onDone={(chosen) => {
+            setRole(chosen);
+            setAnthemPlaying(false);
+          }}
+        />
+      )}
       <Header
         signedInEmail={signedInEmail}
         onAuth={() => setAuthOpen(true)}
