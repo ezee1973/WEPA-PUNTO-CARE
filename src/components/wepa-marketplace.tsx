@@ -306,11 +306,6 @@ function NurseExperience({ onSelectGig, onAnthem }: { onSelectGig: (gig: DemoGig
         </div>
       </section>
 
-      {!soundOn && (
-        <button type="button" onClick={onSound} className="fixed inset-x-4 bottom-20 z-40 flex items-center justify-center gap-2 rounded-full bg-primary py-3 text-sm font-bold text-primary-foreground shadow-xl md:hidden">
-          <Music2 /> {anthemAuto ? "Turn on the anthem sound" : "Experience the WEPA anthem"}
-        </button>
-      )}
       <MobileNurseNav />
     </>
   );
