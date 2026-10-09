@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, Bot, CheckCircle2, Circle, Download, FileText, Languages, Loader2, Paperclip, Pencil, RefreshCw, Send, ShieldCheck, Upload } from "lucide-react";
 import nurseIconAsset from "@/assets/wepa-nurse.png.asset.json";
@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { INTEREST_OPTIONS, interestsComplete, elena, nextBestAction, pathwayResult, preparationProgress, streamGuide, useReadiness, type ChecklistItem, type ItemStatus, type Pathway, type ReadinessState } from "@/lib/readiness";
+import { INTEREST_OPTIONS, interestsComplete, nextBestAction, pathwayResult, preparationProgress, streamGuide, useReadiness, type ChecklistItem, type ItemStatus, type NurseProfile, type Pathway, type ReadinessState } from "@/lib/readiness";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 
@@ -39,13 +39,14 @@ const statusTone: Record<ItemStatus, string> = {
 };
 
 function guideContext(s: ReadinessState) {
-  return { profile: elena, goal: "Get ready for all WEPA Puerto Rico gigs, then match by interests", interests: s.interests, pathway: s.pathway, checklist: s.checklist.map(({ title, status, source, expires }) => ({ title, status, source, expires })) };
+  return { profile: s.profile, goal: "Get ready for all WEPA Puerto Rico gigs, then match by interests", interests: s.interests, pathway: s.pathway, checklist: s.checklist.map(({ title, status, source, expires }) => ({ title, status, source, expires })) };
 }
 
 export function ReadinessPassport() {
   const { state, update, reset } = useReadiness();
   const [tab, setTab] = useState<Tab>("overview");
   const [guide, setGuide] = useState({ text: "", busy: false, error: "" });
+  const [editProfile, setEditProfile] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const progress = preparationProgress(state);
   const remaining = state.checklist.filter((c) => !["Nurse confirmed", "Submitted — self-reported", "Accepted"].includes(c.status));
@@ -116,8 +117,9 @@ export function ReadinessPassport() {
           <Button asChild variant="ghost" size="icon" aria-label="Back to WEPA.care"><Link to="/"><ArrowLeft /></Link></Button>
           <div className="min-w-0 flex-1">
             <p className="truncate font-display text-lg font-bold leading-tight">Puerto Rico Readiness Passport</p>
-            <p className="truncate text-xs text-muted-foreground">{elena.name} · {elena.specialty}</p>
+            <p className="truncate text-xs text-muted-foreground">{state.profile.name} · {state.profile.specialty}</p>
           </div>
+          <Button variant="outline" size="sm" className="shrink-0" onClick={() => setEditProfile(true)}><Pencil /> Edit profile</Button>
           <span className="rounded-full bg-surface-dark px-3 py-1 text-sm font-bold text-surface-dark-foreground">{progress}%</span>
         </div>
         <nav className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-4 pb-2 [scrollbar-width:none]">
@@ -172,7 +174,7 @@ export function ReadinessPassport() {
                   <p className="font-display text-xl font-bold">Ready for nurse review</p>
                   <p className="mt-1 text-sm text-muted-foreground">Wepa Guide prepared these answers from your profile. Nothing is submitted until you confirm.</p>
                   <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
-                    {[["Name", elena.name], ["License", elena.license], ["Issued", elena.licenseIssued], ["Expires", elena.licenseExpires], ["Category", state.pathway.category], ["Certifications", elena.certs.join(", ")]].map(([k, v]) => (
+                    {[["Name", state.profile.name], ["License", state.profile.license], ["Issued", state.profile.licenseIssued], ["Expires", state.profile.licenseExpires], ["Category", state.pathway.category], ["Certifications", state.profile.certs.join(", ")]].map(([k, v]) => (
                       <div key={k} className="rounded-xl bg-muted p-3"><dt className="text-xs text-muted-foreground">{k}</dt><dd className="font-semibold">{v}</dd></div>
                     ))}
                   </dl>
@@ -224,7 +226,39 @@ export function ReadinessPassport() {
 
         <GuidePanel guide={guide} onAsk={ask} onPrepare={state.packetPrepared ? undefined : preparePacket} onStop={() => abortRef.current?.abort()} />
       </main>
+
+      <ProfileDialog open={editProfile} onOpenChange={setEditProfile} profile={state.profile} onSave={(p) => { update((s) => ({ ...s, profile: p })); setEditProfile(false); toast.success("Profile updated everywhere — passport, checklist and Wepa Guide."); }} />
     </div>
+  );
+}
+
+function ProfileDialog({ open, onOpenChange, profile, onSave }: { open: boolean; onOpenChange: (o: boolean) => void; profile: NurseProfile; onSave: (p: NurseProfile) => void }) {
+  const [draft, setDraft] = useState(profile);
+  useEffect(() => { if (open) setDraft(profile); }, [open, profile]);
+  const set = (k: keyof NurseProfile, v: string) => setDraft((d) => ({ ...d, [k]: k === "years" ? Math.max(0, Number(v) || 0) : k === "certs" ? v.split(",").map((c) => c.trim()).filter(Boolean) : v }));
+  const fields: [keyof NurseProfile, string, string?][] = [
+    ["name", "Full name"], ["city", "Home city & state"], ["specialty", "Specialty"], ["years", "Years of experience", "number"],
+    ["license", "Home-state license"], ["licenseIssued", "License issued", "date"], ["licenseExpires", "License expires", "date"],
+    ["certs", "Certifications (comma-separated)"], ["availability", "Availability"], ["spanish", "Spanish level"], ["travelingWith", "Traveling with"], ["email", "Email", "email"],
+  ];
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[85dvh] overflow-y-auto sm:max-w-lg">
+        <DialogTitle>Edit your profile</DialogTitle>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {fields.map(([k, label, type]) => (
+            <label key={k} className={cn("text-xs font-semibold", (k === "license" || k === "certs" || k === "availability") && "sm:col-span-2")}>
+              {label}
+              <Input type={type ?? "text"} value={k === "certs" ? draft.certs.join(", ") : String(draft[k])} onChange={(e) => set(k, e.target.value)} className="mt-1" />
+            </label>
+          ))}
+        </div>
+        <div className="flex gap-2">
+          <Button onClick={() => onSave(draft)}>Save profile</Button>
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -413,13 +447,13 @@ export function CandidatePassport({ state, compact }: { state: ReadinessState; c
   const outstanding = state.checklist.filter((c) => !["Nurse confirmed", "Submitted — self-reported", "Accepted"].includes(c.status)).map((c) => c.title);
   const credDone = state.credentialing.filter((c) => c.done).length;
   const rows: [string, string][] = [
-    ["Specialty & experience", `${elena.specialty} · ${elena.years} years`],
+    ["Specialty & experience", `${state.profile.specialty} · ${state.profile.years} years`],
     ["License pathway", `${pathwayResult(state.pathway)} · Official authorization ${state.officialAuthorization.toLowerCase()}`],
     ["PR application preparation", `${preparationProgress(state)}% preparation progress`],
     ["Gig interests", interestsComplete(state.interests) ? `${state.interests.regions.join(", ")} · ${state.interests.experiences.join(", ")} · ${state.interests.length}, ${state.interests.housing}` : "Not set yet"],
     ["Hospital credentials", `${credDone}/${state.credentialing.length} candidate-reported`],
     ["Spanish readiness", state.spanish ?? "Not completed"],
-    ["Availability", elena.availability],
+    ["Availability", state.profile.availability],
     ["Outstanding items", outstanding.length ? outstanding.join("; ") : "None"],
     ["Consent to share", state.applied ? new Date(state.applied).toLocaleString() : "Not yet shared"],
   ];
@@ -427,7 +461,7 @@ export function CandidatePassport({ state, compact }: { state: ReadinessState; c
     <section className="overflow-hidden rounded-3xl border border-border bg-card">
       <div className="flex items-center gap-3 bg-surface-dark p-4 text-surface-dark-foreground">
         <img src={nurseIconAsset.url} alt="" aria-hidden className="size-11 rounded-full object-contain" />
-        <div className="min-w-0"><p className="font-display text-lg font-bold">{elena.name}</p><p className="text-xs opacity-75">Candidate Passport · {elena.city}</p></div>
+        <div className="min-w-0"><p className="font-display text-lg font-bold">{state.profile.name}</p><p className="text-xs opacity-75">Candidate Passport · {state.profile.city}</p></div>
         <ShieldCheck className="ml-auto size-6 text-primary" />
       </div>
       <dl className={cn("grid gap-px bg-border", !compact && "sm:grid-cols-2")}>

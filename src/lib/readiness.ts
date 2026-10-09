@@ -37,7 +37,10 @@ export type Pathway = {
   active: boolean; oneYear: boolean; continuous: boolean; inactive: boolean; goodStanding: boolean; pending: boolean; revoked: boolean; category: string;
 };
 
+export type NurseProfile = typeof elena;
+
 export type ReadinessState = {
+  profile: NurseProfile;
   pathway: Pathway;
   checklist: ChecklistItem[];
   packetPrepared: boolean;
@@ -81,6 +84,7 @@ const seedChecklist: ChecklistItem[] = [
 ];
 
 export const seed: ReadinessState = {
+  profile: elena,
   pathway: { active: true, oneYear: true, continuous: true, inactive: false, goodStanding: true, pending: false, revoked: false, category: "RN — Emergency" },
   checklist: seedChecklist,
   packetPrepared: false,
