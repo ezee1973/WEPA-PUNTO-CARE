@@ -1,13 +1,14 @@
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, Bot, CheckCircle2, Circle, Download, FileText, Languages, Loader2, Paperclip, Send, ShieldCheck, Upload } from "lucide-react";
 import nurseIconAsset from "@/assets/wepa-nurse.png.asset.json";
+import logoAsset from "@/assets/wepa-care-logo.asset.json";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
-import { assignment, elena, pathwayResult, preparationProgress, streamGuide, useReadiness, type ChecklistItem, type ItemStatus, type Pathway, type ReadinessState } from "@/lib/readiness";
+import { INTEREST_OPTIONS, interestsComplete, elena, pathwayResult, preparationProgress, streamGuide, useReadiness, type ChecklistItem, type ItemStatus, type Pathway, type ReadinessState } from "@/lib/readiness";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 
@@ -17,7 +18,8 @@ const TABS = [
   { id: "pathway", label: "Pathway" },
   { id: "checklist", label: "Checklist" },
   { id: "spanish", label: "Spanish" },
-  { id: "hospital", label: "Hospital" },
+  { id: "interests", label: "Interests" },
+  { id: "hospital", label: "Credentials" },
   { id: "passport", label: "Passport" },
 ] as const;
 type Tab = (typeof TABS)[number]["id"];
@@ -35,7 +37,7 @@ const statusTone: Record<ItemStatus, string> = {
 };
 
 function guideContext(s: ReadinessState) {
-  return { profile: elena, assignment, pathway: s.pathway, checklist: s.checklist.map(({ title, status, source, expires }) => ({ title, status, source, expires })) };
+  return { profile: elena, goal: "Get ready for all WEPA Puerto Rico gigs, then match by interests", interests: s.interests, pathway: s.pathway, checklist: s.checklist.map(({ title, status, source, expires }) => ({ title, status, source, expires })) };
 }
 
 export function ReadinessPassport() {
@@ -47,12 +49,13 @@ export function ReadinessPassport() {
   const remaining = state.checklist.filter((c) => !["Nurse confirmed", "Submitted — self-reported", "Accepted"].includes(c.status));
   const tracks = [
     { label: "Puerto Rico authorization", value: Math.round((state.checklist.length - remaining.length) / state.checklist.length * 100), note: `Official authorization ${state.officialAuthorization.toLowerCase()}` },
-    { label: "Hospital credentialing", value: Math.round(state.credentialing.filter((c) => c.done).length / state.credentialing.length * 100), note: "Set by Hospital del Mar" },
+    { label: "Hospital credentialing", value: Math.round(state.credentialing.filter((c) => c.done).length / state.credentialing.length * 100), note: "Common across PR partner hospitals" },
+    { label: "Gig matching interests", value: interestsComplete(state.interests) ? 100 : 0, note: interestsComplete(state.interests) ? `${state.interests.regions.length} regions · ${state.interests.experiences.length} experiences` : "Tell us what island life you want" },
     { label: "Clinical Spanish readiness", value: state.spanish ? 100 : 0, note: state.spanish ?? "Scenario not started" },
   ];
   const nextAction = !state.packetConfirmed
     ? state.packetPrepared ? "Review and confirm your prepared packet" : "Tap “Prepare my packet” — Wepa Guide will review everything"
-    : state.checklist.find((c) => c.id === "declaration")?.status !== "Submitted — self-reported" ? "Sign your sworn declaration before a notary" : !state.spanish ? "Complete the 3-question clinical Spanish scenario" : !state.applied ? "Apply to Hospital del Mar" : "Hospital is reviewing your Candidate Passport";
+    : state.checklist.find((c) => c.id === "declaration")?.status !== "Submitted — self-reported" ? "Sign your sworn declaration before a notary" : !state.spanish ? "Complete the 3-question clinical Spanish scenario" : !interestsComplete(state.interests) ? "Pick your island interests so we can match you" : !state.applied ? "Join the WEPA gig pool and start matching" : "You're in the gig pool — hospitals with matching gigs can now see your Passport";
 
   async function ask(task: string, detail = "", onDone?: (t: string) => void) {
     abortRef.current?.abort();
@@ -75,7 +78,7 @@ export function ReadinessPassport() {
       packetPrepared: true,
       checklist: s.checklist.map((c) => {
         if (["standing", "discipline"].includes(c.id)) return { ...c, source: c.id === "standing" ? "Nursys verification — candidate-reported" : "Florida Board certification — candidate-reported", next: "Confirm" };
-        if (c.id === "liability") return { ...c, status: "Ready for review", source: "Hospital del Mar coverage certificate (requested)", next: "Confirm" };
+        if (c.id === "liability") return { ...c, status: "Ready for review", source: "Employer coverage — provided by your matched hospital", next: "Confirm" };
         if (c.id === "background") return { ...c, status: "Ready for review", source: "Authorization pre-filled from profile", next: "Confirm and sign" };
         if (c.id === "fee") return { ...c, status: "Ready for review", source: "$100 — pay at submission", next: "Confirm" };
         if (c.id === "reviewed") return { ...c, status: "Ready for review", source: "Packet prepared by Wepa Guide", next: "Review screen" };
@@ -102,7 +105,7 @@ export function ReadinessPassport() {
 
   function apply() {
     update((s) => ({ ...s, applied: new Date().toISOString(), stage: "Readiness review" }));
-    toast.success("Applied. Hospital del Mar can now see your Candidate Passport.");
+    toast.success("You're in the gig pool. Matching Puerto Rico hospitals can now see your Passport.");
     setTab("passport");
   }
 
@@ -133,7 +136,7 @@ export function ReadinessPassport() {
                 <p className="font-display text-6xl font-black">{progress}%</p>
                 <Progress value={progress} className="mt-3 h-2" />
                 <p className="mt-4 text-sm opacity-75">Current phase</p>
-                <p className="font-semibold">{state.applied ? "Hospital review" : state.packetConfirmed ? "Final documents & Spanish" : "Packet preparation"}</p>
+                <p className="font-semibold">{state.applied ? "Matching with gigs" : state.packetConfirmed ? "Final documents & Spanish" : "Packet preparation"}</p>
                 <div className="mt-4 rounded-2xl bg-background/10 p-4">
                   <p className="text-xs uppercase tracking-wide opacity-70">Next best action</p>
                   <p className="mt-1 font-semibold">{nextAction}</p>
@@ -142,15 +145,14 @@ export function ReadinessPassport() {
                 {state.packetPrepared && !state.packetConfirmed && <Button onClick={() => setTab("checklist")} className="mt-4 w-full bg-coral text-coral-foreground hover:bg-coral/90" size="lg">Ready for nurse review</Button>}
               </section>
               <section className="rounded-3xl border border-border bg-card p-5">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Preparing for</p>
-                <p className="mt-1 font-display text-xl font-bold">{assignment.title}</p>
-                <p className="text-sm text-muted-foreground">{assignment.hospital} · {assignment.location}</p>
-                <p className="mt-2 text-sm">{assignment.pay} · {assignment.perks}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Your goal</p>
+                <p className="mt-1 font-display text-xl font-bold">Get ready once. Match with every gig.</p>
+                <p className="mt-1 text-sm text-muted-foreground">Finish your Puerto Rico readiness and interests, join the WEPA gig pool, and we match you with hospital gigs and island packages that fit how you want to live.</p>
               </section>
-              <section className="grid gap-3 sm:grid-cols-3">
+              <section className="grid gap-3 sm:grid-cols-2">
                 {tracks.map((t, i) => (
                   <div key={t.label} className="rounded-2xl border border-border bg-card p-4">
-                    <p className="text-xs font-bold text-muted-foreground">{"ABC"[i]}. {t.label}</p>
+                    <p className="text-xs font-bold text-muted-foreground">{"ABCD"[i]}. {t.label}</p>
                     <p className="mt-2 font-display text-3xl font-black">{t.value}%</p>
                     <Progress value={t.value} className="mt-2 h-1.5" />
                     <p className="mt-2 text-xs text-muted-foreground">{t.note}</p>
@@ -191,10 +193,12 @@ export function ReadinessPassport() {
 
           {tab === "spanish" && <SpanishScenario result={state.spanish} onResult={(r) => update((s) => ({ ...s, spanish: r }))} />}
 
+          {tab === "interests" && <InterestsPicker interests={state.interests} onChange={(i) => update((s) => ({ ...s, interests: i }))} />}
+
           {tab === "hospital" && (
             <section className="rounded-3xl border border-border bg-card p-5">
-              <p className="font-display text-xl font-bold">Hospital del Mar credentialing</p>
-              <p className="mt-1 text-sm text-muted-foreground">These are set by the hospital for this gig — they are not universal Puerto Rico licensing requirements.</p>
+              <p className="font-display text-xl font-bold">Common hospital credentials</p>
+              <p className="mt-1 text-sm text-muted-foreground">What most Puerto Rico partner hospitals ask for. Each hospital may add its own items once you match — these are not Puerto Rico licensing requirements.</p>
               <ul className="mt-4 space-y-2">
                 {state.credentialing.map((c) => (
                   <li key={c.id}>
@@ -212,8 +216,8 @@ export function ReadinessPassport() {
             <section className="space-y-4">
               <CandidatePassport state={state} />
               {!state.applied ? (
-                <Button size="lg" className="w-full bg-coral text-coral-foreground hover:bg-coral/90" onClick={apply}><Send /> Apply to Hospital del Mar & share my Passport</Button>
-              ) : <p className="rounded-xl bg-muted p-3 text-sm">Shared with Hospital del Mar · Stage: <strong>{state.stage}</strong></p>}
+                <Button size="lg" className="w-full bg-coral text-coral-foreground hover:bg-coral/90" onClick={apply}><Send /> Join the gig pool & start matching</Button>
+              ) : <p className="rounded-xl bg-muted p-3 text-sm">In the WEPA gig pool · Matching by your interests · Stage: <strong>{state.stage}</strong></p>}
             </section>
           )}
         </div>
@@ -352,7 +356,8 @@ export function CandidatePassport({ state, compact }: { state: ReadinessState; c
     ["Specialty & experience", `${elena.specialty} · ${elena.years} years`],
     ["License pathway", `${pathwayResult(state.pathway)} · Official authorization ${state.officialAuthorization.toLowerCase()}`],
     ["PR application preparation", `${preparationProgress(state)}% preparation progress`],
-    ["Hospital credentialing", `${credDone}/${state.credentialing.length} candidate-reported`],
+    ["Gig interests", interestsComplete(state.interests) ? `${state.interests.regions.join(", ")} · ${state.interests.experiences.join(", ")} · ${state.interests.length}, ${state.interests.housing}` : "Not set yet"],
+    ["Hospital credentials", `${credDone}/${state.credentialing.length} candidate-reported`],
     ["Spanish readiness", state.spanish ?? "Not completed"],
     ["Availability", elena.availability],
     ["Outstanding items", outstanding.length ? outstanding.join("; ") : "None"],
@@ -380,7 +385,7 @@ function GuidePanel({ guide, onAsk, onPrepare, onStop }: { guide: { text: string
   const body = (
     <div className="flex h-full flex-col gap-3">
       <div className="flex items-center gap-2">
-        <div className="grid size-9 place-items-center rounded-full bg-coral text-coral-foreground"><Bot className="size-5" /></div>
+        <GuideAvatar className="size-9" />
         <div><p className="font-display font-bold">Wepa Guide</p><p className="text-[11px] text-muted-foreground">AI preparation help — never approves eligibility</p></div>
       </div>
       {onPrepare && <Button onClick={onPrepare} className="bg-coral text-coral-foreground hover:bg-coral/90">Prepare my packet</Button>}
@@ -400,7 +405,7 @@ function GuidePanel({ guide, onAsk, onPrepare, onStop }: { guide: { text: string
       <div className="lg:hidden">
         {!open && (
           <button onClick={() => setOpen(true)} className="fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-40 flex items-center gap-3 rounded-full bg-surface-dark p-2 pr-5 text-left text-surface-dark-foreground shadow-lg">
-            <span className="grid size-10 place-items-center rounded-full bg-coral text-coral-foreground">{guide.busy ? <Loader2 className="size-5 animate-spin" /> : <Bot className="size-5" />}</span>
+            {guide.busy ? <span className="grid size-10 place-items-center rounded-full bg-secondary"><Loader2 className="size-5 animate-spin text-foreground" /></span> : <GuideAvatar className="size-10" />}
             <span className="min-w-0 flex-1 truncate text-sm font-semibold">{guide.busy ? "Wepa Guide is working…" : guide.text ? "Wepa Guide replied — tap to read" : "Ask Wepa Guide"}</span>
           </button>
         )}
@@ -412,5 +417,35 @@ function GuidePanel({ guide, onAsk, onPrepare, onStop }: { guide: { text: string
         )}
       </div>
     </>
+  );
+}
+
+function GuideAvatar({ className }: { className?: string }) {
+  return <span className={cn("grid shrink-0 place-items-center overflow-hidden rounded-full bg-secondary ring-2 ring-coral", className)}><img src={logoAsset.url} alt="" aria-hidden className="w-[86%] object-contain" /></span>;
+}
+
+function InterestsPicker({ interests, onChange }: { interests: ReadinessState["interests"]; onChange: (i: ReadinessState["interests"]) => void }) {
+  const toggle = (key: "regions" | "experiences", v: string) => onChange({ ...interests, [key]: interests[key].includes(v) ? interests[key].filter((x) => x !== v) : [...interests[key], v] });
+  const chip = (on: boolean) => cn("rounded-full border px-4 py-2 text-sm font-medium transition", on ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card hover:bg-muted");
+  const groups: { title: string; hint: string; body: ReactNode }[] = [
+    { title: "Where on the island?", hint: "Pick any", body: INTEREST_OPTIONS.regions.map((r) => <button key={r} className={chip(interests.regions.includes(r))} onClick={() => toggle("regions", r)}>{r}</button>) },
+    { title: "What do you want to experience?", hint: "Pick any", body: INTEREST_OPTIONS.experiences.map((r) => <button key={r} className={chip(interests.experiences.includes(r))} onClick={() => toggle("experiences", r)}>{r}</button>) },
+    { title: "How long?", hint: "Pick one", body: INTEREST_OPTIONS.lengths.map((r) => <button key={r} className={chip(interests.length === r)} onClick={() => onChange({ ...interests, length: r })}>{r}</button>) },
+    { title: "Where do you want to live?", hint: "Pick one", body: INTEREST_OPTIONS.housing.map((r) => <button key={r} className={chip(interests.housing === r)} onClick={() => onChange({ ...interests, housing: r })}>{r}</button>) },
+  ];
+  return (
+    <section className="space-y-3">
+      <div className="rounded-3xl bg-surface-dark p-5 text-surface-dark-foreground">
+        <p className="font-display text-xl font-bold">Your island, your way</p>
+        <p className="mt-1 text-sm opacity-80">Once you're ready, WEPA matches you to every gig whose location and island package fit what you pick here.</p>
+        {interestsComplete(interests) && <p className="mt-3 flex items-center gap-2 text-sm font-semibold"><CheckCircle2 className="size-4 text-primary" /> Interests saved — ready to match</p>}
+      </div>
+      {groups.map((g) => (
+        <div key={g.title} className="rounded-2xl border border-border bg-card p-4">
+          <p className="font-semibold">{g.title} <span className="text-xs font-normal text-muted-foreground">· {g.hint}</span></p>
+          <div className="mt-3 flex flex-wrap gap-2">{g.body}</div>
+        </div>
+      ))}
+    </section>
   );
 }

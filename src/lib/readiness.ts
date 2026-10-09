@@ -18,10 +18,14 @@ export const elena = {
   spanish: "Conversational", travelingWith: "Spouse and child", email: "elena.rivera@example.com",
 };
 
-export const assignment = {
-  hospital: "Hospital del Mar (fictional)", title: "Emergency Department RN — 4 weeks", location: "Carolina, Puerto Rico",
-  pay: "$1,850/wk local pay", perks: "Flight, beachside condo for a family of 3, El Yunque + bio-bay weekend",
-};
+export const INTEREST_OPTIONS = {
+  regions: ["San Juan metro", "East coast & El Yunque", "Ponce & the south", "West coast surf towns", "Vieques & Culebra", "Anywhere on the island"],
+  experiences: ["Beaches & snorkeling", "Rainforest & hiking", "Bio-bay nights", "Surf", "Food & rum culture", "Spa & wellness", "Old San Juan history", "Family-friendly"],
+  lengths: ["4 weeks", "8 weeks", "13 weeks"],
+  housing: ["Beachside", "City / walkable", "Quiet countryside"],
+} as const;
+
+export type Interests = { regions: string[]; experiences: string[]; length: string; housing: string; settings: string[] };
 
 export type Pathway = {
   active: boolean; oneYear: boolean; continuous: boolean; inactive: boolean; goodStanding: boolean; pending: boolean; revoked: boolean; category: string;
@@ -35,10 +39,16 @@ export type ReadinessState = {
   declarationDraft: string;
   spanish?: "English-supported setting ready" | "Developing clinical Spanish" | "Hospital review recommended";
   credentialing: { id: string; title: string; done: boolean }[];
-  applied?: string; // consent timestamp
+  interests: Interests;
+  applied?: string; // consent timestamp — joined the WEPA gig pool
   stage: Stage;
   officialAuthorization: "Not started" | "Pending" | "Issued";
 };
+
+export function interestsComplete(i: Interests) {
+  return i.regions.length > 0 && i.experiences.length > 0 && !!i.length && !!i.housing;
+}
+
 
 const seedChecklist: ChecklistItem[] = [
   { id: "id", title: "Government-issued photo ID", status: "Nurse confirmed", source: "Florida driver license", expires: "2029-04-02", next: "None", help: "A valid passport, REAL ID or driver license. The Board also asks for a recent 2×2 photo." },
@@ -69,6 +79,7 @@ export const seed: ReadinessState = {
     { id: "orient", title: "Facility orientation", done: false },
     { id: "ehr", title: "EHR orientation", done: false },
   ],
+  interests: { regions: [], experiences: [], length: "", housing: "", settings: [] },
   stage: "Applied",
   officialAuthorization: "Pending",
 };
