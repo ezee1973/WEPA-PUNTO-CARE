@@ -10,8 +10,6 @@ import {
   HeartPulse,
   MapPin,
   Menu,
-  Music2,
-  Play,
   Search,
   Sparkles,
   Stethoscope,
@@ -20,7 +18,6 @@ import {
 import { toast } from "sonner";
 
 import coastImage from "@/assets/puerto-rico-coast.jpg";
-import anthemPoster from "@/assets/wepa-anthem-poster.jpg";
 import jingleAsset from "@/assets/wepa-jingle.asset.json";
 import logoAsset from "@/assets/wepa-care-logo.asset.json";
 import { Button } from "@/components/ui/button";
