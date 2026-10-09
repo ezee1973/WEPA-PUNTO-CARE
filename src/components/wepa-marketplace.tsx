@@ -194,7 +194,7 @@ function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
           started ? "opacity-0" : "opacity-45",
         )}
       />
-      <div className="absolute inset-x-0 bottom-0 h-[48%] bg-gradient-to-t from-ocean via-ocean/60 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-[48%] bg-gradient-to-t from-ocean/40 via-ocean/80 to-ocean" />
       <div className="absolute -top-40 left-1/2 h-[26rem] w-[46rem] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
       <video
         ref={videoRef}
