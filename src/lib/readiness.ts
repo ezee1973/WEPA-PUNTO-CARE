@@ -116,7 +116,7 @@ export function useReadiness() {
 
 export async function streamGuide(task: string, context: unknown, onText: (t: string) => void, detail = "", signal?: AbortSignal) {
   const res = await fetch("/api/wepa-guide", {
-    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ task, detail, context }), signal,
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ task, detail, context }), signal: signal ?? null,
   });
   if (!res.ok || !res.body) {
     const msg = await res.json().then((j) => j.error).catch(() => null);

@@ -38,7 +38,7 @@ export const Route = createFileRoute("/api/wepa-guide")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const apiKey = process.env.LOVABLE_API_KEY;
+        const apiKey = process.env["LOVABLE_API_KEY"];
         if (!apiKey) return Response.json({ error: "Wepa Guide is not configured." }, { status: 500 });
         const body = (await request.json().catch(() => null)) as { task?: string; detail?: string; context?: unknown } | null;
         const task = TASKS[body?.task ?? ""];

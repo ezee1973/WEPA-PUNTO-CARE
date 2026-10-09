@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { assignment, elena, pathwayResult, preparationProgress, streamGuide, useReadiness, type ChecklistItem, type ItemStatus, type Pathway, type ReadinessState } from "@/lib/readiness";
 import { cn } from "@/lib/utils";
+import ReactMarkdown from "react-markdown";
 
 const DISCLAIMER = "WEPA provides preparation and process guidance. Only the appropriate Puerto Rico licensing authority can determine eligibility or authorize practice.";
 const TABS = [
@@ -318,7 +319,7 @@ function SpanishScenario({ result, onResult }: { result?: ReadinessState["spanis
   const [answers, setAnswers] = useState<number[]>([]);
   const done = answers.length === SCENARIO.length;
   function finish() {
-    const score = answers.filter((a, i) => a === SCENARIO[i].correct).length;
+    const score = answers.filter((a, i) => a === SCENARIO[i]?.correct).length;
     onResult(!answers[2] || answers[2] !== 1 ? "Hospital review recommended" : score === 3 ? "English-supported setting ready" : "Developing clinical Spanish");
   }
   return (
@@ -371,7 +372,7 @@ export function CandidatePassport({ state, compact }: { state: ReadinessState; c
   );
 }
 
-function GuidePanel({ guide, onAsk, onPrepare, onStop }: { guide: { text: string; busy: boolean; error: string }; onAsk: (task: string, detail?: string) => void; onPrepare?: () => void; onStop: () => void }) {
+function GuidePanel({ guide, onAsk, onPrepare, onStop }: { guide: { text: string; busy: boolean; error: string }; onAsk: (task: string, detail?: string) => void; onPrepare?: (() => void) | undefined; onStop: () => void }) {
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const chips: [string, string][] = [["checklist", "Request checklist"], ["dates", "Check my dates"], ["reminders", "Reminders"]];
@@ -383,7 +384,7 @@ function GuidePanel({ guide, onAsk, onPrepare, onStop }: { guide: { text: string
       </div>
       {onPrepare && <Button onClick={onPrepare} className="bg-coral text-coral-foreground hover:bg-coral/90">Prepare my packet</Button>}
       <div className="flex flex-wrap gap-2">{chips.map(([t, l]) => <Button key={t} size="sm" variant="outline" onClick={() => onAsk(t)} disabled={guide.busy}>{l}</Button>)}</div>
-      <div className="min-h-32 flex-1 overflow-y-auto rounded-2xl bg-muted p-3 text-sm whitespace-pre-wrap">
+      <div className="min-h-32 flex-1 overflow-y-auto rounded-2xl bg-muted p-3 text-sm">
         {guide.error ? <p className="text-destructive">{guide.error}</p> : guide.text || (guide.busy ? <span className="flex items-center gap-2 text-muted-foreground"><Loader2 className="size-4 animate-spin" /> Reviewing your information…</span> : <span className="text-muted-foreground">Ask me what a document is, or let me prepare your packet.</span>)}
       </div>
       <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); if (q.trim()) { onAsk("ask", q); setQ(""); } }}>
