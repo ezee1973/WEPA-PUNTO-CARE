@@ -131,8 +131,8 @@ export function PassportDocument({
           </div>
         )}
         <div className="mt-3 overflow-hidden rounded-md bg-ivory-foreground/5 px-2 py-1.5 font-mono text-[9px] leading-tight tracking-[0.12em] text-ivory-foreground/70 sm:text-[10px]">
-          <p className="truncate">{tr(mrz1)}</p>
-          <p className="truncate">{tr(mrz2)}</p>
+          <p className="truncate">{mrz1}</p>
+          <p className="truncate">{mrz2}</p>
         </div>
       </div>
       <p className="relative px-5 pb-4 text-[10px] opacity-70">

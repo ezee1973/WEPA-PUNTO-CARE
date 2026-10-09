@@ -88,7 +88,7 @@ function guideContext(s: ReadinessState) {
 }
 
 export function ReadinessPassport() {
-  const { t: tr } = useLanguage();
+  const { t: tr, language } = useLanguage();
   const { state, update, reset } = useReadiness();
   const [tab, setTab] = useState<Tab>("overview");
   const [guide, setGuide] = useState({ text: "", busy: false, error: "" });
@@ -157,7 +157,7 @@ export function ReadinessPassport() {
         task,
         guideContext(state),
         (t) => setGuide((g) => ({ ...g, text: t })),
-        detail,
+        `${detail}\nRespond in ${language === "es" ? "Spanish" : "English"}. Preserve required bilingual legal drafts.`,
         ctrl.signal,
       );
       onDone?.(text);
