@@ -123,8 +123,8 @@ const ROLE_ICONS: Record<MarketRole, string> = {
 const SPLASH_STATS: { value: string; label: string; tone: "coral" | "teal" }[] = [
   { value: "92%", label: "experience burnout", tone: "coral" },
   { value: "63%", label: "seek additional income", tone: "teal" },
-  { value: "42%", label: "plan to remain in healthcare", tone: "coral" },
   { value: "50%", label: "San Juan median RN pay v U.S.", tone: "coral" },
+  { value: "42%", label: "plan to remain in healthcare", tone: "coral" },
 ];
 
 const JOURNEY_DOORS: { id: MarketRole; audience: string; title: string; copy: string }[] = [
@@ -234,23 +234,13 @@ function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
                   "Travel nurses are licensed professionals who take temporary hospital assignments. Puerto Rico competes with higher-paying mainland contracts, making critical vacancies harder to fill.",
                 )}
               </p>
-              <p className="mt-3 max-w-2xl text-xs leading-relaxed text-ocean-foreground/80 sm:text-base">
-                <img
-                  src={logoUrl}
-                  alt="WEPA! care"
-                  className="mr-1.5 inline-block h-4 w-auto -translate-y-px object-contain align-middle [filter:brightness(0)_invert(1)] sm:h-5"
-                />
-                {tr(
-                  "closes the gap: hospitals offer local-pay gigs, tourism partners add stays and experiences, and U.S. nurses get ready and match.",
-                )}
-              </p>
               <p className="mt-3 text-sm font-black text-primary sm:text-lg">
                 {tr("Come for the Island. Care for its People.")}
               </p>
             </div>
 
-            <div className="wepa-splash-intro mt-8 w-full border-t border-ocean-foreground/15 pt-5 sm:mt-10 sm:pt-6">
-              <dl className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4 sm:gap-x-8">
+            <div className="wepa-splash-intro mt-6 w-full border-t border-ocean-foreground/15 pt-4 sm:mt-8 sm:pt-5">
+              <dl className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4 sm:gap-x-8">
                 {SPLASH_STATS.map((stat) => (
                   <div key={stat.label} className="flex flex-col">
                     <dt className="order-2 mt-1.5 text-[0.7rem] font-semibold leading-snug text-ocean-foreground/85 sm:text-xs">
@@ -267,11 +257,19 @@ function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
                   </div>
                 ))}
               </dl>
-              <p className="mt-4 max-w-3xl text-xs leading-relaxed text-ocean-foreground/90 sm:text-sm">
+              <p className="mt-3 max-w-3xl text-xs leading-relaxed text-ocean-foreground/90 sm:text-sm">
                 <span className="font-black text-coral">{tr("The result:")}</span>{" "}
-                {tr(
-                  "Capacity loss drives unsafe nurse:patient ratios, increased mortality from wait times, compromised preventive care, and an overall erosion of patient care.",
-                )}
+                {tr("unsafe nurse-to-patient ratios and eroding patient care.")}
+              </p>
+              <p className="mt-4 max-w-2xl text-balance text-xl font-black leading-tight text-ocean-foreground sm:mt-5 sm:text-3xl">
+                {tr("The fastest fix: travel nurses from the mainland.")}
+                <br />
+                <img
+                  src={logoUrl}
+                  alt="WEPA! care"
+                  className="mr-2 inline-block h-5 w-auto -translate-y-0.5 object-contain align-middle [filter:brightness(0)_invert(1)] sm:h-7"
+                />
+                {tr("gets them ready and matched.")}
               </p>
             </div>
 
