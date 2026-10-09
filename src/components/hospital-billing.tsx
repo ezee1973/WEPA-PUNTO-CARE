@@ -1,11 +1,12 @@
 import { CreditCard, FileText, TrendingUp } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
-import { HOSPITAL_ANNUAL_FEE, WEPA_FEE_RATE, hospitalWeekly, revenueModel, usd } from "@/lib/business";
-import { POOL, useHospital } from "@/lib/hospital-data";
+import { CLINIC_FLAT_FEE, FEE_PER_BED, membershipFee, WEPA_FEE_RATE, hospitalWeekly, revenueModel, usd } from "@/lib/business";
+import { FACILITIES, POOL, useHospital } from "@/lib/hospital-data";
 
 export function HospitalBilling() {
   const { t: tr } = useLanguage();
   const { state } = useHospital();
+  const facility = FACILITIES.find((f) => f.id === state.facilityId) ?? FACILITIES[0]!;
   const placed = state.candidates.filter((c) => c.stage === "Accepted" || c.stage === "Offer sent" || c.stage === "Negotiating");
   const rows = placed.map((c) => {
     const n = POOL.find((p) => p.id === c.nurseId);
@@ -22,8 +23,9 @@ export function HospitalBilling() {
       <div className="grid gap-3 md:grid-cols-3">
         <div className="border border-border bg-card p-5">
           <p className="flex items-center gap-2 text-xs font-bold uppercase text-muted-foreground"><CreditCard className="size-4" />{tr("Membership")}</p>
-          <p className="mt-2 text-3xl font-black">{usd(HOSPITAL_ANNUAL_FEE)}<span className="text-sm font-bold text-muted-foreground">{tr("/yr")}</span></p>
-          <p className="text-sm text-muted-foreground">{tr("Active · renews Jul 1, 2027")}</p>
+          <p className="mt-2 text-3xl font-black">{usd(membershipFee(facility.beds))}<span className="text-sm font-bold text-muted-foreground">{tr("/yr")}</span></p>
+          <p className="text-sm text-muted-foreground">{tr(`${facility.beds} beds × $${FEE_PER_BED}/bed`)} · {tr("renews Jul 1, 2027")}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{tr(`Clinics and sites without beds: $${CLINIC_FLAT_FEE.toLocaleString()}/yr per location`)}</p>
         </div>
         <div className="border border-border bg-card p-5">
           <p className="text-xs font-bold uppercase text-muted-foreground">{tr("Platform fee")}</p>
@@ -58,7 +60,7 @@ export function HospitalBilling() {
 
       <div className="border border-border bg-card p-5">
         <h3 className="flex items-center gap-2 font-black"><TrendingUp className="size-4" />{tr("How WEPA earns")}</h3>
-        <p className="text-sm text-muted-foreground">{tr("Sample pilot year: 20 hospitals, 240 nurses placed. Nurses always use WEPA free.")}</p>
+        <p className="text-sm text-muted-foreground">{tr("Sample pilot year: 20 hospitals, 15 clinic sites, 240 nurses placed. Nurses always use WEPA free.")}</p>
         <ul className="mt-4 space-y-3">
           {model.map((m) => (
             <li key={m.id}>

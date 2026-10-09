@@ -2,7 +2,12 @@ import { useCallback, useEffect, useState } from "react";
 
 /* ---------- Rates (single source of truth; all amounts are demo / simulated) ---------- */
 export const WEPA_FEE_RATE = 0.08;
-export const HOSPITAL_ANNUAL_FEE = 12000;
+export const FEE_PER_BED = 60; // per licensed bed, per year
+export const CLINIC_FLAT_FEE = 1800; // clinics / no-bed sites, per location, per year
+/** Annual membership: per bed for hospitals, flat per location for clinics with no beds. */
+export function membershipFee(beds: number, locations = 1) {
+  return beds > 0 ? beds * FEE_PER_BED : CLINIC_FLAT_FEE * Math.max(locations, 1);
+}
 
 export const netPay = (gross: number) => Math.round(gross * (1 - WEPA_FEE_RATE));
 export const wepaFee = (gross: number) => Math.round(gross * WEPA_FEE_RATE);
@@ -57,7 +62,7 @@ export function bookingTotals(bookings: Booking[]) {
 /** Sample WEPA revenue model for a pilot year (synthetic). */
 export function revenueModel(opts = { hospitals: 20, nursesPlaced: 240, avgGross: 1800, avgWeeks: 10, boosts: { boost: 30, featured: 18, spotlight: 6 }, bookingsPerNurse: 3, avgShare: 30 }) {
   const payFees = Math.round(opts.nursesPlaced * opts.avgWeeks * opts.avgGross * WEPA_FEE_RATE * 2); // fee charged on both sides
-  const memberships = opts.hospitals * HOSPITAL_ANNUAL_FEE;
+  const memberships = opts.hospitals * membershipFee(200) + 15 * CLINIC_FLAT_FEE; // avg 200-bed hospitals + 15 clinic sites
   const boosts = (opts.boosts.boost * 49 + opts.boosts.featured * 149 + opts.boosts.spotlight * 399) * 12;
   const services = opts.nursesPlaced * opts.bookingsPerNurse * opts.avgShare;
   return [
