@@ -242,7 +242,7 @@ export function ReadinessPassport({ initialTab }: { initialTab?: "community" } =
         c.status === "Ready for review" ? { ...c, status: "Nurse confirmed", next: "None" } : c,
       ),
     }));
-    toast.success(tr("Confirmed. Preparation progress is now 92%."));
+    toast.success(tr("Confirmed. Your preparation progress has been updated."));
   }
 
   function setItem(id: string, patch: Partial<ChecklistItem>) {
