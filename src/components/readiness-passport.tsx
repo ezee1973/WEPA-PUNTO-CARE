@@ -448,36 +448,63 @@ function ChecklistCard({ item, state, onExplain, onDraft, onDraftChange, onSet }
 }
 
 const SCENARIO = [
-  { q: "El paciente dice: “Me duele mucho el pecho, como una presión.” What is the patient describing?", options: ["Strong chest pain, like pressure", "Mild stomach ache", "A headache since yesterday"], correct: 0 },
-  { q: "To confirm a medication allergy, which question do you ask?", options: ["¿Tiene alergia a algún medicamento?", "¿Dónde vive usted?", "¿Tiene hambre?"], correct: 0 },
-  { q: "The patient's family begins describing a complex history quickly in Spanish before consent for a procedure. What do you do?", options: ["Continue with my conversational Spanish", "Escalate to a bilingual clinician or certified interpreter", "Ask them to speak English"], correct: 1 },
+  { q: "El paciente dice: “Me duele mucho el pecho, como una presión.” What is the patient describing?", options: ["Strong chest pain, like pressure", "Mild stomach ache", "A headache since yesterday"], correct: 0, why: "“Me duele mucho el pecho” = “My chest hurts a lot”; “como una presión” = “like pressure” — a classic cardiac complaint." },
+  { q: "To confirm a medication allergy, which question do you ask?", options: ["¿Tiene alergia a algún medicamento?", "¿Dónde vive usted?", "¿Tiene hambre?"], correct: 0, why: "“¿Tiene alergia a algún medicamento?” = “Are you allergic to any medication?” The others ask where they live and if they're hungry." },
+  { q: "The patient's family begins describing a complex history quickly in Spanish before consent for a procedure. What do you do?", options: ["Continue with my conversational Spanish", "Escalate to a bilingual clinician or certified interpreter", "Ask them to speak English"], correct: 1, why: "Informed consent and complex histories need a certified interpreter or bilingual clinician — conversational Spanish isn't enough for safety or legal consent." },
 ];
 
 function SpanishScenario({ result, onResult }: { result?: ReadinessState["spanish"]; onResult: (r: NonNullable<ReadinessState["spanish"]>) => void }) {
   const [answers, setAnswers] = useState<number[]>([]);
-  const done = answers.length === SCENARIO.length;
+  const [reviewed, setReviewed] = useState(false);
+  const done = SCENARIO.every((_, i) => answers[i] !== undefined);
+  const score = answers.filter((a, i) => a === SCENARIO[i]?.correct).length;
   function finish() {
-    const score = answers.filter((a, i) => a === SCENARIO[i]?.correct).length;
-    onResult(!answers[2] || answers[2] !== 1 ? "Hospital review recommended" : score === 3 ? "English-supported setting ready" : "Developing clinical Spanish");
+    setReviewed(true);
+    onResult(answers[2] !== 1 ? "Hospital review recommended" : score === 3 ? "English-supported setting ready" : "Developing clinical Spanish");
   }
+  function retake() { setAnswers([]); setReviewed(false); }
   return (
     <section className="space-y-3">
       <div className="rounded-3xl border border-border bg-card p-5">
         <p className="flex items-center gap-2 font-display text-xl font-bold"><Languages className="size-5 text-accent-strong" /> Clinical Spanish scenario</p>
         <p className="mt-1 text-xs text-muted-foreground">WEPA readiness indicator—not a language certification or licensing decision.</p>
-        {result && <p className="mt-3 rounded-xl bg-secondary p-3 font-semibold text-secondary-foreground">{result}</p>}
-      </div>
-      {SCENARIO.map((s, i) => (
-        <div key={i} className="rounded-2xl border border-border bg-card p-4">
-          <p className="text-sm font-medium">{i + 1}. {s.q}</p>
-          <div className="mt-3 grid gap-2">
-            {s.options.map((o, j) => (
-              <button key={o} onClick={() => setAnswers((a) => { const n = [...a]; n[i] = j; return n; })} className={cn("rounded-xl border px-3 py-2 text-left text-sm", answers[i] === j ? "border-primary bg-primary text-primary-foreground" : "border-border")}>{o}</button>
-            ))}
+        {reviewed ? (
+          <div className="mt-3 rounded-xl bg-secondary p-4 text-secondary-foreground">
+            <p className="font-display text-3xl font-bold">{score} / {SCENARIO.length} correct</p>
+            <p className="mt-1 font-semibold">{result}</p>
+            <p className="mt-1 text-sm opacity-80">Review each answer below.</p>
           </div>
-        </div>
-      ))}
-      <Button size="lg" className="w-full" disabled={!done || answers.some((a) => a === undefined)} onClick={finish}>See my readiness indicator</Button>
+        ) : result ? (
+          <p className="mt-3 rounded-xl bg-secondary p-3 text-sm text-secondary-foreground"><span className="font-semibold">Last result:</span> {result} — answer again to see your score and review.</p>
+        ) : null}
+      </div>
+      {SCENARIO.map((s, i) => {
+        const right = answers[i] === s.correct;
+        return (
+          <div key={i} className={cn("rounded-2xl border bg-card p-4", reviewed ? (right ? "border-primary" : "border-destructive") : "border-border")}>
+            <p className="text-sm font-medium">{i + 1}. {s.q}</p>
+            <div className="mt-3 grid gap-2">
+              {s.options.map((o, j) => {
+                const picked = answers[i] === j;
+                const cls = reviewed
+                  ? j === s.correct ? "border-primary bg-primary/15 font-semibold" : picked ? "border-destructive bg-destructive/10 line-through" : "border-border opacity-60"
+                  : picked ? "border-primary bg-primary text-primary-foreground" : "border-border";
+                return (
+                  <button key={o} disabled={reviewed} onClick={() => setAnswers((a) => { const n = [...a]; n[i] = j; return n; })} className={cn("flex items-center justify-between gap-2 rounded-xl border px-3 py-2 text-left text-sm", cls)}>
+                    <span>{o}</span>
+                    {reviewed && j === s.correct && <span className="shrink-0 text-xs font-bold">✓ Correct</span>}
+                    {reviewed && picked && j !== s.correct && <span className="shrink-0 text-xs font-bold text-destructive">✗ Your answer</span>}
+                  </button>
+                );
+              })}
+            </div>
+            {reviewed && <p className="mt-3 text-sm text-muted-foreground"><span className={cn("font-semibold", right ? "text-foreground" : "text-destructive")}>{right ? "Right." : "Not quite."}</span> {s.why}</p>}
+          </div>
+        );
+      })}
+      {reviewed
+        ? <Button size="lg" variant="outline" className="w-full" onClick={retake}>Retake the scenario</Button>
+        : <Button size="lg" className="w-full" disabled={!done} onClick={finish}>See my score</Button>}
     </section>
   );
 }
