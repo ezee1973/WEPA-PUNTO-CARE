@@ -19,4 +19,4 @@
 - [x] Service/mission gigs (unpaid, rural, underserved; faith or non-faith): nurse passport interest + hospital/org creation option, low-key
 - [x] Nurse home pitch line → marketplace one-liner
 - [x] English / Español toggle on welcome and across nurse, hospital, tourism and passport journeys
-- [ ] Nurse community: connections, travel teams, experience reviews, and approved testimonials
+- [x] Nurse community: connections, travel teams, experience reviews, and approved testimonials

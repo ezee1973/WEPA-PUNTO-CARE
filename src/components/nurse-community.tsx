@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   ArrowLeft,
@@ -88,6 +88,10 @@ export function NurseCommunity() {
       testimonialApproved: false,
     },
   );
+
+  useEffect(() => {
+    if (state.review) setReview(state.review);
+  }, [state.review]);
 
   const visibleGroups = COMMUNITY_GROUPS.filter((group) =>
     `${group.name} ${group.description} ${group.tag}`.toLowerCase().includes(query.toLowerCase()),
@@ -281,6 +285,11 @@ function CommunityStat({ value, label }: { value: string; label: string }) { ret
 export function NurseStorySpotlight() {
   const { t: tr } = useLanguage();
   const [index, setIndex] = useState(0);
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const timer = window.setInterval(() => setIndex((current) => (current + 1) % STORIES.length), 7000);
+    return () => window.clearInterval(timer);
+  }, []);
   const story = STORIES[index];
   if (!story) return null;
   const nurse = COMMUNITY_NURSES.find((item) => item.id === story.nurseId);
