@@ -14,7 +14,7 @@ import {
   MapPin,
   Menu,
   Music2,
-  Palmtree,
+  Play,
   Plane,
   Plus,
   Search,
@@ -204,17 +204,77 @@ function NurseExperience({ onSelectGig, soundOn, onSound, jingleMedia }: { onSel
       <section className="relative isolate overflow-hidden bg-surface-dark text-surface-dark-foreground">
         <img src={coastImage} alt="Puerto Rico coast and turquoise Caribbean water" className="absolute inset-0 -z-20 h-full w-full object-cover object-center" />
         <div className="absolute inset-0 -z-10 bg-hero-wash" />
-        <div className="mx-auto grid min-h-[470px] max-w-[1440px] content-end px-4 pb-10 pt-20 sm:px-6 sm:pb-14 lg:px-8">
-          <div className="max-w-3xl">
+        <div className="mx-auto grid max-w-[1440px] items-end gap-10 px-4 pb-12 pt-20 sm:px-6 lg:grid-cols-[1.05fr_.95fr] lg:px-8 lg:pb-16">
+          <div>
             <div className="mb-5 inline-flex items-center gap-2 border-l-2 border-accent px-3 text-xs font-bold uppercase text-surface-dark-foreground/80">
-              <Sparkles className="size-4 text-accent" /> Your next chapter is closer than you think
+              <Sparkles className="size-4 text-accent" /> Travel nursing, Puerto Rico remixed
             </div>
-            <h1 className="max-w-2xl text-4xl font-black leading-[1.02] sm:text-6xl lg:text-7xl">Care deeply.<br /><span className="text-primary">Live loudly.</span></h1>
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-surface-dark-foreground/80 sm:text-lg">Puerto Rico hospitals are building remarkable travel-nurse gigs—complete with the island experiences you came for.</p>
+            <h1 className="max-w-2xl text-4xl font-black leading-[1.02] sm:text-6xl lg:text-7xl">Come for the Island.<br /><span className="text-primary">Care for its People.</span></h1>
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-surface-dark-foreground/85 sm:text-lg">Come for the island — and make a little money while you’re here. Puerto Rico hospitals pay honest local wages, and the island picks up the rest: <strong className="font-bold text-surface-dark-foreground">free travel, lodging, and entertainment instead of high pay.</strong></p>
+            <div className="mt-6 grid max-w-lg grid-cols-3 gap-3">
+              <HeroStat value="$1,850" label="weekly, local hospital pay" />
+              <HeroStat value="+$1,400" label="island living covered" />
+              <HeroStat value="100%" label="turnkey arrival" />
+            </div>
             <div className="mt-7 flex flex-wrap gap-3">
               <Button size="lg" onClick={() => document.getElementById("gigs")?.scrollIntoView({ behavior: "smooth" })}>Explore live gigs <ArrowRight /></Button>
               <Button size="lg" variant="outline" className="border-surface-dark-foreground/30 bg-surface-dark/30 text-surface-dark-foreground hover:bg-surface-dark-foreground/10 hover:text-surface-dark-foreground" onClick={() => document.getElementById("ready")?.scrollIntoView({ behavior: "smooth" })}>Get Puerto Rico ready</Button>
             </div>
+          </div>
+          <div className="relative overflow-hidden border border-surface-dark-foreground/25 bg-surface-dark/55 shadow-2xl backdrop-blur">
+            <div className="flex items-center justify-between border-b border-surface-dark-foreground/15 px-4 py-3">
+              <span className="text-[11px] font-bold uppercase tracking-widest text-surface-dark-foreground/70">The WEPA anthem</span>
+              <span className="text-[11px] text-surface-dark-foreground/50">6 seconds of island</span>
+            </div>
+            <button type="button" onClick={onSound} aria-label={soundOn ? "Pause the WEPA anthem" : "Play the WEPA anthem"} className="group relative block w-full cursor-pointer">
+              {jingleMedia}
+              {soundOn ? (
+                <span className="absolute inset-x-0 bottom-0 flex items-end justify-center gap-1.5 bg-gradient-to-t from-black/60 to-transparent p-4" aria-hidden>
+                  {[10, 18, 26, 14, 22, 8, 16, 24, 12].map((h, i) => (
+                    <span key={i} className="w-1.5 animate-pulse rounded-full bg-primary" style={{ height: `${h}px`, animationDelay: `${i * 90}ms` }} />
+                  ))}
+                </span>
+              ) : (
+                <span className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-surface-dark/35 transition-colors group-hover:bg-surface-dark/20">
+                  <span className="flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform group-hover:scale-105"><Play className="ml-0.5 size-6" /></span>
+                  <span className="text-xs font-bold uppercase tracking-wide text-surface-dark-foreground">Watch &amp; listen · 6s</span>
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section id="formula" className="mx-auto max-w-[1440px] px-4 py-12 sm:px-6 lg:px-8">
+        <div className="max-w-2xl">
+          <p className="eyebrow">The WEPA formula</p>
+          <h2 className="mt-1 text-3xl font-black sm:text-4xl">Free travel, lodging, and fun — instead of high pay.</h2>
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">Mainland travel contracts pay big, then quietly take it back in rent, overtime, and burnout. Here you make a little money while you’re here — and the island picks up almost everything else.</p>
+        </div>
+        <div className="mt-7 grid gap-5 lg:grid-cols-2">
+          <div className="border border-border bg-card">
+            <div className="flex items-baseline justify-between border-b border-border bg-muted px-5 py-4">
+              <h3 className="text-lg font-black">The mainland contract</h3>
+              <span className="text-sm font-bold text-muted-foreground line-through decoration-coral decoration-2">$3,800/wk</span>
+            </div>
+            <ul className="space-y-3 p-5">
+              <li className="flex items-start gap-3 text-sm"><X className="mt-0.5 size-4 shrink-0 text-coral" /> Gouged short-term rent swallows most of the paycheck</li>
+              <li className="flex items-start gap-3 text-sm"><X className="mt-0.5 size-4 shrink-0 text-coral" /> Crisis overtime just to break even</li>
+              <li className="flex items-start gap-3 text-sm"><X className="mt-0.5 size-4 shrink-0 text-coral" /> Winter shifts in a city you never see</li>
+            </ul>
+            <p className="border-t border-border px-5 py-3 text-xs font-bold uppercase text-muted-foreground">Bottom line: a paycheck that disappears</p>
+          </div>
+          <div className="border-2 border-primary bg-primary/5">
+            <div className="flex items-baseline justify-between border-b border-primary/20 bg-primary px-5 py-4 text-primary-foreground">
+              <h3 className="text-lg font-black">The WEPA island chapter</h3>
+              <span className="text-sm font-bold">$1,850/wk + island</span>
+            </div>
+            <ul className="space-y-3 p-5">
+              <li className="flex items-start gap-3 text-sm"><CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" /> Honest local pay from Puerto Rico hospitals</li>
+              <li className="flex items-start gap-3 text-sm"><CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" /> Travel, lodging, and food covered by island partners</li>
+              <li className="flex items-start gap-3 text-sm"><CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" /> Bio-bay weekends, surf, and rainforest built into the gig</li>
+            </ul>
+            <p className="border-t border-primary/20 bg-primary/10 px-5 py-3 text-xs font-bold uppercase text-primary">Bottom line: you keep the island — and still bank savings</p>
           </div>
         </div>
       </section>
@@ -257,6 +317,11 @@ function NurseExperience({ onSelectGig, soundOn, onSound, jingleMedia }: { onSel
         </div>
       </section>
 
+      {!soundOn && (
+        <button type="button" onClick={onSound} className="fixed inset-x-4 bottom-20 z-40 flex items-center justify-center gap-2 rounded-full bg-primary py-3 text-sm font-bold text-primary-foreground shadow-xl md:hidden">
+          <Music2 /> Experience the WEPA anthem
+        </button>
+      )}
       <MobileNurseNav />
     </>
   );
