@@ -370,9 +370,6 @@ function Header({
 function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void }) {
   const { t: tr } = useLanguage();
   const [specialty, setSpecialty] = useState("All specialties");
-  const { state } = useReadiness();
-  const progress = preparationProgress(state);
-  const nextAction = nextBestAction(state);
   const [region, setRegion] = useState("Anywhere");
   const [showService, setShowService] = useState(false);
   const paid = islandGigs.filter((g) => !g.service);
