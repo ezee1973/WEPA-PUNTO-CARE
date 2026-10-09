@@ -8,9 +8,9 @@ export const Route = createFileRoute("/ready")({
   head: () => ({
     meta: [
       { title: "Puerto Rico Readiness Passport — WEPA.care" },
-      { name: "description", content: "Prepare, draft and track every step for a Puerto Rico nursing assignment with Wepa Guide, your AI preparation assistant." },
+      { name: "description", content: "Get ready once and match with every Puerto Rico nursing gig: pathway check, documents, clinical Spanish, take-home pay and travel booking, guided by Wepa Guide." },
       { property: "og:title", content: "Get Puerto Rico Ready — WEPA.care" },
-      { property: "og:description", content: "License pathway check, AI-drafted documents, clinical Spanish readiness and a Candidate Passport hospitals can review." },
+      { property: "og:description", content: "Pathway check, AI-drafted documents, clinical Spanish, island interests and a shareable Island Passport. Free for nurses." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
