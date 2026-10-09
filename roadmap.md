@@ -8,3 +8,4 @@
 - [x] Integrate supplied branding, jingle, and mobile-first nurse experience
 - [x] Verify the full demo loop on desktop and mobile
 - [x] Puerto Rico Readiness Passport with Wepa Guide AI (nurse) + Candidate Passport (hospital)
+- [x] Consolidate nurse-home readiness into one live passport band (single source of truth)
