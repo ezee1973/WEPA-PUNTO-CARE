@@ -13,3 +13,5 @@
 - Localize presentation through the shared language provider and English-keyed Spanish catalog; preserve canonical stored values and explicit option values so changing language never alters marketplace state.
 - Keep community, review, and testimonial demo state in one typed local store so every nurse-facing surface stays consistent without implying real members or verified reviews.
 - Keep tourism partner offers in one shared catalog (src/lib/partner-offers.ts) that feeds both the partner directory and the hospital perk menu, so offers published on one side appear on the other.
+
+- Keep all rates, fee math, boost tiers, and traveler-service pricing in src/lib/business.ts, so nurse net pay, hospital billing, and partner boosts always agree.
