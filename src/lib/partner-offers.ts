@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { boostRank, boostTier, type BoostId } from "@/lib/business";
+import { boostRank, type BoostId } from "@/lib/business";
 import {
   LOCATIONS,
   PERKS,
@@ -371,10 +371,6 @@ export function currentBoosts(): Record<string, BoostId> {
   return out;
 }
 
-/** What an operator is paying for placement this month. */
-export function boostSpend(boosts: Record<string, BoostId>) {
-  return Object.values(boosts).reduce((a, id) => a + (boostTier(id)?.price ?? 0), 0);
-}
 
 /* ---------- Trending (deterministic synthetic signals) ---------- */
 export function trending(list: DirectoryOffer[]) {

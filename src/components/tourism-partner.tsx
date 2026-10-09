@@ -44,7 +44,6 @@ import {
   REGIONS,
   SAMPLE_IMAGES,
   accountOffers,
-  boostSpend,
   customToDirectory,
   fullDirectory,
   hash,
@@ -56,7 +55,7 @@ import {
   type OfferStatus,
   type PartnerAccount,
 } from "@/lib/partner-offers";
-import { BOOST_TIERS, boostTier, type BoostId } from "@/lib/business";
+import { BOOST_TIERS, boostSpend, boostTier, type BoostId } from "@/lib/business";
 import { FeeSchedule } from "@/components/fee-schedule";
 import heroImg from "@/assets/partners/el-conquistador.jpg";
 
