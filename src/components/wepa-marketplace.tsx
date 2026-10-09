@@ -1,29 +1,20 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode, type RefObject } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import {
   ArrowRight,
   Bell,
-  BriefcaseMedical,
   Building2,
   Check,
   CheckCircle2,
-  ChevronRight,
-  CircleDollarSign,
   ClipboardCheck,
   FileCheck2,
   HeartPulse,
   MapPin,
   Menu,
   Music2,
-  Palmtree,
   Play,
-  Plane,
-  Plus,
   Search,
-  ShieldCheck,
   Sparkles,
-  Star,
   Stethoscope,
-  Users,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -37,31 +28,21 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Textarea } from "@/components/ui/textarea";
 import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
-import { demoGigs, demoOffers, qualificationSteps, type DemoGig, type DemoOffer, type DemoRole } from "@/lib/wepa-data";
+import { demoGigs, qualificationSteps, type DemoGig } from "@/lib/wepa-data";
 import { cn } from "@/lib/utils";
 
 const logoUrl = logoAsset.url;
 const jingleUrl = jingleAsset.url;
 
-const roleMeta: Record<DemoRole, { label: string; short: string; icon: typeof HeartPulse }> = {
-  nurse: { label: "Nurse", short: "Find my gig", icon: HeartPulse },
-  hospital: { label: "Hospital", short: "Build a package", icon: Building2 },
-  tourism: { label: "Tourism partner", short: "Make an offer", icon: Palmtree },
-};
-
 const ANTHEM_SEEN_KEY = "wepa-anthem-experienced";
 
 export function WepaMarketplace() {
-  const [role, setRole] = useState<DemoRole>("nurse");
   const [selectedGig, setSelectedGig] = useState<DemoGig | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
-  const [soundOn, setSoundOn] = useState(false);
-  const [anthemAuto, setAnthemAuto] = useState(false);
+  const [anthemPlaying, setAnthemPlaying] = useState(false);
   const [signedInEmail, setSignedInEmail] = useState<string | null>(null);
-  const mediaRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     void supabase.auth.getUser().then(({ data }) => setSignedInEmail(data.user?.email ?? null));
@@ -70,54 +51,16 @@ export function WepaMarketplace() {
   }, []);
 
   useEffect(() => {
-    // First-time "WEPA!" moment only: the anthem plays itself, silently,
-    // on the very first land. Every later visit gets a quiet poster.
+    // First land only: the anthem takes over the whole screen, then fades away.
     try {
       if (!window.localStorage.getItem(ANTHEM_SEEN_KEY)) {
         window.localStorage.setItem(ANTHEM_SEEN_KEY, "1");
-        setAnthemAuto(true);
+        setAnthemPlaying(true);
       }
     } catch {
-      setAnthemAuto(true);
+      setAnthemPlaying(true);
     }
   }, []);
-
-  async function toggleSound() {
-    const media = mediaRef.current;
-    if (!media) return;
-    if (soundOn) {
-      media.pause();
-      media.currentTime = 0;
-      setSoundOn(false);
-      if (anthemAuto) {
-        // Settle back into the silent ambient loop.
-        media.muted = true;
-        media.loop = true;
-        void media.play().catch(() => {});
-      }
-      return;
-    }
-    try {
-      media.muted = false;
-      media.loop = false;
-      media.currentTime = 0;
-      await media.play();
-      setSoundOn(true);
-    } catch {
-      toast.error("Sound is waiting for browser permission. Tap again to play.");
-    }
-  }
-
-  function handleAnthemEnded() {
-    setSoundOn(false);
-    const media = mediaRef.current;
-    if (media && anthemAuto) {
-      media.muted = true;
-      media.loop = true;
-      media.currentTime = 0;
-      void media.play().catch(() => {});
-    }
-  }
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -126,48 +69,85 @@ export function WepaMarketplace() {
 
   return (
     <main className="min-h-screen bg-background text-foreground">
-      {role !== "nurse" && <video ref={mediaRef} src={jingleUrl} className="hidden" onEnded={() => setSoundOn(false)} playsInline />}
+      {anthemPlaying && <AnthemTakeover onDone={() => setAnthemPlaying(false)} />}
       <Header
-        role={role}
-        setRole={setRole}
-        soundOn={soundOn}
-        onSound={() => void toggleSound()}
+        onAnthem={() => setAnthemPlaying(true)}
         signedInEmail={signedInEmail}
         onAuth={() => setAuthOpen(true)}
         onSignOut={() => void signOut()}
       />
-      <RoleRail role={role} setRole={setRole} />
-      {role === "nurse" && (
-        <NurseExperience
-          onSelectGig={setSelectedGig}
-          soundOn={soundOn}
-          onSound={() => void toggleSound()}
-          anthemAuto={anthemAuto}
-          onAnthemEnded={handleAnthemEnded}
-          mediaRef={mediaRef}
-        />
-      )}
-      {role === "hospital" && <HospitalExperience />}
-      {role === "tourism" && <TourismExperience />}
+      <NurseExperience onSelectGig={setSelectedGig} onAnthem={() => setAnthemPlaying(true)} />
       <GigDialog gig={selectedGig} onClose={() => setSelectedGig(null)} signedIn={Boolean(signedInEmail)} onAuth={() => setAuthOpen(true)} />
       <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
     </main>
   );
 }
 
+function AnthemTakeover({ onDone }: { onDone: () => void }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [fading, setFading] = useState(false);
+  const doneRef = useRef(false);
+
+  function finish() {
+    if (doneRef.current) return;
+    doneRef.current = true;
+    setFading(true);
+    window.setTimeout(onDone, 650);
+  }
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    // Try with sound first; if the browser blocks it, fall back to muted.
+    video.muted = false;
+    void video.play().catch(() => {
+      video.muted = true;
+      void video.play().catch(() => {});
+    });
+    // Safety net: never trap the visitor if "ended" never fires.
+    const timer = window.setTimeout(finish, 9000);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <div
+      className={cn(
+        "fixed inset-0 z-[80] flex items-center justify-center bg-surface-dark transition-opacity duration-500",
+        fading && "pointer-events-none opacity-0",
+      )}
+      role="dialog"
+      aria-label="WEPA.care anthem"
+    >
+      <video
+        ref={videoRef}
+        src={jingleUrl}
+        autoPlay
+        playsInline
+        onEnded={finish}
+        className="h-full w-full object-cover"
+      />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between bg-gradient-to-t from-surface-dark/80 to-transparent p-5 sm:p-8">
+        <img src={logoUrl} alt="" className="h-9 w-auto object-contain" />
+        <button
+          type="button"
+          onClick={finish}
+          className="pointer-events-auto rounded-full border border-surface-dark-foreground/30 bg-surface-dark/60 px-4 py-2 text-xs font-bold uppercase tracking-wide text-surface-dark-foreground backdrop-blur transition-colors hover:bg-surface-dark-foreground/15"
+        >
+          Skip
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function Header({
-  role,
-  setRole,
-  soundOn,
-  onSound,
+  onAnthem,
   signedInEmail,
   onAuth,
   onSignOut,
 }: {
-  role: DemoRole;
-  setRole: (role: DemoRole) => void;
-  soundOn: boolean;
-  onSound: () => void;
+  onAnthem: () => void;
   signedInEmail: string | null;
   onAuth: () => void;
   onSignOut: () => void;
@@ -178,55 +158,24 @@ function Header({
         <img src={logoUrl} alt="WEPA.care" className="h-11 w-auto object-contain" />
         <div className="hidden h-7 w-px bg-border sm:block" />
         <p className="hidden text-xs font-semibold uppercase text-muted-foreground sm:block">Come for the Island.<br />Care for its People.</p>
-        <div className="ml-auto hidden rounded-md bg-muted p-1 md:flex" aria-label="Demo role switcher">
-          {(Object.keys(roleMeta) as DemoRole[]).map((key) => {
-            const Icon = roleMeta[key].icon;
-            return (
-              <Button key={key} variant={role === key ? "default" : "ghost"} size="sm" onClick={() => setRole(key)} className="h-8">
-                <Icon /> {roleMeta[key].label}
-              </Button>
-            );
-          })}
+        <div className="ml-auto flex items-center gap-1">
+          <Button variant="ghost" size="icon" onClick={onAnthem} aria-label="Play the WEPA anthem" title="Play the WEPA anthem">
+            <Music2 />
+          </Button>
+          <Button variant="ghost" size="icon" aria-label="Notifications"><Bell /></Button>
+          {signedInEmail ? (
+            <Button variant="outline" size="sm" onClick={onSignOut} className="hidden sm:inline-flex">Sign out</Button>
+          ) : (
+            <Button size="sm" onClick={onAuth}>Sign in</Button>
+          )}
+          <Button variant="ghost" size="icon" className="md:hidden" aria-label="Open menu"><Menu /></Button>
         </div>
-        <Button variant="ghost" size="icon" onClick={onSound} aria-label={soundOn ? "Stop WEPA jingle" : "Play WEPA jingle"} title="Play the WEPA jingle">
-          <Music2 className={soundOn ? "text-coral" : ""} />
-        </Button>
-        <Button variant="ghost" size="icon" aria-label="Notifications"><Bell /></Button>
-        {signedInEmail ? (
-          <Button variant="outline" size="sm" onClick={onSignOut} className="hidden sm:inline-flex">Sign out</Button>
-        ) : (
-          <Button size="sm" onClick={onAuth}>Sign in</Button>
-        )}
-        <Button variant="ghost" size="icon" className="md:hidden" aria-label="Open menu"><Menu /></Button>
       </div>
     </header>
   );
 }
 
-function RoleRail({ role, setRole }: { role: DemoRole; setRole: (role: DemoRole) => void }) {
-  return (
-    <div className="border-b border-border bg-surface-dark text-surface-dark-foreground">
-      <div className="mx-auto flex max-w-[1440px] items-center gap-2 overflow-x-auto px-4 py-2 sm:px-6 lg:px-8">
-        <span className="shrink-0 text-[11px] font-bold uppercase text-surface-dark-foreground/55">Judge view</span>
-        <ChevronRight className="size-3 shrink-0 text-surface-dark-foreground/40" />
-        {(Object.keys(roleMeta) as DemoRole[]).map((key) => (
-          <Button
-            key={key}
-            variant="ghost"
-            size="sm"
-            onClick={() => setRole(key)}
-            className={cn("h-7 shrink-0 text-surface-dark-foreground/65 hover:bg-surface-dark-foreground/10 hover:text-surface-dark-foreground md:hidden", role === key && "bg-surface-dark-foreground/15 text-surface-dark-foreground")}
-          >
-            {roleMeta[key].label}
-          </Button>
-        ))}
-        <span className="ml-auto hidden text-xs text-surface-dark-foreground/55 md:block">Switch roles to follow one offer from partner → hospital → nurse</span>
-      </div>
-    </div>
-  );
-}
-
-function NurseExperience({ onSelectGig, soundOn, onSound, anthemAuto, onAnthemEnded, mediaRef }: { onSelectGig: (gig: DemoGig) => void; soundOn: boolean; onSound: () => void; anthemAuto: boolean; onAnthemEnded: () => void; mediaRef: RefObject<HTMLVideoElement | null> }) {
+function NurseExperience({ onSelectGig, onAnthem }: { onSelectGig: (gig: DemoGig) => void; onAnthem: () => void }) {
   const [specialty, setSpecialty] = useState("All specialties");
   const [stepState, setStepState] = useState(qualificationSteps);
   const complete = stepState.filter((step) => step.done).length;
@@ -260,42 +209,18 @@ function NurseExperience({ onSelectGig, soundOn, onSound, anthemAuto, onAnthemEn
               <Button size="lg" variant="outline" className="border-surface-dark-foreground/30 bg-surface-dark/30 text-surface-dark-foreground hover:bg-surface-dark-foreground/10 hover:text-surface-dark-foreground" onClick={() => document.getElementById("ready")?.scrollIntoView({ behavior: "smooth" })}>Get Puerto Rico ready</Button>
             </div>
           </div>
-          <div className="relative overflow-hidden border border-surface-dark-foreground/25 bg-surface-dark/55 shadow-2xl backdrop-blur">
-            <div className="flex items-center justify-between border-b border-surface-dark-foreground/15 px-4 py-3">
-              <span className="text-[11px] font-bold uppercase tracking-widest text-surface-dark-foreground/70">The WEPA anthem</span>
-              <span className="text-[11px] text-surface-dark-foreground/50">6 seconds of island</span>
-            </div>
-            <button type="button" onClick={onSound} aria-label={soundOn ? "Pause the WEPA anthem" : "Play the WEPA anthem with sound"} className="group relative block w-full cursor-pointer">
-              {anthemAuto ? (
-                <video ref={mediaRef} src={jingleUrl} autoPlay muted loop playsInline onEnded={onAnthemEnded} className="aspect-video w-full object-cover" />
-              ) : (
-                <>
-                  <img src={anthemPoster} alt="Frame from the WEPA.care anthem video" className="aspect-video w-full object-cover" />
-                  <video ref={mediaRef} src={jingleUrl} playsInline onEnded={onAnthemEnded} className="hidden" />
-                </>
-              )}
-              {soundOn ? (
-                <span className="absolute inset-x-0 bottom-0 flex items-end justify-center gap-1.5 bg-gradient-to-t from-black/60 to-transparent p-4" aria-hidden>
-                  {[10, 18, 26, 14, 22, 8, 16, 24, 12].map((h, i) => (
-                    <span key={i} className="w-1.5 animate-pulse rounded-full bg-primary" style={{ height: `${h}px`, animationDelay: `${i * 90}ms` }} />
-                  ))}
-                </span>
-              ) : anthemAuto ? (
-                <span className="absolute bottom-3 left-3 flex items-center gap-2 rounded-full bg-black/55 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-white backdrop-blur">
-                  <span className="relative flex size-2" aria-hidden>
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-coral opacity-75" />
-                    <span className="relative inline-flex size-2 rounded-full bg-coral" />
-                  </span>
-                  Tap for sound
-                </span>
-              ) : (
-                <span className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-surface-dark/35 transition-colors group-hover:bg-surface-dark/20">
-                  <span className="flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform group-hover:scale-105"><Play className="ml-0.5 size-6" /></span>
-                  <span className="text-xs font-bold uppercase tracking-wide text-surface-dark-foreground">Watch &amp; listen · 6s</span>
-                </span>
-              )}
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={onAnthem}
+            aria-label="Replay the WEPA anthem"
+            className="group relative block w-full cursor-pointer overflow-hidden border border-surface-dark-foreground/25 shadow-2xl"
+          >
+            <img src={anthemPoster} alt="Frame from the WEPA.care anthem video" className="aspect-video w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+            <span className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-surface-dark/35 transition-colors group-hover:bg-surface-dark/20">
+              <span className="flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform group-hover:scale-105"><Play className="ml-0.5 size-6" /></span>
+              <span className="text-xs font-bold uppercase tracking-wide text-surface-dark-foreground">Replay the anthem · 6s</span>
+            </span>
+          </button>
         </div>
       </section>
 
@@ -371,11 +296,6 @@ function NurseExperience({ onSelectGig, soundOn, onSound, anthemAuto, onAnthemEn
         </div>
       </section>
 
-      {!soundOn && (
-        <button type="button" onClick={onSound} className="fixed inset-x-4 bottom-20 z-40 flex items-center justify-center gap-2 rounded-full bg-primary py-3 text-sm font-bold text-primary-foreground shadow-xl md:hidden">
-          <Music2 /> {anthemAuto ? "Turn on the anthem sound" : "Experience the WEPA anthem"}
-        </button>
-      )}
       <MobileNurseNav />
     </>
   );
@@ -400,94 +320,9 @@ function GigCard({ gig, featured, onOpen }: { gig: DemoGig; featured: boolean; o
   );
 }
 
-function HospitalExperience() {
-  const [selected, setSelected] = useState(() => demoOffers.filter((offer) => offer.selected).map((offer) => offer.id));
-  const [published, setPublished] = useState(true);
-  const packageValue = useMemo(() => demoOffers.filter((offer) => selected.includes(offer.id)).reduce((total, offer) => total + offer.retail, 0), [selected]);
-
-  function toggleOffer(id: string) {
-    setSelected((current) => current.includes(id) ? current.filter((key) => key !== id) : [...current, id]);
-  }
-
-  return (
-    <WorkspaceShell role="hospital" title="Build the gig they’ll cross an ocean for." subtitle="Centro Médico del Caribe · San Juan">
-      <div className="grid gap-6 xl:grid-cols-[1.45fr_.55fr]">
-        <section>
-          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="eyebrow">Private partner marketplace</p><h2 className="mt-1 text-3xl font-black">Make your offer impossible to ignore.</h2><p className="mt-2 max-w-2xl text-sm text-muted-foreground">Compare island partners competing to strengthen your Cardiac ICU package. Their private pricing never appears to nurses.</p></div><Button variant="outline"><Search /> Filter offers</Button></div>
-          <div className="mt-6 grid gap-4 md:grid-cols-2">{demoOffers.map((offer) => <OfferCard key={offer.id} offer={offer} selected={selected.includes(offer.id)} onToggle={() => toggleOffer(offer.id)} />)}</div>
-        </section>
-        <aside className="xl:sticky xl:top-28 xl:self-start">
-          <div className="border border-border bg-card">
-            <div className="border-b border-border bg-surface-dark p-5 text-surface-dark-foreground"><p className="text-xs font-bold uppercase text-surface-dark-foreground/60">Package preview</p><h3 className="mt-2 text-2xl font-black">Cardiac ICU, with an island built in</h3><p className="mt-2 text-sm text-surface-dark-foreground/65">San Juan · 13 weeks · $2,450/wk</p></div>
-            <div className="p-5"><div className="flex items-end justify-between"><span className="text-sm text-muted-foreground">Nurse-facing value</span><strong className="text-3xl font-black text-primary">${packageValue.toLocaleString()}</strong></div><div className="mt-5 space-y-3">{demoOffers.filter((offer) => selected.includes(offer.id)).map((offer) => <div key={offer.id} className="flex items-start gap-3 border-b border-border pb-3"><CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" /><div><p className="text-sm font-bold">{offer.title}</p><p className="text-xs text-muted-foreground">{offer.partner}</p></div></div>)}</div>
-              <Button className="mt-5 w-full" onClick={() => { setPublished(true); toast.success("Gig package published to matched nurses."); }}>{published ? <><Check /> Package is live</> : <>Publish package <ArrowRight /></>}</Button>
-              <p className="mt-3 text-center text-xs text-muted-foreground">Private partner prices stay hidden.</p>
-            </div>
-          </div>
-          <div className="mt-4 border-l-2 border-coral bg-coral/8 p-4"><div className="flex gap-3"><Users className="size-5 text-coral" /><div><p className="font-bold">12 qualified matches</p><p className="mt-1 text-xs leading-relaxed text-muted-foreground">4 nurses are ready to interview now.</p></div></div></div>
-        </aside>
-      </div>
-      <Applicants />
-    </WorkspaceShell>
-  );
-}
-
-function OfferCard({ offer, selected, onToggle }: { offer: DemoOffer; selected: boolean; onToggle: () => void }) {
-  const savings = offer.retail ? Math.round((1 - offer.price / offer.retail) * 100) : 100;
-  return (
-    <article className={cn("flex flex-col border bg-card p-5 transition-colors", selected ? "border-primary ring-1 ring-primary" : "border-border hover:border-primary/60")}>
-      <div className="flex items-start justify-between gap-3"><span className="tag">{offer.category}</span>{offer.price === 0 ? <span className="tag tag-coral">Partner gift</span> : <span className="tag tag-teal">Save {savings}%</span>}</div>
-      <p className="mt-4 text-xs font-bold uppercase text-muted-foreground">{offer.partner}</p><h3 className="mt-1 text-xl font-extrabold">{offer.title}</h3><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{offer.description}</p>
-      <div className="mt-5 flex items-end justify-between border-t border-border pt-4"><div><span className="block text-xs text-muted-foreground">Private hospital price</span><strong className="text-2xl">{offer.price === 0 ? "FREE" : `$${offer.price}`}</strong> <span className="text-xs text-muted-foreground line-through">${offer.retail}</span></div><Button size="sm" variant={selected ? "default" : "outline"} onClick={onToggle}>{selected ? <><Check /> Added</> : <><Plus /> Add</>}</Button></div>
-    </article>
-  );
-}
-
-function Applicants() {
-  const [status, setStatus] = useState("Qualified");
-  return (
-    <section className="mt-12"><div className="flex items-end justify-between"><div><p className="eyebrow">Candidate pipeline</p><h2 className="mt-1 text-3xl font-black">Ready talent, clearly ranked.</h2></div><span className="hidden text-sm text-muted-foreground sm:block">Updated now</span></div>
-      <div className="mt-6 overflow-x-auto border border-border bg-card"><table className="w-full min-w-[760px] text-left"><thead className="border-b border-border bg-muted text-xs uppercase text-muted-foreground"><tr><th className="p-4">Nurse</th><th className="p-4">Specialty</th><th className="p-4">PR ready</th><th className="p-4">Match</th><th className="p-4">Stage</th><th className="p-4"></th></tr></thead><tbody><tr><td className="p-4"><div className="flex items-center gap-3"><span className="flex size-9 items-center justify-center rounded-full bg-primary/15 font-bold text-primary">MR</span><div><strong className="block">Maya Rivera, RN</strong><span className="text-xs text-muted-foreground">Austin, TX · 6 yrs</span></div></div></td><td className="p-4 text-sm">Cardiac ICU</td><td className="p-4"><span className="tag tag-teal">80% complete</span></td><td className="p-4 font-black text-primary">94%</td><td className="p-4"><select value={status} onChange={(event) => { setStatus(event.target.value); toast.success(`Maya moved to ${event.target.value}.`); }} className="h-9 rounded-md border border-input bg-background px-3 text-sm"><option>Applied</option><option>Qualified</option><option>Interview</option><option>Offered</option></select></td><td className="p-4"><Button variant="outline" size="sm">Review</Button></td></tr></tbody></table></div>
-    </section>
-  );
-}
-
-function TourismExperience() {
-  const [offers, setOffers] = useState(demoOffers);
-  const [formOpen, setFormOpen] = useState(false);
-  const [draft, setDraft] = useState({ title: "", category: "Stay", location: "", retail: "", price: "", description: "" });
-
-  function submitOffer(event: FormEvent) {
-    event.preventDefault();
-    const offer: DemoOffer = { id: crypto.randomUUID(), partner: "Your Puerto Rico brand", title: draft.title, category: draft.category, location: draft.location, retail: Number(draft.retail), price: Number(draft.price), description: draft.description, selected: false };
-    setOffers((current) => [offer, ...current]);
-    setFormOpen(false);
-    toast.success("Your private hospital offer is live.");
-  }
-
-  return (
-    <WorkspaceShell role="tourism" title="Put your brand inside the journey." subtitle="Private offers · Puerto Rico-wide">
-      <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
-        <section className="bg-coral p-6 text-coral-foreground sm:p-8"><Palmtree className="size-8" /><p className="mt-10 text-xs font-bold uppercase text-coral-foreground/65">Marketplace impact</p><h2 className="mt-2 text-3xl font-black">You make the gig feel like Puerto Rico.</h2><p className="mt-3 text-sm leading-relaxed text-coral-foreground/80">Hospitals compete for great nurses. Your private offer can be the reason one chooses their team—and discovers your business.</p><Button className="mt-7 bg-surface-dark text-surface-dark-foreground hover:bg-surface-dark/90" onClick={() => setFormOpen(true)}><Plus /> Create an offer</Button></section>
-        <section className="grid grid-cols-2 gap-3 sm:grid-cols-4"><Stat label="Live offers" value={String(offers.length)} icon={BriefcaseMedical} /><Stat label="Package adds" value="11" icon={CheckCircle2} /><Stat label="Nurses reached" value="284" icon={Users} /><Stat label="Value contributed" value="$18.6k" icon={CircleDollarSign} /></section>
-      </div>
-      <section className="mt-12"><div className="flex items-end justify-between"><div><p className="eyebrow">Your private offers</p><h2 className="mt-1 text-3xl font-black">Compete on what makes you memorable.</h2></div><Button onClick={() => setFormOpen(true)}><Plus /> New offer</Button></div><div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">{offers.slice(0, 6).map((offer, index) => <article key={offer.id} className="border border-border bg-card p-5"><div className="flex items-center justify-between"><span className="tag">{offer.category}</span><span className="flex items-center gap-1 text-xs font-bold text-primary"><span className="size-2 rounded-full bg-primary" /> Live</span></div><h3 className="mt-4 text-xl font-extrabold">{offer.title}</h3><p className="mt-2 text-sm text-muted-foreground">{offer.location}</p><div className="mt-5 grid grid-cols-2 border-y border-border py-3"><div><span className="block text-xs text-muted-foreground">Hospital price</span><strong>{offer.price === 0 ? "Partner gift" : `$${offer.price}`}</strong></div><div className="border-l border-border pl-4"><span className="block text-xs text-muted-foreground">Package adds</span><strong>{index === 0 ? 6 : Math.max(1, 4 - index)}</strong></div></div><Button variant="ghost" className="mt-3 w-full justify-between">View activity <ArrowRight /></Button></article>)}</div></section>
-      <Dialog open={formOpen} onOpenChange={setFormOpen}><DialogContent className="max-h-[90vh] overflow-y-auto"><DialogHeader><DialogTitle>Create a private hospital offer</DialogTitle><DialogDescription>Hospitals see your terms and price. Nurses see only the benefit when it’s selected.</DialogDescription></DialogHeader><form onSubmit={submitOffer} className="space-y-4"><Field label="Offer title"><Input required value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} placeholder="e.g. First month waterfront stay" /></Field><div className="grid grid-cols-2 gap-3"><Field label="Category"><select className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm" value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value })}><option>Stay</option><option>Mobility</option><option>Experience</option><option>Wellness</option><option>Food</option></select></Field><Field label="Location"><Input required value={draft.location} onChange={(e) => setDraft({ ...draft, location: e.target.value })} /></Field></div><Field label="What’s included"><Textarea required value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} /></Field><div className="grid grid-cols-2 gap-3"><Field label="Retail value"><Input required type="number" value={draft.retail} onChange={(e) => setDraft({ ...draft, retail: e.target.value })} /></Field><Field label="Hospital price"><Input required type="number" value={draft.price} onChange={(e) => setDraft({ ...draft, price: e.target.value })} /></Field></div><Button type="submit" className="w-full">Publish private offer <ArrowRight /></Button></form></DialogContent></Dialog>
-    </WorkspaceShell>
-  );
-}
-
-function WorkspaceShell({ role, title, subtitle, children }: { role: DemoRole; title: string; subtitle: string; children: ReactNode }) {
-  const Icon = roleMeta[role].icon;
-  return <><section className="border-b border-border bg-card"><div className="mx-auto flex max-w-[1440px] items-center gap-4 px-4 py-8 sm:px-6 lg:px-8"><span className="flex size-12 items-center justify-center rounded-full bg-primary/15 text-primary"><Icon className="size-6" /></span><div><p className="text-xs font-bold uppercase text-muted-foreground">{roleMeta[role].label} workspace · {subtitle}</p><h1 className="mt-1 text-3xl font-black sm:text-4xl">{title}</h1></div></div></section><div className="mx-auto max-w-[1440px] px-4 py-10 sm:px-6 lg:px-8">{children}</div></>;
-}
 
 function HeroStat({ value, label }: { value: string; label: string }) {
   return <div className="border border-surface-dark-foreground/20 bg-surface-dark/50 px-3 py-3 backdrop-blur"><strong className="block text-lg font-black text-primary sm:text-xl">{value}</strong><span className="mt-0.5 block text-[11px] leading-tight text-surface-dark-foreground/70">{label}</span></div>;
-}
-
-function Stat({ label, value, icon: Icon }: { label: string; value: string; icon: typeof Star }) {
-  return <div className="border border-border bg-card p-4"><Icon className="size-5 text-primary" /><strong className="mt-5 block text-2xl font-black">{value}</strong><span className="text-xs text-muted-foreground">{label}</span></div>;
 }
 
 function GigDialog({ gig, onClose, signedIn, onAuth }: { gig: DemoGig | null; onClose: () => void; signedIn: boolean; onAuth: () => void }) {
