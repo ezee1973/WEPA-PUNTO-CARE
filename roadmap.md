@@ -10,3 +10,4 @@
 - [x] Puerto Rico Readiness Passport with Wepa Guide AI (nurse) + Candidate Passport (hospital)
 - [x] Consolidate nurse-home readiness into one live passport band (single source of truth)
 - [x] Move Edit profile button from passport header into the Ready for nurse review box
+- [x] Hospital side: demo log in, nurse pool, location-based gig builder with perks + competitive rating, hiring pipeline, dashboard
