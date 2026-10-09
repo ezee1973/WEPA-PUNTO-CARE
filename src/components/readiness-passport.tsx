@@ -329,8 +329,9 @@ function PathwayCheck({ pathway, onChange, onContinue }: { pathway: Pathway; onC
         </div>
       ))}
       <label className="block rounded-2xl border border-border bg-card p-4 text-sm font-medium">What license category and specialty do you hold?
-        <input value={pathway.category} onChange={(e) => onChange({ ...pathway, category: e.target.value })} className="mt-2 w-full rounded-xl border border-input bg-background px-3 py-2" />
+        <input value={pathway.category} onChange={(e) => onChange({ ...pathway, category: e.target.value })} className="mt-2 w-full rounded-xl border border-input bg-background px-3 py-2" placeholder="e.g. RN — Emergency" />
       </label>
+      <ContinueButton label={complete ? "Continue to your checklist" : "Answer all questions to continue"} onClick={onContinue} disabled={!complete} />
     </section>
   );
 }
