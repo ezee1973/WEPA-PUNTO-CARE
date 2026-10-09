@@ -132,15 +132,15 @@ function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
     >
       {/* Full-bleed island backdrop blends the welcome into the anthem */}
       <img
-        src={anthemPoster}
+        src={coastImage}
         alt=""
         aria-hidden
         className={cn(
           "absolute inset-0 h-full w-full object-cover transition-all duration-700",
-          started ? "opacity-0" : "opacity-50",
+          started ? "opacity-0" : "opacity-90",
         )}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-surface-dark/80 via-surface-dark/55 to-surface-dark/90" />
+      <div className="absolute inset-0 bg-gradient-to-b from-surface-dark/55 via-surface-dark/35 to-surface-dark/80" />
       <video
         ref={videoRef}
         src={jingleUrl}
@@ -151,7 +151,11 @@ function AnthemTakeover({ onDone }: { onDone: (role: MarketRole) => void }) {
       />
       {!started && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-8 overflow-y-auto px-5 py-10 sm:gap-10">
-          <img src={logoUrl} alt="WEPA.care" className="h-20 w-auto drop-shadow-2xl sm:h-28" />
+          <img
+            src={logoUrl}
+            alt="WEPA.care"
+            className="h-20 w-auto [filter:drop-shadow(0_0_18px_rgba(245,242,233,0.95))_drop-shadow(0_0_55px_rgba(245,242,233,0.75))] sm:h-28"
+          />
           <p className="text-center text-sm font-bold uppercase tracking-[0.25em] text-surface-dark-foreground/90 sm:text-base">
             Come for the Island. Care for its People.
           </p>
