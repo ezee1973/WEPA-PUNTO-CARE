@@ -30,3 +30,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local backend configuration and internal planning history
+.env
+.lovable/
