@@ -33,3 +33,8 @@
 - [x] Elena in the hospital pool is the same live record as her Passport (progress + ID)
 - [x] Saved drafts/published gigs appear on the hospital dashboard; published gigs reach the nurse gig list
 - [x] Nurse "Apply" on a hospital gig lands in that hospital's pipeline
+
+## Repository for the hackathon
+- [x] README rewritten with the pitch, the four numbers, run steps and a judge walkthrough
+- [x] Backend config and internal planning history added to the ignore list
+- [ ] GitHub repository created and connected by the user (Plus menu -> GitHub -> Connect project)
