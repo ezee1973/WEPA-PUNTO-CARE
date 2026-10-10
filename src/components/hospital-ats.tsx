@@ -49,7 +49,7 @@ const rel = (iso?: string) => {
 
 export function toPassport(n: PoolNurse): SharedPassport {
   return {
-    id: passportId(n.name, n.id),
+    id: n.passportCode ?? passportId(n.name, n.id),
     name: n.name,
     specialty: n.specialty,
     years: n.years,
@@ -132,7 +132,7 @@ export function PassportThumb({ nurse, onOpen }: { nurse: PoolNurse; onOpen: () 
       <IdCard className="size-4 text-primary" />
       <span className="text-[11px] font-bold uppercase tracking-wider">{tr("View passport")}</span>
       <span className="font-mono text-[10px] opacity-60">
-        {tr(passportId(nurse.name, nurse.id))}
+        {nurse.passportCode ?? passportId(nurse.name, nurse.id)}
       </span>
     </button>
   );
