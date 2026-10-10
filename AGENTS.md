@@ -15,3 +15,5 @@
 - Keep tourism partner offers in one shared catalog (src/lib/partner-offers.ts) where each real operator account owns its own slice of offers, placement and billing; the directory and the hospital perk menu read every account while a partner's own views read only the signed-in one, so publishing on one side reaches the other without one operator's edits leaking into another.
 
 - Keep all rates, fee math, boost tiers, and traveler-service pricing in src/lib/business.ts, so nurse net pay, hospital billing, and partner boosts always agree.
+
+- Keep local backend configuration (.env) and the internal planning history (.lovable) out of version control; the repository is shared with judges and collaborators, and both are regenerated locally.
