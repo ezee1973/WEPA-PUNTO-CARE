@@ -45,6 +45,7 @@ import {
   LOCATIONS,
   MUNICIPALITIES,
   POOL,
+  useLinkedPool,
   hubFor,
   offerOf,
   matchScore,
@@ -67,6 +68,7 @@ const locName = (id: LocationId) => LOCATIONS.find((l) => l.id === id)?.name ?? 
 export function HospitalExperience() {
   const { t: tr } = useLanguage();
   const { state, update, reset } = useHospital();
+  useLinkedPool(); // keeps Elena's pool record in step with her live Passport
   const [tab, setTab] = useState<Tab>("dashboard");
   const facility = FACILITIES.find((f) => f.id === state.facilityId) ?? FACILITIES[0]!;
 
@@ -524,7 +526,12 @@ function NursePool({ facilityLocation }: { facilityLocation: LocationId }) {
       (!readyOnly || n.status === "Passport ready") &&
       `${n.name} ${n.home}`.toLowerCase().includes(q.toLowerCase()),
   ).sort((a, b) => matchScore(b, facilityLocation) - matchScore(a, facilityLocation));
-  const gig = state.gigs[0];
+  const [gigId, setGigId] = useState("");
+  const gig =
+    state.gigs.find((g) => g.id === gigId) ??
+    state.gigs.find((g) => g.status === "Published" && g.specialty === specialty) ??
+    state.gigs.find((g) => g.status === "Published") ??
+    state.gigs[0];
   const [passport, setPassport] = useState<PoolNurse | null>(null);
   const [limit, setLimit] = useState(24);
 
@@ -533,7 +540,7 @@ function NursePool({ facilityLocation }: { facilityLocation: LocationId }) {
       toast.error(tr("Build a gig first."));
       return;
     }
-    if (state.candidates.some((c) => c.nurseId === n.id)) {
+    if (state.candidates.some((c) => c.nurseId === n.id && c.gigId === gig.id)) {
       toast(tr(`${n.name} is already in your pipeline.`));
       return;
     }
@@ -546,11 +553,15 @@ function NursePool({ facilityLocation }: { facilityLocation: LocationId }) {
           gigId: gig.id,
           stage: "Shortlisted",
           weeklyPay: gig.weeklyPay,
+          source: "WEPA pool match",
+          owner: "You",
+          updatedAt: new Date().toISOString(),
           messages: [],
+          activity: [{ text: `Shortlisted from pool for ${gig.title}`, at: new Date().toISOString() }],
         },
       ],
     }));
-    toast.success(tr(`${n.name} added to your pipeline.`));
+    toast.success(`${tr(n.name)} → ${tr(gig.title)}`);
   }
 
   const sel = "h-10 rounded-md border border-input bg-card px-3 text-sm";
@@ -586,6 +597,20 @@ function NursePool({ facilityLocation }: { facilityLocation: LocationId }) {
             </option>
           ))}
         </select>
+        <select
+          className={sel}
+          aria-label={tr("Shortlist for")}
+          value={gig?.id ?? ""}
+          onChange={(e) => setGigId(e.target.value)}
+        >
+          {state.gigs.map((g) => (
+            <option key={g.id} value={g.id}>
+              {tr("For: ")}
+              {tr(g.title)}
+              {g.status === "Draft" ? ` (${tr("Draft")})` : ""}
+            </option>
+          ))}
+        </select>
         <label className="flex items-center gap-2 text-sm">
           <input
             type="checkbox"
@@ -604,7 +629,7 @@ function NursePool({ facilityLocation }: { facilityLocation: LocationId }) {
       <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {list.slice(0, limit).map((n) => {
           const m = matchScore(n, facilityLocation);
-          const inPipe = state.candidates.some((c) => c.nurseId === n.id);
+          const inPipe = !!gig && state.candidates.some((c) => c.nurseId === n.id && c.gigId === gig.id);
           return (
             <div key={n.id} className="flex flex-col border border-border bg-card p-5">
               <div className="flex items-start justify-between gap-2">

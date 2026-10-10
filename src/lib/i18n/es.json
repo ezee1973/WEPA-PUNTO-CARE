@@ -854,7 +854,7 @@
   "Airport pickup": "Recogido en el aeropuerto",
   "A modern surgical suite with weekends free for the coast.": "Quirófano moderno con fines de semana libres para disfrutar la costa.",
   "Furnished townhouse": "Casa adosada amueblada",
-  "Car rental": "Alquiler de carro",
+  "Car rental": "Alquiler de autos",
   "El Yunque hike": "Caminata en El Yunque",
   "Precept residents' patients and learn island medicine from the inside.": "Supervisa a los pacientes de residentes y conoce la medicina de la isla desde adentro.",
   "Bayamón apartment": "Apartamento en Bayamón",
@@ -1269,7 +1269,6 @@
   "Adventure park": "Parque de aventuras",
   "Rum & culture": "Ron y cultura",
   "Island-hop flights": "Vuelos entre islas",
-  "Car rental": "Alquiler de autos",
   "Beach stays": "Estancias de playa",
   "Wellness & surf": "Bienestar y surf",
   "Total": "Total",
@@ -1300,5 +1299,7 @@
   "/bed": "/cama",
   "Clinics and sites without beds: ": "Clínicas y sitios sin camas: ",
   "/yr per location": "/año por ubicación",
-  "Sample pilot year: 20 hospitals, 15 clinic sites, 240 nurses placed. Nurses always use WEPA free.": "Año piloto de muestra: 20 hospitales, 15 clínicas, 240 enfermeras. Las enfermeras siempre usan WEPA gratis."
+  "Sample pilot year: 20 hospitals, 15 clinic sites, 240 nurses placed. Nurses always use WEPA free.": "Año piloto de muestra: 20 hospitales, 15 clínicas, 240 enfermeras. Las enfermeras siempre usan WEPA gratis.",
+  "Shortlist for": "Preseleccionar para",
+  "For: ": "Para: "
 }
