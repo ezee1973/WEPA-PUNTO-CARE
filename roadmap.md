@@ -29,7 +29,7 @@
 - [x] Splash redesign: shortage stats + travel-nurse punch line, bilingual, verified desktop/mobile EN/ES
 
 ## QA continuity — one working system
-- [ ] Shortlist puts a nurse in the pipeline for the gig the hospital chose
-- [ ] Elena in the hospital pool is the same live record as her Passport (progress + ID)
-- [ ] Saved drafts/published gigs appear on the hospital dashboard; published gigs reach the nurse gig list
-- [ ] Nurse "Apply" on a hospital gig lands in that hospital's pipeline
+- [x] Shortlist puts a nurse in the pipeline for the gig the hospital chose
+- [x] Elena in the hospital pool is the same live record as her Passport (progress + ID)
+- [x] Saved drafts/published gigs appear on the hospital dashboard; published gigs reach the nurse gig list
+- [x] Nurse "Apply" on a hospital gig lands in that hospital's pipeline
