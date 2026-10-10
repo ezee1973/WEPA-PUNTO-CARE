@@ -57,6 +57,20 @@ import { CandidatePassport } from "@/components/readiness-passport";
 import { HospitalExperience } from "@/components/hospital-experience";
 import { NurseStorySpotlight } from "@/components/nurse-community";
 import { STAGES, useReadiness } from "@/lib/readiness";
+import { FACILITIES, LOCATIONS, packageTotals, useHospital, type HospitalState } from "@/lib/hospital-data";
+
+/** Published gigs from the hospital workspace, shown in the nurse gig search. */
+function hospitalGigsForNurses(h: HospitalState): DemoGig[] {
+  const f = FACILITIES.find((x) => x.id === h.facilityId) ?? FACILITIES[0]!;
+  return h.gigs
+    .filter((g) => g.status === "Published")
+    .map((g) => ({
+      id: `hosp:${g.id}`, hospital: f.name, city: g.town ?? LOCATIONS.find((l) => l.id === g.location)?.name ?? g.location,
+      title: g.title, specialty: g.specialty, pay: g.weeklyPay, duration: g.weeks, shift: g.shift, start: g.start, match: 92,
+      description: `Posted by ${f.name} on WEPA.care.`, benefits: packageTotals(g.perks).list.slice(0, 3).map((p) => p.title),
+      region: LOCATIONS.find((l) => l.id === g.location)?.name ?? g.location, service: !!g.service,
+    }));
+}
 
 const logoUrl = logoAsset.url;
 const jingleUrl = jingleAsset.url;
@@ -419,8 +433,10 @@ function NurseExperience({ onSelectGig }: { onSelectGig: (gig: DemoGig) => void 
   const [specialty, setSpecialty] = useState("All specialties");
   const [region, setRegion] = useState("Anywhere");
   const [showService, setShowService] = useState(false);
-  const paid = islandGigs.filter((g) => !g.service);
-  const service = islandGigs.filter((g) => g.service);
+  const { state: hospital } = useHospital();
+  const allGigs = [...hospitalGigsForNurses(hospital), ...islandGigs];
+  const paid = allGigs.filter((g) => !g.service);
+  const service = allGigs.filter((g) => g.service);
   const regions = ["Anywhere", ...Array.from(new Set(paid.map((g) => g.region!)))];
   const specialties = ["All specialties", ...Array.from(new Set(paid.map((g) => g.specialty)))];
   const filtered = paid
@@ -876,7 +892,11 @@ function GigDialog({
   onClose: () => void;
 }) {
   const { t: tr } = useLanguage();
-  const [applied, setApplied] = useState(false);
+  const { state: hospital, update: updateHospital } = useHospital();
+  const hospitalGigId = gig?.id.startsWith("hosp:") ? gig.id.slice(5) : null;
+  const inPipeline = !!hospitalGigId && hospital.candidates.some((c) => c.nurseId === "n1" && c.gigId === hospitalGigId);
+  const [appliedLocal, setApplied] = useState(false);
+  const applied = appliedLocal || inPipeline;
   useEffect(() => setApplied(false), [gig?.id]);
   if (!gig) return null;
   return (
@@ -964,6 +984,13 @@ function GigDialog({
               onClick={() => {
                 // Demo nurse profile applies without a real account.
                 setApplied(true);
+                if (hospitalGigId) {
+                  const hg = hospital.gigs.find((g) => g.id === hospitalGigId);
+                  updateHospital((s) => s.candidates.some((c) => c.nurseId === "n1" && c.gigId === hospitalGigId) ? s : ({
+                    ...s,
+                    candidates: [...s.candidates, { nurseId: "n1", gigId: hospitalGigId, stage: "Shortlisted", weeklyPay: hg?.weeklyPay ?? 0, source: "Applied to gig", owner: "You", updatedAt: new Date().toISOString(), messages: [], activity: [{ text: "Applied from the nurse gig search", at: new Date().toISOString() }] }],
+                  }));
+                }
                 toast.success(tr("Application sent to the hospital."));
               }}
             >

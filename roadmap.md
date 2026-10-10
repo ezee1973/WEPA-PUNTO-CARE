@@ -27,3 +27,9 @@
 - [x] Gig builder perk cards: boost badge moved beside the offer-type pill so it no longer overlaps the offer title
 - [x] Splash: workforce stats strip (92/63/42/50) + "The result" line, bilingual, between headline and journey doors
 - [x] Splash redesign: shortage stats + travel-nurse punch line, bilingual, verified desktop/mobile EN/ES
+
+## QA continuity — one working system
+- [x] Shortlist puts a nurse in the pipeline for the gig the hospital chose
+- [x] Elena in the hospital pool is the same live record as her Passport (progress + ID)
+- [x] Saved drafts/published gigs appear on the hospital dashboard; published gigs reach the nurse gig list
+- [x] Nurse "Apply" on a hospital gig lands in that hospital's pipeline

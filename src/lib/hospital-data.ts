@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { passportId } from "@/lib/passport-share";
+import { preparationProgress, seed as readinessSeed, useReadiness, type ReadinessState } from "@/lib/readiness";
 
 // All facilities, nurses and prices below are fictional demo data.
 
@@ -107,6 +109,8 @@ export type PoolNurse = {
   spanish: "Basic" | "Conversational" | "Fluent"; regions: LocationId[]; experiences: string[]; length: number;
   family: string; status: "Passport ready" | "Pathway in review";
   certs?: string[]; email?: string; phone?: string; available?: string;
+  /** Set on the one pool record that mirrors the live nurse Passport on this device. */
+  passportCode?: string; linked?: boolean;
 };
 
 export const POOL: PoolNurse[] = [
@@ -220,16 +224,42 @@ export const hospitalSeed: HospitalState = {
 const KEY = "wepa-hospital-v2";
 const EVT = "wepa-hospital-change";
 
+/** Elena (n1) in the hospital pool is the same record as the nurse Passport workspace. */
+export function syncLinkedNurse(r: ReadinessState) {
+  const n = POOL.find((x) => x.id === "n1");
+  if (!n) return;
+  const progress = preparationProgress(r);
+  n.name = r.profile.name; n.years = r.profile.years; n.home = r.profile.city.replace("Florida", "FL");
+  n.readiness = progress; n.linked = true;
+  n.passportCode = passportId(r.profile.name, r.profile.license);
+  n.status = r.applied ? "Passport ready" : "Pathway in review";
+}
+syncLinkedNurse(readinessSeed);
+
+export function useLinkedPool() {
+  const { state } = useReadiness();
+  syncLinkedNurse(state);
+  return POOL;
+}
+
 export function useHospital() {
   const [state, setState] = useState<HospitalState>(hospitalSeed);
+  const ref = useRef(state);
   useEffect(() => {
-    const load = () => { try { const raw = localStorage.getItem(KEY); if (raw) setState(JSON.parse(raw)); } catch { /* ignore */ } };
+    const load = () => { try { const raw = localStorage.getItem(KEY); if (raw) { ref.current = JSON.parse(raw); setState(ref.current); } } catch { /* ignore */ } };
     load();
     window.addEventListener(EVT, load);
     return () => window.removeEventListener(EVT, load);
   }, []);
   function update(fn: (s: HospitalState) => HospitalState) {
-    setState((cur) => { const next = fn(cur); localStorage.setItem(KEY, JSON.stringify(next)); queueMicrotask(() => window.dispatchEvent(new Event(EVT))); return next; });
+    // Compute and persist immediately: the caller may unmount right after (e.g. "Save draft" → dashboard).
+    let cur = ref.current;
+    try { const raw = localStorage.getItem(KEY); if (raw) cur = JSON.parse(raw); } catch { /* ignore */ }
+    const next = fn(cur);
+    ref.current = next;
+    localStorage.setItem(KEY, JSON.stringify(next));
+    setState(next);
+    queueMicrotask(() => window.dispatchEvent(new Event(EVT)));
   }
   function reset() { update((s) => ({ ...hospitalSeed, loggedIn: s.loggedIn, facilityId: s.facilityId })); }
   return { state, update, reset };
